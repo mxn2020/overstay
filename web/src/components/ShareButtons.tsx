@@ -7,7 +7,7 @@ interface ShareButtonsProps {
 }
 
 export default function ShareButtons({ prediction, cardRef }: ShareButtonsProps) {
-    const shareText = `The AI predicted I'm not leaving until ${prediction.exitTime} 🕐 My chaos rating is ${prediction.chaosRating.toFixed(1)}/10`
+    const shareText = `The AI predicted I'm not leaving until ${prediction.exitTime} 🍺 My chaos rating is ${prediction.chaosRating.toFixed(1)}/10`
 
     const handleDownload = useCallback(async () => {
         if (!cardRef.current) return
@@ -18,7 +18,7 @@ export default function ShareButtons({ prediction, cardRef }: ShareButtonsProps)
                 scale: 2,
             })
             const link = document.createElement('a')
-            link.download = `overstay-prediction-${Date.now()}.png`
+            link.download = `justonelastdrink-prediction-${Date.now()}.png`
             link.href = canvas.toDataURL('image/png')
             link.click()
         } catch (err) {
@@ -39,11 +39,11 @@ export default function ShareButtons({ prediction, cardRef }: ShareButtonsProps)
                     const blob = await new Promise<Blob>((resolve) =>
                         canvas.toBlob((b) => resolve(b!), 'image/png')
                     )
-                    const file = new File([blob], 'overstay-prediction.png', { type: 'image/png' })
+                    const file = new File([blob], 'justonelastdrink-prediction.png', { type: 'image/png' })
                     await navigator.share({
-                        title: 'Overstay Prediction',
+                        title: 'JustOneLastDrink',
                         text: shareText,
-                        url: 'https://overstay.app',
+                        url: 'https://justonelastdrink.com',
                         files: [file],
                     })
                 }
@@ -51,9 +51,9 @@ export default function ShareButtons({ prediction, cardRef }: ShareButtonsProps)
                 // Fallback to text-only share
                 try {
                     await navigator.share({
-                        title: 'Overstay Prediction',
+                        title: 'JustOneLastDrink',
                         text: shareText,
-                        url: 'https://overstay.app',
+                        url: 'https://justonelastdrink.com',
                     })
                 } catch {
                     // User cancelled
@@ -63,7 +63,7 @@ export default function ShareButtons({ prediction, cardRef }: ShareButtonsProps)
     }, [cardRef, shareText])
 
     const handleTwitter = () => {
-        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText + ' @overstayapp')}&url=${encodeURIComponent('https://overstay.app')}`
+        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText + ' @justonelastdrink')}&url=${encodeURIComponent('https://justonelastdrink.com')}`
         window.open(url, '_blank')
     }
 
@@ -73,7 +73,7 @@ export default function ShareButtons({ prediction, cardRef }: ShareButtonsProps)
                 📥 Download
             </button>
 
-            {navigator.share && (
+            {'share' in navigator && (
                 <button className="btn btn--primary btn--small" onClick={handleNativeShare}>
                     📤 Share
                 </button>

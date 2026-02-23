@@ -54,11 +54,11 @@ export default function LandingPage({ onPredict, useConvex }: LandingPageProps) 
             <div className="hero__content">
                 <p className="hero__tagline animate-fade-in">The Nightlife Oracle</p>
                 <h1 className="hero__title animate-fade-in-delay-1">
-                    We know you're not leaving.
+                    "Just one last drink."
                 </h1>
                 <p className="hero__subtitle animate-fade-in-delay-2">
                     Upload a night-out photo. Our AI analyzes the vibes and predicts how long you'll
-                    <em> actually</em> stay — exposing the universal lie: <strong>"One last drink."</strong>
+                    <em> actually</em> stay — because we both know <strong>"just one last drink"</strong> is always a lie.
                 </p>
                 <div className="hero__cta animate-fade-in-delay-3">
                     <button className="btn btn--primary btn--large" onClick={() => setShowUpload(true)}>
@@ -68,7 +68,7 @@ export default function LandingPage({ onPredict, useConvex }: LandingPageProps) 
 
                 {/* Demo Prediction Card */}
                 <div className="demo-card animate-fade-in-delay-3">
-                    <div className="demo-card__time-icon">🕐</div>
+                    <div className="demo-card__time-icon">🍺</div>
                     <div className="demo-card__time">2:47 AM</div>
                     <div className="demo-card__roast">
                         You said "last one" at 9:15 PM. That was a lie.
@@ -93,7 +93,7 @@ export default function LandingPage({ onPredict, useConvex }: LandingPageProps) 
                         </span>
                     </div>
                     <div className="demo-card__divider" />
-                    <div className="demo-card__footer">overstay.app</div>
+                    <div className="demo-card__footer">justonelastdrink.com</div>
                 </div>
             </div>
         </section>

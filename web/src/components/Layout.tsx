@@ -1,4 +1,5 @@
-import { type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
+import { getRandomRide, getRandomSafetyMessage } from '../lib/safeRide'
 
 interface LayoutProps {
     children: ReactNode
@@ -7,12 +8,24 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, onNavigateHome, onNavigateProfile }: LayoutProps) {
+    const [safetyMessage, setSafetyMessage] = useState(getRandomSafetyMessage())
+    const [ride, setRide] = useState(getRandomRide())
+
+    // Shuffle the safety message every 8 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setSafetyMessage(getRandomSafetyMessage())
+            setRide(getRandomRide())
+        }, 8000)
+        return () => clearInterval(interval)
+    }, [])
+
     return (
         <div className="app">
             <header className="app__header">
                 <button className="app__logo" onClick={onNavigateHome}>
-                    <span className="app__logo-icon">🕐</span>
-                    Overstay
+                    <span className="app__logo-icon">🍺</span>
+                    JustOneLastDrink
                 </button>
                 <nav className="app__nav">
                     <button className="app__nav-link" onClick={onNavigateHome}>
@@ -29,21 +42,22 @@ export default function Layout({ children, onNavigateHome, onNavigateProfile }: 
             </main>
 
             <footer className="app__footer">
-                <p>Drink responsibly. Know your limits. 🕐</p>
+                <p>Drink responsibly. Know your limits. 🍺</p>
                 <p style={{ marginTop: '4px' }}>
-                    <a href="https://overstay.app">overstay.app</a> — The nightlife oracle.
+                    <a href="https://justonelastdrink.com">justonelastdrink.com</a> — Just one more. Sure.
                 </p>
             </footer>
 
-            {/* Get Home Safe — always visible per safety guidelines */}
+            {/* Get Home Safe — rotates services and messages */}
             <div className="get-home-safe">
                 <a
-                    href="https://www.uber.com"
+                    href={ride.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="get-home-safe__btn"
+                    key={safetyMessage}
                 >
-                    🏠 Get Home Safe
+                    {safetyMessage}
                 </a>
             </div>
         </div>

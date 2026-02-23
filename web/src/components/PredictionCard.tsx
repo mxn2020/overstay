@@ -42,7 +42,7 @@ export default function PredictionCard({ prediction, cardRef }: PredictionCardPr
                 />
             )}
             <div className="prediction-card__content">
-                <div className="prediction-card__icon">🕐</div>
+                <div className="prediction-card__icon">🍺</div>
                 <div className="prediction-card__exit-time animate-fade-in">
                     {prediction.exitTime}
                 </div>
@@ -88,9 +88,9 @@ export default function PredictionCard({ prediction, cardRef }: PredictionCardPr
                 </div>
 
                 <div className="prediction-card__divider" />
-                <div className="prediction-card__watermark">overstay.app</div>
+                <div className="prediction-card__watermark">justonelastdrink.com</div>
                 <div className="prediction-card__responsible">
-                    Drink responsibly. Know your limits. 🕐
+                    Drink responsibly. Know your limits. 🍺
                 </div>
             </div>
         </div>
