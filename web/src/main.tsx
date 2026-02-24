@@ -11,16 +11,13 @@ applyTheme(theme)
 
 // Convex is optional — when VITE_CONVEX_URL is set, it wraps with ConvexProvider
 // Otherwise the app runs in demo mode with local scoring
-const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined
+import { convex } from './lib/convexClient'
 
 async function mount() {
     const root = createRoot(document.getElementById('root')!)
 
-    if (convexUrl) {
-        const { ConvexProvider, ConvexReactClient } = await import('convex/react')
-        const { wireLogCallback } = await import('./lib/logWiring')
-        const convex = new ConvexReactClient(convexUrl)
-        wireLogCallback(convex)
+    if (convex) {
+        const { ConvexProvider } = await import('convex/react')
         root.render(
             <StrictMode>
                 <ConvexProvider client={convex}>

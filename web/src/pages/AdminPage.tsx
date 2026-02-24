@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback } from 'react'
-import { useMutation, useQuery } from 'convex/react'
+import { useMutation, useQuery, useAction } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { VISION_MODELS, type ModelInfo } from '../lib/modelRegistry'
-import { callNvidiaModel, fileToBase64 } from '../lib/nvidiaApi'
+import { fileToBase64 } from '../lib/nvidiaApi'
 import { VISION_SYSTEM_PROMPT, VISION_USER_PROMPT, COMBINED_SYSTEM_PROMPT, buildCombinedUserPrompt } from '../lib/aiPrompts'
 
 interface TestResult {
@@ -62,6 +62,7 @@ export default function AdminPage() {
         selectedRunId ? { testRunId: selectedRunId } : 'skip'
     )
     const deleteTestRun = useMutation(api.modelTests.deleteTestRun)
+    const callModelAction = useAction(api.nvidia.callModel)
 
     const toggleModel = (id: string) => {
         setSelectedModels(prev => {
@@ -148,7 +149,9 @@ export default function AdminPage() {
                     },
                 ]
 
-                const rawResponse = await callNvidiaModel(model.id, messages, {
+                const rawResponse = await callModelAction({
+                    model: model.id,
+                    messages,
                     temperature: 0.3,
                     maxTokens: 4096,
                     caller: `admin-test:${mode}`,
@@ -221,7 +224,7 @@ export default function AdminPage() {
         }))
 
         setIsRunning(false)
-    }, [testImage, selectedModels, mode, saveTestResult])
+    }, [testImage, selectedModels, mode, saveTestResult, callModelAction])
 
     return (
         <div className="admin-page">

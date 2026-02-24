@@ -4,20 +4,12 @@
 //   "single-model" → Kimi K2.5 (vision + prediction in one call)
 //   "demo"         → Local random scoring (default, no API key needed)
 
-import { callNvidiaModel, fileToBase64 } from './nvidiaApi'
-import {
-    VISION_SYSTEM_PROMPT,
-    VISION_USER_PROMPT,
-    PREDICTION_SYSTEM_PROMPT,
-    buildPredictionUserPrompt,
-    COMBINED_SYSTEM_PROMPT,
-    buildCombinedUserPrompt,
-} from './aiPrompts'
+import { fileToBase64 } from './nvidiaApi'
 import { analyzeImageLocally, type LocalPredictionResult } from './localScoring'
+import { convex } from './convexClient'
+import { api } from '../../convex/_generated/api'
 
-// NVIDIA NIM model identifiers
-const MODEL_VISION = 'moonshotai/kimi-k2.5'
-const MODEL_PREDICTION = 'nvidia/nemotron-3-nano-30b-a3b'
+// Backend handles model identifiers and exact prompts automatically now.
 
 export type PipelineMode = 'two-model' | 'single-model' | 'demo'
 
@@ -27,14 +19,7 @@ export function getPipelineMode(): PipelineMode {
     return 'demo'
 }
 
-function parseJsonResponse(raw: string): Record<string, unknown> {
-    // Strip markdown code fences if the model wraps its response
-    let cleaned = raw.trim()
-    if (cleaned.startsWith('```')) {
-        cleaned = cleaned.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
-    }
-    return JSON.parse(cleaned)
-}
+// Removed parseJsonResponse as backend handles parsing
 
 // ============================================
 // Option A: Two-Model Pipeline
@@ -42,55 +27,21 @@ function parseJsonResponse(raw: string): Record<string, unknown> {
 // Nemotron-3-Nano → generates prediction from signals
 // ============================================
 async function runTwoModelPipeline(file: File): Promise<LocalPredictionResult> {
-    console.log('[AI Pipeline] Running two-model pipeline: Kimi K2.5 → Nemotron Nano')
+    if (!convex) throw new Error("Convex client not initialized")
 
-    // Step 1: Convert image to base64
     const base64 = await fileToBase64(file)
-
-    // Step 2: Kimi K2.5 — Analyze the image
-    console.log('[AI Pipeline] Step 1/2: Kimi K2.5 analyzing image...')
-    const visionResponse = await callNvidiaModel(MODEL_VISION, [
-        { role: 'system', content: VISION_SYSTEM_PROMPT },
-        {
-            role: 'user',
-            content: [
-                { type: 'text', text: VISION_USER_PROMPT },
-                { type: 'image_url', image_url: { url: base64 } },
-            ],
-        },
-    ], {
-        temperature: 0.3,
-        maxTokens: 4096,
-        caller: 'pipeline:two-model:vision',
-    })
-
-    console.log('[AI Pipeline] Vision signals received:', visionResponse.substring(0, 200))
-    const visionSignals = parseJsonResponse(visionResponse)
-
-    // Step 3: Nemotron Nano — Generate prediction from signals
-    console.log('[AI Pipeline] Step 2/2: Nemotron Nano generating prediction...')
-    const predictionResponse = await callNvidiaModel(MODEL_PREDICTION, [
-        { role: 'system', content: PREDICTION_SYSTEM_PROMPT },
-        { role: 'user', content: buildPredictionUserPrompt(JSON.stringify(visionSignals, null, 2)) },
-    ], {
-        temperature: 0.8,
-        maxTokens: 2048,
-        caller: 'pipeline:two-model:prediction',
-    })
-
-    console.log('[AI Pipeline] Prediction received:', predictionResponse.substring(0, 200))
-    const prediction = parseJsonResponse(predictionResponse)
+    const prediction: any = await convex.action(api.nvidia.runPipeline, { imageBase64: base64, mode: 'single' })
 
     return {
         predictionId: `nvidia-2m-${Date.now()}`,
-        exitTime: prediction.exitTime as string,
-        overstayMinutes: prediction.overstayMinutes as number,
-        chaosRating: prediction.chaosRating as number,
-        textRegret: prediction.textRegret as number,
-        barHop: prediction.barHop as number,
-        cryRisk: prediction.cryRisk as number,
-        sunriseRisk: prediction.sunriseRisk as string,
-        roastLine: prediction.roastLine as string,
+        exitTime: prediction.exitTime,
+        overstayMinutes: prediction.overstayMinutes,
+        chaosRating: prediction.chaosRating,
+        textRegret: prediction.textRegret,
+        barHop: prediction.barHop,
+        cryRisk: prediction.cryRisk,
+        sunriseRisk: prediction.sunriseRisk,
+        roastLine: prediction.roastLine,
     }
 }
 
@@ -99,43 +50,21 @@ async function runTwoModelPipeline(file: File): Promise<LocalPredictionResult> {
 // Kimi K2.5 → analyzes AND predicts in one call
 // ============================================
 async function runSingleModelPipeline(file: File): Promise<LocalPredictionResult> {
-    console.log('[AI Pipeline] Running single-model pipeline: Kimi K2.5 (analyze + predict)')
+    if (!convex) throw new Error("Convex client not initialized")
 
-    // Step 1: Convert image to base64
     const base64 = await fileToBase64(file)
-
-    // Step 2: Kimi K2.5 — Analyze and predict in one call
-    const response = await callNvidiaModel(MODEL_VISION, [
-        { role: 'system', content: COMBINED_SYSTEM_PROMPT },
-        {
-            role: 'user',
-            content: [
-                { type: 'text', text: buildCombinedUserPrompt() },
-                { type: 'image_url', image_url: { url: base64 } },
-            ],
-        },
-    ], {
-        temperature: 0.7,
-        maxTokens: 2048,
-        caller: 'pipeline:single-model',
-    })
-
-    console.log('[AI Pipeline] Combined response:', response.substring(0, 200))
-    const result = parseJsonResponse(response)
-
-    // Extract from nested "prediction" key
-    const pred = (result.prediction ?? result) as Record<string, unknown>
+    const pred: any = await convex.action(api.nvidia.runPipeline, { imageBase64: base64, mode: 'combined' })
 
     return {
         predictionId: `nvidia-1m-${Date.now()}`,
-        exitTime: pred.exitTime as string,
-        overstayMinutes: pred.overstayMinutes as number,
-        chaosRating: pred.chaosRating as number,
-        textRegret: pred.textRegret as number,
-        barHop: pred.barHop as number,
-        cryRisk: pred.cryRisk as number,
-        sunriseRisk: pred.sunriseRisk as string,
-        roastLine: pred.roastLine as string,
+        exitTime: pred.exitTime,
+        overstayMinutes: pred.overstayMinutes,
+        chaosRating: pred.chaosRating,
+        textRegret: pred.textRegret,
+        barHop: pred.barHop,
+        cryRisk: pred.cryRisk,
+        sunriseRisk: pred.sunriseRisk,
+        roastLine: pred.roastLine,
     }
 }
 
