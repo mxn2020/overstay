@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
-import { analyzeImageLocally } from '../lib/localScoring'
+import { analyzeImage, getPipelineMode } from '../lib/aiPipeline'
 import type { PredictionResult } from '../App'
 
 interface PhotoUploadProps {
@@ -16,6 +16,8 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
     const [error, setError] = useState<string | null>(null)
     const [preview, setPreview] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    const pipelineMode = getPipelineMode()
 
     const validateFile = (file: File): string | null => {
         if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -43,27 +45,40 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
         try {
             onAnalysisStart()
 
-            if (useConvex) {
-                // Convex mode: compress, upload, analyze via Convex
-                const { default: imageCompression } = await import('browser-image-compression')
-                const compressed = await imageCompression(file, {
-                    maxSizeMB: 1,
-                    maxWidthOrHeight: 1920,
-                    useWebWorker: true,
-                })
+            let processedFile = file
 
-                const { useMutation } = await import('convex/react')
-                void useMutation // Convex mode would use hooks — this path requires ConvexProvider
-                // For now, fall through to demo mode
-                const result = await analyzeImageLocally()
+            // Compress image before sending to AI (saves bandwidth + faster)
+            if (pipelineMode !== 'demo') {
+                try {
+                    const { default: imageCompression } = await import('browser-image-compression')
+                    processedFile = await imageCompression(file, {
+                        maxSizeMB: 1,
+                        maxWidthOrHeight: 1920,
+                        useWebWorker: true,
+                    })
+                } catch {
+                    // If compression fails, use original file
+                    console.warn('Image compression failed, using original')
+                }
+            }
+
+            if (useConvex) {
+                // Convex mode: would use server-side AI calls
+                // For now, fall through to client-side pipeline
+                const result = await analyzeImage(processedFile)
                 onResult({ ...result, imageUrl: previewUrl })
             } else {
-                // Demo mode: use local scoring engine
-                const result = await analyzeImageLocally()
+                // Client-side pipeline (demo, single-model, or two-model)
+                const result = await analyzeImage(processedFile)
                 onResult({ ...result, imageUrl: previewUrl })
             }
         } catch (err) {
-            setError("Something went wrong. Like your decision to go out on a Tuesday.")
+            const message = err instanceof Error ? err.message : 'Unknown error'
+            if (message.includes('NVIDIA API')) {
+                setError(`AI error: ${message}`)
+            } else {
+                setError("Something went wrong. Like your decision to go out on a Tuesday.")
+            }
             console.error('Upload error:', err)
         }
     }
@@ -89,6 +104,19 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
         const file = e.target.files?.[0]
         if (file) processFile(file)
     }
+
+    // Show current pipeline mode as a subtle badge
+    const modeBadge = pipelineMode === 'demo' ? null : (
+        <div style={{
+            textAlign: 'center',
+            marginTop: '8px',
+            fontSize: '0.7rem',
+            color: 'var(--color-smoke-gray)',
+            opacity: 0.6,
+        }}>
+            🤖 AI: {pipelineMode === 'two-model' ? 'Kimi K2.5 → Nemotron' : 'Kimi K2.5'}
+        </div>
+    )
 
     return (
         <div>
@@ -137,6 +165,8 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
                 onChange={handleFileSelect}
                 style={{ display: 'none' }}
             />
+
+            {modeBadge}
 
             {error && (
                 <p style={{
