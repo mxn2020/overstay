@@ -1,7 +1,6 @@
 // NVIDIA NIM API Client
-// All models use OpenAI-compatible chat completions endpoint
-
-const NVIDIA_API_BASE = 'https://integrate.api.nvidia.com/v1'
+// Calls go through /api/nvidia server-side proxy (keeps API key secret)
+// In production, replace with Convex actions or serverless functions
 
 export interface NvidiaMessage {
     role: 'system' | 'user' | 'assistant'
@@ -42,17 +41,11 @@ export async function callNvidiaModel(
         topP?: number
     } = {}
 ): Promise<string> {
-    const apiKey = import.meta.env.VITE_NVIDIA_API_KEY as string
-
-    if (!apiKey) {
-        throw new Error('VITE_NVIDIA_API_KEY is not set. Get a free key at https://build.nvidia.com')
-    }
-
-    const response = await fetch(`${NVIDIA_API_BASE}/chat/completions`, {
+    // Route through server-side proxy — API key is injected there, never in the browser
+    const response = await fetch('/api/nvidia', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
             model,
@@ -65,8 +58,10 @@ export async function callNvidiaModel(
     })
 
     if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`NVIDIA API error (${response.status}): ${errorText}`)
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(
+            `NVIDIA API error (${response.status}): ${(errorData as { error?: string }).error ?? JSON.stringify(errorData)}`
+        )
     }
 
     const data = (await response.json()) as NvidiaChatResponse

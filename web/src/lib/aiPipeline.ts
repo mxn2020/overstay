@@ -27,10 +27,6 @@ export function getPipelineMode(): PipelineMode {
     return 'demo'
 }
 
-export function hasNvidiaApiKey(): boolean {
-    return Boolean(import.meta.env.VITE_NVIDIA_API_KEY)
-}
-
 function parseJsonResponse(raw: string): Record<string, unknown> {
     // Strip markdown code fences if the model wraps its response
     let cleaned = raw.trim()
