@@ -43,6 +43,7 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
         setPreview(previewUrl)
 
         try {
+            console.log('[PhotoUpload] Starting analysis...', { pipelineMode, useConvex, fileSize: file.size, fileType: file.type })
             onAnalysisStart()
 
             let processedFile = file
@@ -50,34 +51,30 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
             // Compress image before sending to AI (saves bandwidth + faster)
             if (pipelineMode !== 'demo') {
                 try {
+                    console.log('[PhotoUpload] Compressing image...')
                     const { default: imageCompression } = await import('browser-image-compression')
                     processedFile = await imageCompression(file, {
                         maxSizeMB: 1,
                         maxWidthOrHeight: 1920,
                         useWebWorker: true,
                     })
-                } catch {
-                    // If compression fails, use original file
-                    console.warn('Image compression failed, using original')
+                    console.log('[PhotoUpload] Compressed:', { originalSize: file.size, compressedSize: processedFile.size })
+                } catch (compressErr) {
+                    console.warn('[PhotoUpload] Image compression failed, using original:', compressErr)
                 }
             }
 
-            if (useConvex) {
-                // Convex mode: would use server-side AI calls
-                // For now, fall through to client-side pipeline
-                const result = await analyzeImage(processedFile)
-                onResult({ ...result, imageUrl: previewUrl })
-            } else {
-                // Client-side pipeline (demo, single-model, or two-model)
-                const result = await analyzeImage(processedFile)
-                onResult({ ...result, imageUrl: previewUrl })
-            }
+            console.log('[PhotoUpload] Calling analyzeImage()...')
+            const result = await analyzeImage(processedFile)
+            console.log('[PhotoUpload] Got result:', result)
+            onResult({ ...result, imageUrl: previewUrl })
         } catch (err) {
+            console.error('[PhotoUpload] ERROR:', err)
             const message = err instanceof Error ? err.message : 'Unknown error'
-            if (message.includes('NVIDIA API')) {
+            if (message.includes('NVIDIA API') || message.includes('NVIDIA_API_KEY')) {
                 setError(`AI error: ${message}`)
             } else {
-                setError("Something went wrong. Like your decision to go out on a Tuesday.")
+                setError(`Something went wrong: ${message}`)
             }
             console.error('Upload error:', err)
         }

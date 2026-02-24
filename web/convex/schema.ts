@@ -48,4 +48,27 @@ export default defineSchema({
         totalPredictions: v.number(),
         peakNight: v.string(),
     }),
+
+    modelTests: defineTable({
+        testRunId: v.string(),
+        model: v.string(),
+        mode: v.string(),
+        imageSize: v.number(),
+        startedAt: v.number(),
+        completedAt: v.number(),
+        durationMs: v.number(),
+        promptTokens: v.number(),
+        completionTokens: v.number(),
+        totalTokens: v.number(),
+        rawResponse: v.string(),
+        parsedResult: v.optional(v.string()),
+        parseSuccess: v.boolean(),
+        hasAllFields: v.boolean(),
+        qualityNotes: v.optional(v.string()),
+        status: v.string(),
+        errorMessage: v.optional(v.string()),
+    })
+        .index("by_testRunId", ["testRunId"])
+        .index("by_model", ["model"])
+        .index("by_startedAt", ["startedAt"]),
 });

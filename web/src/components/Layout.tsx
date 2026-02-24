@@ -5,9 +5,10 @@ interface LayoutProps {
     children: ReactNode
     onNavigateHome: () => void
     onNavigateProfile: () => void
+    onNavigateAdmin?: () => void
 }
 
-export default function Layout({ children, onNavigateHome, onNavigateProfile }: LayoutProps) {
+export default function Layout({ children, onNavigateHome, onNavigateProfile, onNavigateAdmin }: LayoutProps) {
     const [safetyMessage, setSafetyMessage] = useState(getRandomSafetyMessage())
     const [ride, setRide] = useState(getRandomRide())
 
@@ -34,6 +35,11 @@ export default function Layout({ children, onNavigateHome, onNavigateProfile }: 
                     <button className="app__nav-link" onClick={onNavigateProfile}>
                         Profile
                     </button>
+                    {onNavigateAdmin && (
+                        <button className="app__nav-link" onClick={onNavigateAdmin}>
+                            🔬 Admin
+                        </button>
+                    )}
                 </nav>
             </header>
 

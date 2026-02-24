@@ -60,7 +60,7 @@ async function runTwoModelPipeline(file: File): Promise<LocalPredictionResult> {
         },
     ], {
         temperature: 0.3, // Lower temp for factual analysis
-        maxTokens: 1024,
+        maxTokens: 4096,  // Vision analysis needs more room
     })
 
     console.log('[AI Pipeline] Vision signals received:', visionResponse.substring(0, 200))
@@ -73,7 +73,7 @@ async function runTwoModelPipeline(file: File): Promise<LocalPredictionResult> {
         { role: 'user', content: buildPredictionUserPrompt(JSON.stringify(visionSignals, null, 2)) },
     ], {
         temperature: 0.8, // Higher temp for creative roast lines
-        maxTokens: 1024,
+        maxTokens: 2048,
     })
 
     console.log('[AI Pipeline] Prediction received:', predictionResponse.substring(0, 200))

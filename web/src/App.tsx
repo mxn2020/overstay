@@ -3,9 +3,10 @@ import Layout from './components/Layout'
 import LandingPage from './pages/LandingPage'
 import PredictionPage from './pages/PredictionPage'
 import ProfilePage from './pages/ProfilePage'
+import AdminPage from './pages/AdminPage'
 import NotFoundPage from './pages/NotFoundPage'
 
-type Page = 'home' | 'prediction' | 'profile' | '404'
+type Page = 'home' | 'prediction' | 'profile' | 'admin' | '404'
 
 export interface PredictionResult {
     predictionId: string
@@ -47,6 +48,8 @@ function App({ useConvex }: AppProps) {
                 )
             case 'profile':
                 return <ProfilePage />
+            case 'admin':
+                return <AdminPage />
             default:
                 return <NotFoundPage onGoHome={() => navigate('home')} />
         }
@@ -56,6 +59,7 @@ function App({ useConvex }: AppProps) {
         <Layout
             onNavigateHome={() => navigate('home')}
             onNavigateProfile={() => navigate('profile')}
+            onNavigateAdmin={() => navigate('admin')}
         >
             {renderPage()}
         </Layout>

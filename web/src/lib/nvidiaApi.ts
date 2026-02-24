@@ -41,31 +41,49 @@ export async function callNvidiaModel(
         topP?: number
     } = {}
 ): Promise<string> {
+    console.log(`[NVIDIA API] Calling model: ${model}`)
+    console.log(`[NVIDIA API] Messages: ${messages.length} messages, first role: ${messages[0]?.role}`)
+
+    const body = JSON.stringify({
+        model,
+        messages,
+        temperature: options.temperature ?? 0.7,
+        max_tokens: options.maxTokens ?? 2048,
+        top_p: options.topP ?? 0.9,
+        stream: false,
+    })
+    console.log(`[NVIDIA API] Request body size: ${body.length} bytes`)
+
     // Route through server-side proxy — API key is injected there, never in the browser
     const response = await fetch('/api/nvidia', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            model,
-            messages,
-            temperature: options.temperature ?? 0.7,
-            max_tokens: options.maxTokens ?? 2048,
-            top_p: options.topP ?? 0.9,
-            stream: false,
-        }),
+        body,
     })
 
+    console.log(`[NVIDIA API] Response status: ${response.status}`)
+
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        const errorText = await response.text()
+        console.error(`[NVIDIA API] Error response:`, errorText)
         throw new Error(
-            `NVIDIA API error (${response.status}): ${(errorData as { error?: string }).error ?? JSON.stringify(errorData)}`
+            `NVIDIA API error (${response.status}): ${errorText}`
         )
     }
 
     const data = (await response.json()) as NvidiaChatResponse
-    return data.choices[0]?.message?.content ?? ''
+    console.log('[NVIDIA API] Raw response:', JSON.stringify(data, null, 2).substring(0, 1000))
+    const content = data.choices[0]?.message?.content ?? ''
+    console.log(`[NVIDIA API] Response content length: ${content.length} chars`)
+    console.log(`[NVIDIA API] Content preview: ${content.substring(0, 300)}`)
+    console.log(`[NVIDIA API] Usage:`, data.usage)
+    if (!content) {
+        console.error('[NVIDIA API] WARNING: Empty content! Full choice:', JSON.stringify(data.choices[0]))
+        throw new Error(`NVIDIA API returned empty content. Finish reason: ${data.choices[0]?.finish_reason}. Tokens used: ${data.usage?.completion_tokens}`)
+    }
+    return content
 }
 
 // Convert a File to base64 data URI
