@@ -53,6 +53,7 @@ export default function AdminPage() {
     const [isRunning, setIsRunning] = useState(false)
     const [expandedResult, setExpandedResult] = useState<string | null>(null)
     const [selectedRunId, setSelectedRunId] = useState<string | null>(null)
+    const [activeTab, setActiveTab] = useState<'models' | 'prompts'>('models')
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const saveTestResult = useMutation(api.modelTests.saveTestResult)
@@ -63,6 +64,12 @@ export default function AdminPage() {
     )
     const deleteTestRun = useMutation(api.modelTests.deleteTestRun)
     const callModelAction = useAction(api.nvidia.callModel)
+
+    // Prompts hooks
+    const prompts = useQuery(api.prompts.getPrompts)
+    const updatePrompt = useMutation(api.prompts.updatePrompt)
+    const [editingPrompt, setEditingPrompt] = useState<string | null>(null)
+    const [promptDraft, setPromptDraft] = useState<string>('')
 
     const toggleModel = (id: string) => {
         setSelectedModels(prev => {
@@ -228,192 +235,278 @@ export default function AdminPage() {
 
     return (
         <div className="admin-page">
-            <h1 className="admin-page__title">🔬 Model Testing Lab</h1>
-            <p className="admin-page__subtitle">Benchmark NVIDIA Vision models for speed and quality</p>
+            <h1 className="admin-page__title">⚙️ Admin Dashboard</h1>
 
-            {/* Config Panel */}
-            <div className="admin-section">
-                <h2 className="admin-section__title">⚙️ Test Configuration</h2>
-
-                <div className="admin-config">
-                    {/* Image Upload */}
-                    <div className="admin-config__upload">
-                        <label className="admin-label">Test Image</label>
-                        <div
-                            className="admin-upload-zone"
-                            onClick={() => fileInputRef.current?.click()}
-                        >
-                            {imagePreview ? (
-                                <img src={imagePreview} alt="Test" className="admin-upload-zone__preview" />
-                            ) : (
-                                <span>📸 Click to select test image</span>
-                            )}
-                        </div>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileSelect}
-                            style={{ display: 'none' }}
-                        />
-                    </div>
-
-                    {/* Mode */}
-                    <div className="admin-config__mode">
-                        <label className="admin-label">Prompt Mode</label>
-                        <div className="admin-toggle">
-                            <button
-                                className={`admin-toggle__btn ${mode === 'single' ? 'admin-toggle__btn--active' : ''}`}
-                                onClick={() => setMode('single')}
-                            >
-                                Vision Only
-                            </button>
-                            <button
-                                className={`admin-toggle__btn ${mode === 'combined' ? 'admin-toggle__btn--active' : ''}`}
-                                onClick={() => setMode('combined')}
-                            >
-                                Combined (Analyze + Predict)
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Model Selection */}
-                <div className="admin-models">
-                    <div className="admin-models__header">
-                        <label className="admin-label">Models ({selectedModels.size}/{VISION_MODELS.length})</label>
-                        <div className="admin-models__actions">
-                            <button className="admin-btn--small" onClick={selectAll}>Select All</button>
-                            <button className="admin-btn--small" onClick={selectNone}>Clear</button>
-                        </div>
-                    </div>
-                    <div className="admin-models__grid">
-                        {VISION_MODELS.map(model => (
-                            <ModelCard
-                                key={model.id}
-                                model={model}
-                                selected={selectedModels.has(model.id)}
-                                onToggle={() => toggleModel(model.id)}
-                            />
-                        ))}
-                    </div>
-                </div>
-
+            <div className="admin-tabs">
                 <button
-                    className="btn btn--primary admin-run-btn"
-                    onClick={runTests}
-                    disabled={isRunning || !testImage || selectedModels.size === 0}
+                    className={`admin-tab ${activeTab === 'models' ? 'admin-tab--active' : ''}`}
+                    onClick={() => setActiveTab('models')}
                 >
-                    {isRunning ? '⏳ Running...' : `🚀 Run ${selectedModels.size} Model${selectedModels.size !== 1 ? 's' : ''}`}
+                    🧪 Model Testing Lab
+                </button>
+                <button
+                    className={`admin-tab ${activeTab === 'prompts' ? 'admin-tab--active' : ''}`}
+                    onClick={() => setActiveTab('prompts')}
+                >
+                    📝 Prompt Management
                 </button>
             </div>
 
-            {/* Live Results */}
-            {results.length > 0 && (
-                <div className="admin-section">
-                    <h2 className="admin-section__title">📊 Results</h2>
-                    <div className="admin-results">
-                        {results.map(result => (
-                            <div
-                                key={result.model}
-                                className={`admin-result admin-result--${result.status}`}
-                                onClick={() => setExpandedResult(expandedResult === result.model ? null : result.model)}
-                            >
-                                <div className="admin-result__header">
-                                    <div className="admin-result__status">
-                                        {result.status === 'pending' && '⏸️'}
-                                        {result.status === 'running' && '⏳'}
-                                        {result.status === 'success' && '✅'}
-                                        {result.status === 'error' && '❌'}
+            {activeTab === 'models' && (
+                <>
+                    <p className="admin-page__subtitle" style={{ marginTop: '16px' }}>Benchmark NVIDIA Vision models for speed and quality</p>
+
+                    {/* Config Panel */}
+                    <div className="admin-section">
+                        <h2 className="admin-section__title">⚙️ Test Configuration</h2>
+
+                        <div className="admin-config">
+                            {/* Image Upload */}
+                            <div className="admin-config__upload">
+                                <label className="admin-label">Test Image</label>
+                                <div
+                                    className="admin-upload-zone"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    {imagePreview ? (
+                                        <img src={imagePreview} alt="Test" className="admin-upload-zone__preview" />
+                                    ) : (
+                                        <span>📸 Click to select test image</span>
+                                    )}
+                                </div>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileSelect}
+                                    style={{ display: 'none' }}
+                                />
+                            </div>
+
+                            {/* Mode */}
+                            <div className="admin-config__mode">
+                                <label className="admin-label">Prompt Mode</label>
+                                <div className="admin-toggle">
+                                    <button
+                                        className={`admin-toggle__btn ${mode === 'single' ? 'admin-toggle__btn--active' : ''}`}
+                                        onClick={() => setMode('single')}
+                                    >
+                                        Vision Only
+                                    </button>
+                                    <button
+                                        className={`admin-toggle__btn ${mode === 'combined' ? 'admin-toggle__btn--active' : ''}`}
+                                        onClick={() => setMode('combined')}
+                                    >
+                                        Combined (Analyze + Predict)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Model Selection */}
+                        <div className="admin-models">
+                            <div className="admin-models__header">
+                                <label className="admin-label">Models ({selectedModels.size}/{VISION_MODELS.length})</label>
+                                <div className="admin-models__actions">
+                                    <button className="admin-btn--small" onClick={selectAll}>Select All</button>
+                                    <button className="admin-btn--small" onClick={selectNone}>Clear</button>
+                                </div>
+                            </div>
+                            <div className="admin-models__grid">
+                                {VISION_MODELS.map(model => (
+                                    <ModelCard
+                                        key={model.id}
+                                        model={model}
+                                        selected={selectedModels.has(model.id)}
+                                        onToggle={() => toggleModel(model.id)}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                        <button
+                            className="btn btn--primary admin-run-btn"
+                            onClick={runTests}
+                            disabled={isRunning || !testImage || selectedModels.size === 0}
+                        >
+                            {isRunning ? '⏳ Running...' : `🚀 Run ${selectedModels.size} Model${selectedModels.size !== 1 ? 's' : ''}`}
+                        </button>
+                    </div>
+
+                    {/* Live Results */}
+                    {results.length > 0 && (
+                        <div className="admin-section">
+                            <h2 className="admin-section__title">📊 Results</h2>
+                            <div className="admin-results">
+                                {results.map(result => (
+                                    <div
+                                        key={result.model}
+                                        className={`admin-result admin-result--${result.status}`}
+                                        onClick={() => setExpandedResult(expandedResult === result.model ? null : result.model)}
+                                    >
+                                        <div className="admin-result__header">
+                                            <div className="admin-result__status">
+                                                {result.status === 'pending' && '⏸️'}
+                                                {result.status === 'running' && '⏳'}
+                                                {result.status === 'success' && '✅'}
+                                                {result.status === 'error' && '❌'}
+                                            </div>
+                                            <div className="admin-result__name">{result.modelName}</div>
+                                            <div className="admin-result__metrics">
+                                                {result.status === 'success' && (
+                                                    <>
+                                                        <span className="admin-metric">{(result.durationMs / 1000).toFixed(1)}s</span>
+                                                        <span className={`admin-badge ${result.parseSuccess ? 'admin-badge--success' : 'admin-badge--error'}`}>
+                                                            {result.parseSuccess ? 'JSON ✓' : 'JSON ✗'}
+                                                        </span>
+                                                        <span className={`admin-badge ${result.hasAllFields ? 'admin-badge--success' : 'admin-badge--warn'}`}>
+                                                            {result.hasAllFields ? 'Complete' : 'Partial'}
+                                                        </span>
+                                                    </>
+                                                )}
+                                                {result.status === 'error' && (
+                                                    <span className="admin-metric admin-metric--error">{result.errorMessage?.substring(0, 60)}</span>
+                                                )}
+                                                {result.status === 'running' && (
+                                                    <span className="admin-metric">Running...</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {expandedResult === result.model && result.rawResponse && (
+                                            <pre className="admin-result__response">{result.rawResponse}</pre>
+                                        )}
                                     </div>
-                                    <div className="admin-result__name">{result.modelName}</div>
-                                    <div className="admin-result__metrics">
-                                        {result.status === 'success' && (
-                                            <>
-                                                <span className="admin-metric">{(result.durationMs / 1000).toFixed(1)}s</span>
-                                                <span className={`admin-badge ${result.parseSuccess ? 'admin-badge--success' : 'admin-badge--error'}`}>
-                                                    {result.parseSuccess ? 'JSON ✓' : 'JSON ✗'}
-                                                </span>
-                                                <span className={`admin-badge ${result.hasAllFields ? 'admin-badge--success' : 'admin-badge--warn'}`}>
-                                                    {result.hasAllFields ? 'Complete' : 'Partial'}
-                                                </span>
-                                            </>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* History */}
+                    <div className="admin-section">
+                        <h2 className="admin-section__title">📜 Test History</h2>
+                        {testRuns && testRuns.length > 0 ? (
+                            <div className="admin-history">
+                                {testRuns.map(run => (
+                                    <div
+                                        key={run.testRunId}
+                                        className={`admin-history__run ${selectedRunId === run.testRunId ? 'admin-history__run--selected' : ''}`}
+                                    >
+                                        <div
+                                            className="admin-history__run-header"
+                                            onClick={() => setSelectedRunId(selectedRunId === run.testRunId ? null : run.testRunId)}
+                                        >
+                                            <span className="admin-history__date">
+                                                {new Date(run.startedAt).toLocaleString()}
+                                            </span>
+                                            <span className="admin-history__stats">
+                                                {run.successCount}/{run.totalTests} passed • avg {(run.avgDurationMs / 1000).toFixed(1)}s
+                                            </span>
+                                            <button
+                                                className="admin-btn--small admin-btn--danger"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    deleteTestRun({ testRunId: run.testRunId })
+                                                }}
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
+                                        {selectedRunId === run.testRunId && selectedRunTests && (
+                                            <div className="admin-history__details">
+                                                {selectedRunTests
+                                                    .sort((a, b) => a.durationMs - b.durationMs)
+                                                    .map(test => (
+                                                        <div key={test._id} className={`admin-history__test admin-history__test--${test.status}`}>
+                                                            <span className="admin-history__model">{test.model.split('/').pop()}</span>
+                                                            <span className="admin-metric">{(test.durationMs / 1000).toFixed(1)}s</span>
+                                                            <span className={`admin-badge ${test.parseSuccess ? 'admin-badge--success' : 'admin-badge--error'}`}>
+                                                                {test.parseSuccess ? '✓' : '✗'}
+                                                            </span>
+                                                            <span className={`admin-badge ${test.hasAllFields ? 'admin-badge--success' : 'admin-badge--warn'}`}>
+                                                                {test.hasAllFields ? 'Full' : 'Partial'}
+                                                            </span>
+                                                            {test.qualityNotes && (
+                                                                <span className="admin-history__notes">{test.qualityNotes}</span>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                            </div>
                                         )}
-                                        {result.status === 'error' && (
-                                            <span className="admin-metric admin-metric--error">{result.errorMessage?.substring(0, 60)}</span>
-                                        )}
-                                        {result.status === 'running' && (
-                                            <span className="admin-metric">Running...</span>
-                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="admin-empty">No test runs yet. Upload an image and run some models!</p>
+                        )}
+                    </div>
+                </>
+            )}
+
+            {activeTab === 'prompts' && (
+                <div className="admin-section">
+                    <h2 className="admin-section__title">📝 System Prompts CMS</h2>
+                    <p style={{ color: 'var(--color-smoke-gray)', marginBottom: '16px' }}>
+                        Edit the exact prompts sent to the LLMs. Changes take effect on the very next prediction.
+                    </p>
+
+                    <div className="admin-prompts">
+                        {prompts?.map((prompt: any) => (
+                            <div key={prompt._id} className="admin-prompt-card">
+                                <div className="admin-prompt-header">
+                                    <div>
+                                        <h3>{prompt.name}</h3>
+                                        <div className="admin-prompt-desc">{prompt.description}</div>
+                                    </div>
+                                    <div className="admin-prompt-meta">
+                                        Last updated: {new Date(prompt.updatedAt).toLocaleString()}
                                     </div>
                                 </div>
-                                {expandedResult === result.model && result.rawResponse && (
-                                    <pre className="admin-result__response">{result.rawResponse}</pre>
+
+                                {editingPrompt === prompt.promptId ? (
+                                    <div className="admin-prompt-editor">
+                                        <textarea
+                                            value={promptDraft}
+                                            onChange={(e) => setPromptDraft(e.target.value)}
+                                            className="admin-prompt-textarea"
+                                            rows={8}
+                                        />
+                                        <div className="admin-prompt-actions">
+                                            <button
+                                                className="btn btn--ghost admin-btn--small"
+                                                onClick={() => setEditingPrompt(null)}
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                className="btn btn--primary admin-btn--small"
+                                                onClick={async () => {
+                                                    await updatePrompt({ id: prompt._id, content: promptDraft })
+                                                    setEditingPrompt(null)
+                                                }}
+                                            >
+                                                Save Prompt
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="admin-prompt-view">
+                                        <pre className="admin-prompt-content">{prompt.content}</pre>
+                                        <button
+                                            className="btn btn--secondary admin-btn--small"
+                                            onClick={() => {
+                                                setPromptDraft(prompt.content)
+                                                setEditingPrompt(prompt.promptId)
+                                            }}
+                                        >
+                                            Edit Prompt
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         ))}
                     </div>
                 </div>
             )}
-
-            {/* History */}
-            <div className="admin-section">
-                <h2 className="admin-section__title">📜 Test History</h2>
-                {testRuns && testRuns.length > 0 ? (
-                    <div className="admin-history">
-                        {testRuns.map(run => (
-                            <div
-                                key={run.testRunId}
-                                className={`admin-history__run ${selectedRunId === run.testRunId ? 'admin-history__run--selected' : ''}`}
-                            >
-                                <div
-                                    className="admin-history__run-header"
-                                    onClick={() => setSelectedRunId(selectedRunId === run.testRunId ? null : run.testRunId)}
-                                >
-                                    <span className="admin-history__date">
-                                        {new Date(run.startedAt).toLocaleString()}
-                                    </span>
-                                    <span className="admin-history__stats">
-                                        {run.successCount}/{run.totalTests} passed • avg {(run.avgDurationMs / 1000).toFixed(1)}s
-                                    </span>
-                                    <button
-                                        className="admin-btn--small admin-btn--danger"
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            deleteTestRun({ testRunId: run.testRunId })
-                                        }}
-                                    >
-                                        🗑️
-                                    </button>
-                                </div>
-                                {selectedRunId === run.testRunId && selectedRunTests && (
-                                    <div className="admin-history__details">
-                                        {selectedRunTests
-                                            .sort((a, b) => a.durationMs - b.durationMs)
-                                            .map(test => (
-                                                <div key={test._id} className={`admin-history__test admin-history__test--${test.status}`}>
-                                                    <span className="admin-history__model">{test.model.split('/').pop()}</span>
-                                                    <span className="admin-metric">{(test.durationMs / 1000).toFixed(1)}s</span>
-                                                    <span className={`admin-badge ${test.parseSuccess ? 'admin-badge--success' : 'admin-badge--error'}`}>
-                                                        {test.parseSuccess ? '✓' : '✗'}
-                                                    </span>
-                                                    <span className={`admin-badge ${test.hasAllFields ? 'admin-badge--success' : 'admin-badge--warn'}`}>
-                                                        {test.hasAllFields ? 'Full' : 'Partial'}
-                                                    </span>
-                                                    {test.qualityNotes && (
-                                                        <span className="admin-history__notes">{test.qualityNotes}</span>
-                                                    )}
-                                                </div>
-                                            ))}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p className="admin-empty">No test runs yet. Upload an image and run some models!</p>
-                )}
-            </div>
         </div>
     )
 }

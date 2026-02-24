@@ -13,6 +13,25 @@ export default function PredictionPage({ prediction, onBack }: PredictionPagePro
     const cardRef = useRef<HTMLDivElement>(null)
     const [showBeatAI, setShowBeatAI] = useState(false)
 
+    if (prediction.rejected) {
+        return (
+            <div className="prediction-page" style={{ justifyContent: 'center' }}>
+                <div className="card animate-zoom" style={{ textAlign: 'center', borderColor: 'var(--color-neon-orange)', padding: '24px' }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🛑</div>
+                    <h2 style={{ color: 'var(--color-neon-orange)', marginBottom: '12px', fontSize: '1.5rem', fontWeight: '800' }}>
+                        ACCESS DENIED
+                    </h2>
+                    <p style={{ fontSize: '1.1rem', marginBottom: '24px', lineHeight: '1.5', color: 'var(--color-vapor-white)' }}>
+                        "{prediction.rejectReason}"
+                    </p>
+                    <button className="btn btn--primary" onClick={onBack}>
+                        Try Another Image
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className="prediction-page">
             <PredictionCard prediction={prediction} cardRef={cardRef} />

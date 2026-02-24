@@ -9,18 +9,24 @@ import NotFoundPage from './pages/NotFoundPage'
 
 type Page = 'home' | 'prediction' | 'profile' | 'admin' | 'logs' | '404'
 
-export interface PredictionResult {
-    predictionId: string
-    exitTime: string
-    overstayMinutes: number
-    chaosRating: number
-    textRegret: number
-    barHop: number
-    cryRisk: number
-    sunriseRisk: string
-    roastLine: string
-    imageUrl?: string
-}
+export type PredictionResult =
+    | {
+        rejected: true
+        rejectReason: string
+    }
+    | {
+        rejected?: false
+        predictionId: string
+        exitTime: string
+        overstayMinutes: number
+        chaosRating: number
+        textRegret: number
+        barHop: number
+        cryRisk: number
+        sunriseRisk: string
+        roastLine: string
+        imageUrl?: string
+    }
 
 interface AppProps {
     useConvex: boolean

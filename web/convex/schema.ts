@@ -105,4 +105,12 @@ export default defineSchema({
         .index("by_model_timestamp", ["model", "timestamp"])
         .index("by_caller", ["caller"])
         .index("by_status", ["status"]),
+
+    aiPrompts: defineTable({
+        promptId: v.string(),          // e.g., 'guardrail_system', 'vision_user'
+        name: v.string(),        // Human readable name e.g., 'Guardrail System Prompt'
+        content: v.string(),     // The actual prompt text
+        description: v.string(), // What this prompt does
+        updatedAt: v.number(),
+    }).index("by_prompt_id", ["promptId"]),
 });

@@ -1,14 +1,6 @@
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import {
-    VISION_SYSTEM_PROMPT,
-    VISION_USER_PROMPT,
-    PREDICTION_SYSTEM_PROMPT,
-    buildPredictionUserPrompt,
-    COMBINED_SYSTEM_PROMPT,
-    buildCombinedUserPrompt
-} from "./aiPrompts";
 
 export const callModel = action({
     args: {
@@ -32,20 +24,59 @@ export const runPipeline = action({
     handler: async (ctx, args) => {
         const { imageBase64, mode } = args;
 
+        // --- STEP 0: GUARDRAIL CHECK ---
+        const GUARDRAIL_MODEL = 'nvidia/nemotron-mini-4b-instruct';
+        const guardrailSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "guardrail_system" });
+        const guardrailUser = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "guardrail_user" });
+
+        if (!guardrailSystem || !guardrailUser) throw new Error("Guardrail prompts not found in DB");
+
+        const guardrailResponse = await performNvidiaCall(ctx, {
+            model: GUARDRAIL_MODEL,
+            messages: [
+                { role: 'system', content: guardrailSystem },
+                {
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: guardrailUser },
+                        { type: 'image_url', image_url: { url: imageBase64 } },
+                    ],
+                },
+            ],
+            temperature: 0.1,
+            maxTokens: 512,
+            caller: 'pipeline:guardrail',
+        });
+
+        const guardrailData = parseJsonResponse(guardrailResponse);
+        if (guardrailData?.valid === false) {
+            // Guardrail failed! Reject early.
+            return {
+                rejected: true,
+                rejectReason: guardrailData.roast || "Invalid image rejected by AI guardrails."
+            };
+        }
+
+        // --- GUARDRAIL PASSED. PROCEED TO PIPELINE ---
+
         if (mode === "single") {
             // "Vision Only" mode in admin (2 models: Kimi K2.5 -> Nemotron-3-Nano)
             const MODEL_VISION = 'moonshotai/kimi-k2.5'
             const MODEL_PREDICTION = 'nvidia/nemotron-3-nano-30b-a3b'
 
+            const visionSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "vision_system" }) || "";
+            const visionUser = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "vision_user" }) || "";
+            const predictSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "predict_system" }) || "";
+
             // Step 1: Vision
             const visionResponse = await performNvidiaCall(ctx, {
                 model: MODEL_VISION,
                 messages: [
-                    { role: 'system', content: VISION_SYSTEM_PROMPT },
+                    { role: 'system', content: visionSystem },
                     {
                         role: 'user',
                         content: [
-                            { type: 'text', text: VISION_USER_PROMPT },
+                            { type: 'text', text: visionUser },
                             { type: 'image_url', image_url: { url: imageBase64 } },
                         ],
                     },
@@ -55,14 +86,13 @@ export const runPipeline = action({
                 caller: 'pipeline:two-model:vision',
             });
 
-            // Parse exactly like aiPipeline.ts
             const visionSignals = parseJsonResponse(visionResponse);
 
             // Step 2: Predict
             const predictionResponse = await performNvidiaCall(ctx, {
                 model: MODEL_PREDICTION,
                 messages: [
-                    { role: 'system', content: PREDICTION_SYSTEM_PROMPT },
+                    { role: 'system', content: predictSystem },
                     { role: 'user', content: buildPredictionUserPrompt(JSON.stringify(visionSignals, null, 2)) },
                 ],
                 temperature: 0.8,
@@ -74,11 +104,12 @@ export const runPipeline = action({
         } else {
             // "Combined" mode in admin (1 model: Kimi K2.5)
             const MODEL_VISION = 'moonshotai/kimi-k2.5'
+            const combinedSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "combined_system" }) || "";
 
             const response = await performNvidiaCall(ctx, {
                 model: MODEL_VISION,
                 messages: [
-                    { role: 'system', content: COMBINED_SYSTEM_PROMPT },
+                    { role: 'system', content: combinedSystem },
                     {
                         role: 'user',
                         content: [
@@ -246,4 +277,87 @@ async function performNvidiaCall(ctx: any, args: {
             console.error("[NVIDIA API Action] Failed to save log entry:", logErr);
         }
     }
+}
+
+function buildPredictionUserPrompt(visionSignals: string): string {
+    const now = new Date()
+    const currentHour = now.getHours()
+    const currentMinute = now.getMinutes()
+
+    return `Based on these scene analysis signals from a night-out photo, generate a prediction.
+Current time: ${currentHour}:${currentMinute.toString().padStart(2, '0')}
+
+Scene signals:
+${visionSignals}
+
+Generate this JSON:
+{
+  "exitTime": "<predicted time they'll actually leave, e.g. '2:47 AM'>",
+  "overstayMinutes": <minutes from now until they leave>,
+  "chaosRating": <0.0-10.0 chaos level>,
+  "textRegret": <0-100 % chance they'll send a regrettable text>,
+  "barHop": <0-100 % chance they'll hop to another bar>,
+  "cryRisk": <0-100 % chance someone cries>,
+  "sunriseRisk": "LOW" | "MEDIUM" | "HIGH" | "CERTAIN",
+  "roastLine": "<one savage, funny line about their night. Be creative and specific to what you see in the data. Max 80 chars.>"
+}
+
+Rules for predictions:
+- Clubs and house parties = longer stays
+- More drinks, especially shots = way longer
+- Groups > 4 people = they're not leaving
+- Packed venues with neon/strobes = sunrise risk goes up
+- If someone has a coat in sight, they might actually leave
+- Food and water = responsible humans, maybe they DO leave on time
+- "Just one last drink" is ALWAYS a lie
+- Be savage but funny with the roast line
+
+Only output valid JSON.`
+}
+
+function buildCombinedUserPrompt(): string {
+    const now = new Date()
+    const currentHour = now.getHours()
+    const currentMinute = now.getMinutes()
+
+    return `Look at this night-out photo. Analyze the scene and predict when this person/group will ACTUALLY leave.
+Current time: ${currentHour}:${currentMinute.toString().padStart(2, '0')}
+
+Generate this JSON with your analysis AND prediction combined:
+{
+  "analysis": {
+    "setting": "bar" | "club" | "restaurant" | "house_party" | "rooftop" | "outdoor" | "unknown",
+    "face_count": <number>,
+    "estimated_group_size": <number>,
+    "drinks_count": <number>,
+    "drink_types": ["beer", "cocktail", "shot", "wine"],
+    "empty_glasses": <number>,
+    "lighting": "dark" | "dim" | "moderate" | "bright",
+    "neon_or_strobes": true | false,
+    "crowd_density": "empty" | "sparse" | "moderate" | "packed",
+    "vibe": "calm" | "happy" | "excited" | "wild" | "emotional" | "tired",
+    "energy_level": <1-10>,
+    "chaos_signs": [<list of chaos indicators>]
+  },
+  "prediction": {
+    "exitTime": "<predicted time, e.g. '2:47 AM'>",
+    "overstayMinutes": <minutes from now until they leave>,
+    "chaosRating": <0.0-10.0>,
+    "textRegret": <0-100>,
+    "barHop": <0-100>,
+    "cryRisk": <0-100>,
+    "sunriseRisk": "LOW" | "MEDIUM" | "HIGH" | "CERTAIN",
+    "roastLine": "<savage, funny one-liner about their night. Max 80 chars.>"
+  }
+}
+
+Rules:
+- "Just one last drink" is ALWAYS a lie
+- More people + more drinks = they're definitely not leaving
+- Clubs/house parties = add hours
+- Shots visible = sunrise risk goes way up
+- Be savage but funny with the roast line
+- exitTime should be realistic based on the current time and scene
+
+Only output valid JSON.`
 }
