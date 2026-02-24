@@ -118,9 +118,8 @@ export default function AdminPage() {
 
         const base64 = await fileToBase64(processedFile)
 
-        // Run each model sequentially to avoid rate limits
-        for (let i = 0; i < models.length; i++) {
-            const model = models[i]
+        // Run all selected models in parallel
+        await Promise.allSettled(models.map(async (model, i) => {
             const startedAt = Date.now()
 
             setResults(prev => prev.map((r, idx) =>
@@ -219,7 +218,7 @@ export default function AdminPage() {
                     errorMessage,
                 })
             }
-        }
+        }))
 
         setIsRunning(false)
     }, [testImage, selectedModels, mode, saveTestResult])
