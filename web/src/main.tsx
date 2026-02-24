@@ -18,7 +18,9 @@ async function mount() {
 
     if (convexUrl) {
         const { ConvexProvider, ConvexReactClient } = await import('convex/react')
+        const { wireLogCallback } = await import('./lib/logWiring')
         const convex = new ConvexReactClient(convexUrl)
+        wireLogCallback(convex)
         root.render(
             <StrictMode>
                 <ConvexProvider client={convex}>

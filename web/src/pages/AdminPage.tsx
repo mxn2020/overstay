@@ -152,6 +152,7 @@ export default function AdminPage() {
                 const rawResponse = await callNvidiaModel(model.id, messages, {
                     temperature: 0.3,
                     maxTokens: 4096,
+                    caller: `admin-test:${mode}`,
                 })
 
                 const completedAt = Date.now()

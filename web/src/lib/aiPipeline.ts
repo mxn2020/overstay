@@ -59,8 +59,9 @@ async function runTwoModelPipeline(file: File): Promise<LocalPredictionResult> {
             ],
         },
     ], {
-        temperature: 0.3, // Lower temp for factual analysis
-        maxTokens: 4096,  // Vision analysis needs more room
+        temperature: 0.3,
+        maxTokens: 4096,
+        caller: 'pipeline:two-model:vision',
     })
 
     console.log('[AI Pipeline] Vision signals received:', visionResponse.substring(0, 200))
@@ -72,8 +73,9 @@ async function runTwoModelPipeline(file: File): Promise<LocalPredictionResult> {
         { role: 'system', content: PREDICTION_SYSTEM_PROMPT },
         { role: 'user', content: buildPredictionUserPrompt(JSON.stringify(visionSignals, null, 2)) },
     ], {
-        temperature: 0.8, // Higher temp for creative roast lines
+        temperature: 0.8,
         maxTokens: 2048,
+        caller: 'pipeline:two-model:prediction',
     })
 
     console.log('[AI Pipeline] Prediction received:', predictionResponse.substring(0, 200))
@@ -115,6 +117,7 @@ async function runSingleModelPipeline(file: File): Promise<LocalPredictionResult
     ], {
         temperature: 0.7,
         maxTokens: 2048,
+        caller: 'pipeline:single-model',
     })
 
     console.log('[AI Pipeline] Combined response:', response.substring(0, 200))

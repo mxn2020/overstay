@@ -6,9 +6,10 @@ interface LayoutProps {
     onNavigateHome: () => void
     onNavigateProfile: () => void
     onNavigateAdmin?: () => void
+    onNavigateLogs?: () => void
 }
 
-export default function Layout({ children, onNavigateHome, onNavigateProfile, onNavigateAdmin }: LayoutProps) {
+export default function Layout({ children, onNavigateHome, onNavigateProfile, onNavigateAdmin, onNavigateLogs }: LayoutProps) {
     const [safetyMessage, setSafetyMessage] = useState(getRandomSafetyMessage())
     const [ride, setRide] = useState(getRandomRide())
 
@@ -38,6 +39,11 @@ export default function Layout({ children, onNavigateHome, onNavigateProfile, on
                     {onNavigateAdmin && (
                         <button className="app__nav-link" onClick={onNavigateAdmin}>
                             🔬 Admin
+                        </button>
+                    )}
+                    {onNavigateLogs && (
+                        <button className="app__nav-link" onClick={onNavigateLogs}>
+                            📋 Logs
                         </button>
                     )}
                 </nav>

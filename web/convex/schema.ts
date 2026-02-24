@@ -71,4 +71,38 @@ export default defineSchema({
         .index("by_testRunId", ["testRunId"])
         .index("by_model", ["model"])
         .index("by_startedAt", ["startedAt"]),
+
+    aiLogs: defineTable({
+        // Identity
+        requestId: v.string(),
+        model: v.string(),
+        caller: v.string(),
+        // Timing
+        timestamp: v.number(),
+        durationMs: v.number(),
+        // Request
+        systemPrompt: v.string(),
+        userPromptText: v.string(),
+        hasImage: v.boolean(),
+        imageSizeBytes: v.optional(v.number()),
+        temperature: v.number(),
+        maxTokens: v.number(),
+        requestBodySize: v.number(),
+        // Response
+        status: v.string(),
+        httpStatus: v.number(),
+        responseContent: v.string(),
+        responseSize: v.number(),
+        finishReason: v.optional(v.string()),
+        // Tokens
+        promptTokens: v.optional(v.number()),
+        completionTokens: v.optional(v.number()),
+        totalTokens: v.optional(v.number()),
+        // Error
+        errorMessage: v.optional(v.string()),
+    })
+        .index("by_timestamp", ["timestamp"])
+        .index("by_model_timestamp", ["model", "timestamp"])
+        .index("by_caller", ["caller"])
+        .index("by_status", ["status"]),
 });
