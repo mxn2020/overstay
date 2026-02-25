@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
-import type { PredictionResult } from '../App'
+import type { SuccessPrediction } from '../App'
 
 interface ShareButtonsProps {
-    prediction: PredictionResult
+    prediction: SuccessPrediction
     cardRef: React.RefObject<HTMLDivElement | null>
 }
 

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useAction } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { VISION_MODELS, type ModelInfo } from '../lib/modelRegistry'
 import { fileToBase64 } from '../lib/nvidiaApi'
-import { VISION_SYSTEM_PROMPT, VISION_USER_PROMPT, COMBINED_SYSTEM_PROMPT, buildCombinedUserPrompt } from '../lib/aiPrompts'
+// Using prompts from Database now
 
 interface TestResult {
     model: string
@@ -135,22 +135,27 @@ export default function AdminPage() {
             ))
 
             try {
+                const visionSystemPrompt = prompts?.find((p: any) => p.promptId === 'vision_system')?.content || 'You are a vision AI.'
+                const visionUserPrompt = prompts?.find((p: any) => p.promptId === 'vision_user')?.content || 'Analyze this image.'
+                const combinedSystemPrompt = prompts?.find((p: any) => p.promptId === 'combined_system')?.content || 'You are a combined AI.'
+                const combinedUserPrompt = prompts?.find((p: any) => p.promptId === 'vision_user')?.content || 'Analyze this image.' // Using vision_user as fallback for combined
+
                 const isVisionOnly = mode === 'single'
                 const messages = isVisionOnly ? [
-                    { role: 'system' as const, content: VISION_SYSTEM_PROMPT },
+                    { role: 'system' as const, content: visionSystemPrompt },
                     {
                         role: 'user' as const,
                         content: [
-                            { type: 'text' as const, text: VISION_USER_PROMPT },
+                            { type: 'text' as const, text: visionUserPrompt },
                             { type: 'image_url' as const, image_url: { url: base64 } },
                         ],
                     },
                 ] : [
-                    { role: 'system' as const, content: COMBINED_SYSTEM_PROMPT },
+                    { role: 'system' as const, content: combinedSystemPrompt },
                     {
                         role: 'user' as const,
                         content: [
-                            { type: 'text' as const, text: buildCombinedUserPrompt() },
+                            { type: 'text' as const, text: combinedUserPrompt },
                             { type: 'image_url' as const, image_url: { url: base64 } },
                         ],
                     },

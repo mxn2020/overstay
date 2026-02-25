@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { PredictionResult } from '../App'
+import type { SuccessPrediction } from '../App'
 
 const WIN_MESSAGES = [
     "You actually left? We're impressed. And a little disappointed.",
@@ -16,7 +16,7 @@ const LOSE_MESSAGES = [
 ]
 
 interface BeatTheAIProps {
-    prediction: PredictionResult
+    prediction: SuccessPrediction
 }
 
 export default function BeatTheAI({ prediction }: BeatTheAIProps) {

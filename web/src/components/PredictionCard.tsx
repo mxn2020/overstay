@@ -1,7 +1,7 @@
-import type { PredictionResult } from '../App'
+import type { SuccessPrediction } from '../App'
 
 interface PredictionCardProps {
-    prediction: PredictionResult
+    prediction: SuccessPrediction
     cardRef?: React.RefObject<HTMLDivElement | null>
 }
 
