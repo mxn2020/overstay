@@ -8,6 +8,7 @@ import LogsPage from './pages/LogsPage'
 import LoginPage from './pages/LoginPage'
 import PricingPage from './pages/PricingPage'
 import HelpPage from './pages/HelpPage'
+import AuditLogsPage from './pages/AuditLogsPage'
 import { useState } from 'react'
 
 export type SuccessPrediction = {
@@ -50,6 +51,7 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/help" element={<HelpPage />} />
+                    <Route path="/audit-logs" element={<AuditLogsPage />} />
                 </Routes>
             </Layout>
         </BrowserRouter>

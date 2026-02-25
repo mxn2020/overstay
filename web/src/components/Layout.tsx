@@ -40,7 +40,8 @@ export default function Layout({ children }: LayoutProps) {
                     {isAuthenticated && me?.role === 'admin' && (
                         <>
                             <Link to="/admin" className="app__nav-link">🔬 Admin</Link>
-                            <Link to="/logs" className="app__nav-link">📋 Logs</Link>
+                            <Link to="/logs" className="app__nav-link">📋 AI Logs</Link>
+                            <Link to="/audit-logs" className="app__nav-link">🔍 Audit</Link>
                         </>
                     )}
                     {isAuthenticated ? (

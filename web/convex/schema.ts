@@ -119,4 +119,18 @@ export default defineSchema({
         description: v.string(), // What this prompt does
         updatedAt: v.number(),
     }).index("by_prompt_id", ["promptId"]),
+
+    auditLogs: defineTable({
+        action: v.string(),           // e.g. "user.login", "admin.role_change", "prompt.update", "stripe.checkout"
+        category: v.union(v.literal("auth"), v.literal("admin"), v.literal("system"), v.literal("billing")),
+        userId: v.optional(v.string()),
+        targetId: v.optional(v.string()),
+        details: v.string(),          // JSON stringified details
+        ipAddress: v.optional(v.string()),
+        timestamp: v.number(),
+    })
+        .index("by_timestamp", ["timestamp"])
+        .index("by_category", ["category", "timestamp"])
+        .index("by_userId", ["userId", "timestamp"])
+        .index("by_action", ["action", "timestamp"]),
 });

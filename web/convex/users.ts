@@ -99,6 +99,24 @@ export const setRole = mutation({
 
         if (myProfile?.role !== "admin") throw new Error("Not authorized");
 
+        const targetProfile = await ctx.db.get(profileId);
+        const oldRole = targetProfile?.role ?? "unknown";
+
         await ctx.db.patch(profileId, { role });
+
+        // Audit log
+        await ctx.db.insert("auditLogs", {
+            action: "admin.role_change",
+            category: "admin",
+            userId,
+            targetId: profileId,
+            details: JSON.stringify({
+                message: `Changed role from ${oldRole} to ${role}`,
+                oldRole,
+                newRole: role,
+                targetUserId: targetProfile?.userId,
+            }),
+            timestamp: Date.now(),
+        });
     },
 });
