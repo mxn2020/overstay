@@ -1,4 +1,29 @@
+import { useAction, useQuery } from 'convex/react'
+import { useConvexAuth } from 'convex/react'
+import { api } from '../../convex/_generated/api'
+import { useNavigate } from 'react-router-dom'
+
 export default function PricingPage() {
+    const { isAuthenticated } = useConvexAuth()
+    const subscription = useQuery(api.stripe.getSubscription)
+    const createCheckout = useAction(api.stripe.createCheckoutSession)
+    const navigate = useNavigate()
+
+    const handleUpgrade = async (plan: 'pro' | 'enterprise') => {
+        if (!isAuthenticated) {
+            navigate('/login')
+            return
+        }
+        try {
+            const { url } = await createCheckout({ plan })
+            if (url) window.location.href = url
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Failed to create checkout')
+        }
+    }
+
+    const currentPlan = subscription?.plan ?? 'free'
+
     return (
         <div className="pricing-page">
             <div style={{ textAlign: 'center', marginBottom: 'var(--space-2xl, 48px)' }}>
@@ -21,7 +46,9 @@ export default function PricingPage() {
                         <li>❌ History tracking</li>
                         <li>❌ Beat the AI mode</li>
                     </ul>
-                    <button className="btn btn--secondary pricing-card__btn">Current Plan</button>
+                    <button className="btn btn--secondary pricing-card__btn" disabled={currentPlan === 'free'}>
+                        {currentPlan === 'free' ? '✅ Current Plan' : 'Downgrade'}
+                    </button>
                 </div>
 
                 <div className="pricing-card pricing-card--popular">
@@ -37,7 +64,13 @@ export default function PricingPage() {
                         <li>✅ Beat the AI mode</li>
                         <li>✅ Priority support</li>
                     </ul>
-                    <button className="btn btn--primary pricing-card__btn">Upgrade to Pro</button>
+                    <button
+                        className="btn btn--primary pricing-card__btn"
+                        disabled={currentPlan === 'pro'}
+                        onClick={() => handleUpgrade('pro')}
+                    >
+                        {currentPlan === 'pro' ? '✅ Current Plan' : 'Upgrade to Pro'}
+                    </button>
                 </div>
 
                 <div className="pricing-card">
@@ -52,7 +85,13 @@ export default function PricingPage() {
                         <li>✅ Team management</li>
                         <li>✅ SLA support</li>
                     </ul>
-                    <button className="btn btn--secondary pricing-card__btn">Contact Us</button>
+                    <button
+                        className="btn btn--secondary pricing-card__btn"
+                        disabled={currentPlan === 'enterprise'}
+                        onClick={() => handleUpgrade('enterprise')}
+                    >
+                        {currentPlan === 'enterprise' ? '✅ Current Plan' : 'Contact Us'}
+                    </button>
                 </div>
             </div>
         </div>
