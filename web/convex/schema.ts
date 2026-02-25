@@ -1,17 +1,23 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 
 export default defineSchema({
-    users: defineTable({
-        name: v.string(),
-        email: v.string(),
-        authProvider: v.string(),
+    ...authTables,
+
+    // App-specific user profile data (linked to auth users)
+    userProfiles: defineTable({
+        userId: v.string(), // references authTables users._id
+        name: v.optional(v.string()),
+        role: v.union(v.literal("user"), v.literal("admin")),
         overstayScore: v.number(),
         totalPredictions: v.number(),
         beatTheAiWins: v.number(),
         streak: v.number(),
+        stripeCustomerId: v.optional(v.string()),
+        plan: v.optional(v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise"))),
         createdAt: v.number(),
-    }).index("by_email", ["email"]),
+    }).index("by_userId", ["userId"]),
 
     predictions: defineTable({
         userId: v.optional(v.id("users")),

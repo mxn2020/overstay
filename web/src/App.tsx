@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import LandingPage from './pages/LandingPage'
 import PredictionPage from './pages/PredictionPage'
 import ProfilePage from './pages/ProfilePage'
 import AdminPage from './pages/AdminPage'
 import LogsPage from './pages/LogsPage'
-import NotFoundPage from './pages/NotFoundPage'
-
-type Page = 'home' | 'prediction' | 'profile' | 'admin' | 'logs' | '404'
+import LoginPage from './pages/LoginPage'
+import PricingPage from './pages/PricingPage'
+import HelpPage from './pages/HelpPage'
+import { useState } from 'react'
 
 export type SuccessPrediction = {
     rejected?: false
@@ -30,51 +31,28 @@ export type PredictionResult =
     }
     | SuccessPrediction
 
-interface AppProps {
-    useConvex: boolean
-}
-
-function App({ useConvex }: AppProps) {
-    const [page, setPage] = useState<Page>('home')
+function App() {
     const [prediction, setPrediction] = useState<PredictionResult | null>(null)
 
-    const navigate = (p: Page) => setPage(p)
-
-    const handlePrediction = (result: PredictionResult) => {
-        setPrediction(result)
-        setPage('prediction')
-    }
-
-    const renderPage = () => {
-        switch (page) {
-            case 'home':
-                return <LandingPage onPredict={handlePrediction} useConvex={useConvex} />
-            case 'prediction':
-                return prediction ? (
-                    <PredictionPage prediction={prediction} onBack={() => navigate('home')} />
-                ) : (
-                    <LandingPage onPredict={handlePrediction} useConvex={useConvex} />
-                )
-            case 'profile':
-                return <ProfilePage />
-            case 'admin':
-                return <AdminPage />
-            case 'logs':
-                return <LogsPage />
-            default:
-                return <NotFoundPage onGoHome={() => navigate('home')} />
-        }
-    }
-
     return (
-        <Layout
-            onNavigateHome={() => navigate('home')}
-            onNavigateProfile={() => navigate('profile')}
-            onNavigateAdmin={() => navigate('admin')}
-            onNavigateLogs={() => navigate('logs')}
-        >
-            {renderPage()}
-        </Layout>
+        <BrowserRouter>
+            <Layout>
+                <Routes>
+                    <Route path="/" element={<LandingPage onPredict={(r) => setPrediction(r)} useConvex={true} />} />
+                    <Route path="/prediction" element={
+                        prediction
+                            ? <PredictionPage prediction={prediction} onBack={() => window.history.back()} />
+                            : <LandingPage onPredict={(r) => setPrediction(r)} useConvex={true} />
+                    } />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/logs" element={<LogsPage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/help" element={<HelpPage />} />
+                </Routes>
+            </Layout>
+        </BrowserRouter>
     )
 }
 

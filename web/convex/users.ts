@@ -1,45 +1,104 @@
-import { mutation, query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { auth } from "./auth";
 
-export const getProfile = query({
-    args: { userId: v.id("users") },
-    handler: async (ctx, { userId }) => {
-        const user = await ctx.db.get(userId);
-        if (!user) return null;
+// Get the current authenticated user's profile
+export const getMe = query({
+    args: {},
+    handler: async (ctx) => {
+        const userId = await auth.getUserId(ctx);
+        if (!userId) return null;
 
-        const badges = await ctx.db
-            .query("badges")
+        const profile = await ctx.db
+            .query("userProfiles")
             .withIndex("by_userId", (q) => q.eq("userId", userId))
-            .collect();
+            .first();
 
-        return { ...user, badges };
+        if (!profile) {
+            const authUser = await ctx.db.get(userId);
+            return {
+                _id: userId,
+                email: authUser?.email ?? "",
+                name: authUser?.name ?? "",
+                role: "user" as const,
+                plan: "free" as const,
+                hasProfile: false,
+            };
+        }
+
+        const authUser = await ctx.db.get(userId);
+        return {
+            ...profile,
+            email: authUser?.email ?? "",
+            hasProfile: true,
+        };
     },
 });
 
-export const create = mutation({
-    args: {
-        name: v.string(),
-        email: v.string(),
-        authProvider: v.string(),
-    },
-    handler: async (ctx, { name, email, authProvider }) => {
-        // Check if user already exists
+// Create or update user profile after first login
+export const ensureProfile = mutation({
+    args: {},
+    handler: async (ctx) => {
+        const userId = await auth.getUserId(ctx);
+        if (!userId) throw new Error("Not authenticated");
+
         const existing = await ctx.db
-            .query("users")
-            .withIndex("by_email", (q) => q.eq("email", email))
+            .query("userProfiles")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
             .first();
 
-        if (existing) return existing._id;
+        if (!existing) {
+            const authUser = await ctx.db.get(userId);
+            await ctx.db.insert("userProfiles", {
+                userId: userId,
+                name: authUser?.name ?? "",
+                role: "user",
+                overstayScore: 0,
+                totalPredictions: 0,
+                beatTheAiWins: 0,
+                streak: 0,
+                plan: "free",
+                createdAt: Date.now(),
+            });
+        }
+    },
+});
 
-        return await ctx.db.insert("users", {
-            name,
-            email,
-            authProvider,
-            overstayScore: 0,
-            totalPredictions: 0,
-            beatTheAiWins: 0,
-            streak: 0,
-            createdAt: Date.now(),
-        });
+// Admin: list all users
+export const listUsers = query({
+    args: {},
+    handler: async (ctx) => {
+        const userId = await auth.getUserId(ctx);
+        if (!userId) return [];
+
+        const profile = await ctx.db
+            .query("userProfiles")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .first();
+
+        if (profile?.role !== "admin") return [];
+
+        return await ctx.db.query("userProfiles").collect();
+    },
+});
+
+// Admin: set user role
+export const setRole = mutation({
+    args: {
+        profileId: v.id("userProfiles"),
+        role: v.union(v.literal("user"), v.literal("admin")),
+    },
+    handler: async (ctx, { profileId, role }) => {
+        const userId = await auth.getUserId(ctx);
+        if (!userId) throw new Error("Not authenticated");
+
+        const myProfile = await ctx.db
+            .query("userProfiles")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .first();
+
+        if (myProfile?.role !== "admin") throw new Error("Not authorized");
+
+        await ctx.db.patch(profileId, { role });
     },
 });
