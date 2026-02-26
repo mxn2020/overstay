@@ -35,6 +35,7 @@ async function runTwoModelPipeline(file: File): Promise<PredictionResult> {
     if (result.rejected) {
         return {
             rejected: true,
+            reason: result.reason || 'roast',
             rejectReason: result.rejectReason || "Image rejected by AI guardrails.",
         }
     }
@@ -66,6 +67,7 @@ async function runSingleModelPipeline(file: File): Promise<PredictionResult> {
     if (result.rejected) {
         return {
             rejected: true,
+            reason: result.reason || 'roast',
             rejectReason: result.rejectReason || "Image rejected by AI guardrails.",
         }
     }

@@ -28,6 +28,7 @@ export type SuccessPrediction = {
 export type PredictionResult =
     | {
         rejected: true
+        reason: 'roast' | 'harmful'
         rejectReason: string
     }
     | SuccessPrediction

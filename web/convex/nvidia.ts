@@ -57,6 +57,7 @@ export const runPipeline = action({
             // Guardrail failed! Reject early.
             return {
                 rejected: true,
+                reason: guardrailData.reason || "roast", // "roast" = funny, "harmful" = inappropriate
                 rejectReason: guardrailData.roast || "Invalid image rejected by AI guardrails."
             };
         }
