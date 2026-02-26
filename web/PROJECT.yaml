@@ -1,0 +1,12 @@
+name: justonelastdrink-web
+description: web project
+tier: prototype
+lane: side-projects
+priority: medium
+oss: false
+stack: [typescript, react, convex, vite]
+repo: null
+deploy_url: null
+last_active: 2026-02-25
+tags: []
+notes: 
