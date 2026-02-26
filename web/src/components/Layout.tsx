@@ -2,7 +2,7 @@ import { useState, useEffect, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useConvexAuth } from "convex/react"
 import { useAuthActions } from "@convex-dev/auth/react"
-import { useQuery } from "convex/react"
+import { useQuery, useMutation } from "convex/react"
 import { api } from '../../convex/_generated/api'
 import { getRandomRide, getRandomSafetyMessage } from '../lib/safeRide'
 import { Menu, X, Globe } from 'lucide-react'
@@ -20,11 +20,19 @@ export default function Layout({ children }: LayoutProps) {
     const { isAuthenticated } = useConvexAuth()
     const { signOut } = useAuthActions()
     const me = useQuery(api.users.getMe)
+    const ensureProfile = useMutation(api.users.ensureProfile)
     const navigate = useNavigate()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [langOpen, setLangOpen] = useState(false)
 
     const isRTL = RTL_LANGUAGES.includes(i18n.language)
+
+    // Auto-create profile if authenticated user doesn't have one
+    useEffect(() => {
+        if (isAuthenticated && me && !me.hasProfile) {
+            ensureProfile({}).catch(console.error)
+        }
+    }, [isAuthenticated, me, ensureProfile])
 
     useEffect(() => {
         document.documentElement.dir = isRTL ? 'rtl' : 'ltr'
