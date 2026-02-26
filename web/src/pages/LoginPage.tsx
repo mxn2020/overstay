@@ -38,7 +38,19 @@ export default function LoginPage() {
             })
             // Auth state change will trigger the useEffect above
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Authentication failed')
+            const message = err instanceof Error ? err.message : String(err)
+            // Map Convex auth errors to friendly messages
+            if (message.includes('InvalidAccountId') || message.includes('Could not find')) {
+                setError('No account found with this email. Check your email or create a new account.')
+            } else if (message.includes('InvalidSecret') || message.includes('Invalid password')) {
+                setError('Wrong password. Please try again.')
+            } else if (message.includes('AccountAlreadyExists')) {
+                setError('An account with this email already exists. Try signing in instead.')
+            } else if (message.includes('TooManyFailedAttempts')) {
+                setError('Too many failed attempts. Please wait a moment and try again.')
+            } else {
+                setError('Authentication failed. Please check your credentials and try again.')
+            }
         } finally {
             setLoading(false)
         }
