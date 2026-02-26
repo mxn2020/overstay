@@ -1,4 +1,4 @@
-# 🧩 Overstay — Feature Specifications
+# 🧩 JustOneLastDrink — Feature Specifications
 
 ## Core Features
 
@@ -40,7 +40,7 @@
 
 **Output Predictions:**
 - **Exit Time** — predicted departure time (e.g., "2:47 AM")
-- **Overstay Duration** — hours past "one last drink" (e.g., "3h 18m")
+- **JustOneLastDrink Duration** — hours past "one last drink" (e.g., "3h 18m")
 - **Chaos Rating** — 0–10 scale with decimal (e.g., "8.6/10")
 - **Text Regret Probability** — % chance of sending a regrettable text
 - **Bar-Hop Probability** — % chance of venue change
@@ -80,7 +80,7 @@ Modifiers:
 - Dark background with gradient (deep purple → black)
 - Bold, oversized exit time typography
 - Minimal but impactful layout
-- Brand watermark "overstay.app" subtle bottom corner
+- Brand watermark "justOneLastDrink.app" subtle bottom corner
 - Dimensions optimized for Instagram Stories (1080×1920) and feed (1080×1080)
 - One-tap share to Instagram, TikTok, Twitter/X, Snapchat
 - Download as image option
@@ -107,7 +107,7 @@ Modifiers:
 │                                  │
 │  ─────────────────────────────   │
 │                                  │
-│           overstay.app           │
+│           justOneLastDrink.app           │
 └──────────────────────────────────┘
 ```
 
@@ -121,7 +121,7 @@ Modifiers:
 - Sign up with email, Google, or Apple
 - View past predictions
 - Track accuracy over time
-- Profile with "Overstay Score" (lifetime chaos average)
+- Profile with "JustOneLastDrink Score" (lifetime chaos average)
 - Achievement badges
 - Delete account & data (GDPR)
 
@@ -158,7 +158,7 @@ Modifiers:
 - One-tap share prediction card to social platforms
 - "Challenge a friend" — send a prediction link
 - Group predictions — upload group photo, each person gets a prediction
-- Leaderboard — who overstays the most in your friend group
+- Leaderboard — who justOneLastDrinks the most in your friend group
 - Morning-after comparison: prediction vs. reality side-by-side card
 
 ---
@@ -170,7 +170,7 @@ Modifiers:
 **Features:**
 - Location tagging (opt-in)
 - Venue chaos scores based on aggregate data
-- "This venue has a 94% overstay rate on Saturdays"
+- "This venue has a 94% justOneLastDrink rate on Saturdays"
 - Venue leaderboards
 - Bar/club partnership opportunities
 

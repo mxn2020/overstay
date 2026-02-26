@@ -1,4 +1,4 @@
-# 💰 Overstay — Monetization Strategy
+# 💰 JustOneLastDrink — Monetization Strategy
 
 ## Revenue Model: Freemium + Venue B2B
 
@@ -30,7 +30,7 @@ Premium users get:
 |-------------------------|--------|---------------------------------------|
 | Card Theme Pack         | $0.99  | 5 premium card designs                |
 | Roast Pack              | $0.99  | Unlock "nuclear" roast mode           |
-| Custom Watermark Remove | $1.99  | Remove "overstay.app" from cards      |
+| Custom Watermark Remove | $1.99  | Remove "justOneLastDrink.app" from cards      |
 | Prediction Boost        | $0.49  | 5 extra predictions (day pass)        |
 
 ---

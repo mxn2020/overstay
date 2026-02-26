@@ -1,4 +1,4 @@
-# 🗺️ Overstay — Development Roadmap
+# 🗺️ JustOneLastDrink — Development Roadmap
 
 ## Overview
 
@@ -42,7 +42,7 @@ The roadmap is structured in 3 phases, prioritizing the web app MVP and viral me
 - [ ] Rate limiting & abuse prevention
 
 ### Phase 1 Deliverables
-- ✅ Working web app at overstay.app
+- ✅ Working web app at justOneLastDrink.app
 - ✅ Photo → AI prediction → shareable card
 - ✅ User accounts with history
 - ✅ Beat the AI gamification

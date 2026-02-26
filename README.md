@@ -1,8 +1,8 @@
-# 🕐 Overstay
+# 🕐 JustOneLastDrink
 
 > **"We know you're not leaving."**
 
-Overstay is a nightlife prediction app that uses AI to analyze your night-out photos and predict how long you'll *actually* stay — exposing the universal lie: **"One last drink."**
+JustOneLastDrink is a nightlife prediction app that uses AI to analyze your night-out photos and predict how long you'll *actually* stay — exposing the universal lie: **"One last drink."**
 
 Upload a photo → Get a savage, funny, and eerily accurate prediction about your night.
 
@@ -50,7 +50,7 @@ Upload a photo → Get a savage, funny, and eerily accurate prediction about you
 ## 📂 Project Structure
 
 ```
-overstay/
+justOneLastDrink/
 ├── README.md                 # This file
 ├── FEATURES.md               # Detailed feature specifications
 ├── ROADMAP.md                # Development roadmap & milestones

@@ -1,6 +1,10 @@
 import { useState, useRef, useCallback } from 'react'
+import { useConvexAuth, useQuery, useMutation } from 'convex/react'
+import { api } from '../../convex/_generated/api'
 import { analyzeImage, getPipelineMode } from '../lib/aiPipeline'
+import { useNavigate } from 'react-router-dom'
 import type { PredictionResult } from '../App'
+import { Zap, LogIn } from 'lucide-react'
 
 interface PhotoUploadProps {
     onAnalysisStart: () => void
@@ -10,12 +14,19 @@ interface PhotoUploadProps {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp']
+const FREE_TRIAL_KEY = 'overstay_free_used'
 
 export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: PhotoUploadProps) {
     const [isDragging, setIsDragging] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [preview, setPreview] = useState<string | null>(null)
+    const [creditGateModal, setCreditGateModal] = useState<'login' | 'credits' | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const navigate = useNavigate()
+
+    const { isAuthenticated } = useConvexAuth()
+    const balance = useQuery(api.credits.getBalance)
+    const deductCredits = useMutation(api.credits.deductCredits)
 
     const pipelineMode = getPipelineMode()
 
@@ -29,12 +40,41 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
         return null
     }
 
+    const checkCredits = (): boolean => {
+        const freeUsed = localStorage.getItem(FREE_TRIAL_KEY)
+
+        if (!isAuthenticated) {
+            // Anonymous: 1 free prediction via localStorage
+            if (freeUsed) {
+                setCreditGateModal('login')
+                return false
+            }
+            // Allow the free trial
+            return true
+        }
+
+        // Authenticated: check credit balance
+        const credits = balance?.credits ?? 0
+        if (credits < 4) {
+            setCreditGateModal('credits')
+            return false
+        }
+
+        return true
+    }
+
     const processFile = async (file: File) => {
         setError(null)
+        setCreditGateModal(null)
 
         const validationError = validateFile(file)
         if (validationError) {
             setError(validationError)
+            return
+        }
+
+        // Credit check BEFORE analysis
+        if (!checkCredits()) {
             return
         }
 
@@ -67,6 +107,20 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
             console.log('[PhotoUpload] Calling analyzeImage()...')
             const result = await analyzeImage(processedFile)
             console.log('[PhotoUpload] Got result:', result)
+
+            // Deduct credits / mark free trial AFTER successful analysis
+            if (isAuthenticated) {
+                try {
+                    await deductCredits({ description: 'Prediction' })
+                } catch (creditErr) {
+                    console.error('[PhotoUpload] Credit deduction failed:', creditErr)
+                    // Still show result — credits might have been deducted server-side
+                }
+            } else {
+                // Mark free trial as used
+                localStorage.setItem(FREE_TRIAL_KEY, 'true')
+            }
+
             if ('rejected' in result && result.rejected) {
                 onResult(result)
             } else {
@@ -90,7 +144,7 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
         const file = e.dataTransfer.files[0]
         if (file) processFile(file)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [useConvex])
+    }, [useConvex, isAuthenticated, balance])
 
     const handleDragOver = useCallback((e: React.DragEvent) => {
         e.preventDefault()
@@ -121,6 +175,39 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
 
     return (
         <div>
+            {/* Credit Gate Modal */}
+            {creditGateModal && (
+                <div className="credit-gate-overlay" onClick={() => setCreditGateModal(null)}>
+                    <div className="credit-gate-modal" onClick={e => e.stopPropagation()}>
+                        {creditGateModal === 'login' ? (
+                            <>
+                                <div className="credit-gate-modal__icon"><LogIn size={32} /></div>
+                                <h3>You've used your free prediction!</h3>
+                                <p>Sign in and subscribe to keep the party going. 🍻</p>
+                                <button className="btn btn--primary" onClick={() => navigate('/login')}>
+                                    <LogIn size={16} /> Sign In
+                                </button>
+                                <button className="btn btn--ghost" style={{ marginTop: '8px' }} onClick={() => setCreditGateModal(null)}>
+                                    Maybe Later
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <div className="credit-gate-modal__icon"><Zap size={32} /></div>
+                                <h3>Out of credits! 😱</h3>
+                                <p>You need 4 credits per prediction. Top up or subscribe for more.</p>
+                                <button className="btn btn--primary" onClick={() => navigate('/pricing')}>
+                                    <Zap size={16} /> Get Credits
+                                </button>
+                                <button className="btn btn--ghost" style={{ marginTop: '8px' }} onClick={() => setCreditGateModal(null)}>
+                                    Close
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+
             <div
                 className={`upload-zone ${isDragging ? 'upload-zone--active' : ''}`}
                 onDrop={handleDrop}
@@ -168,6 +255,19 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
             />
 
             {modeBadge}
+
+            {/* Credit indicator for authenticated users */}
+            {isAuthenticated && balance && (
+                <div style={{
+                    textAlign: 'center',
+                    marginTop: '12px',
+                    fontSize: '0.8rem',
+                    color: balance.credits < 4 ? '#ef4444' : 'var(--color-smoke-gray)',
+                }}>
+                    <Zap size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                    {balance.credits} credits available{balance.credits < 4 ? ' — need 4 to predict' : ''}
+                </div>
+            )}
 
             {error && (
                 <p style={{

@@ -101,8 +101,8 @@ function StoryboardCardContent({ card }: { card: any }) {
                     <span className="storyboard-card__stat-value">{card.exitTime}</span>
                 </div>
                 <div className="storyboard-card__stat">
-                    <span className="storyboard-card__stat-label">Overstay</span>
-                    <span className="storyboard-card__stat-value">+{card.overstayMinutes}min</span>
+                    <span className="storyboard-card__stat-label">JustOneLastDrink</span>
+                    <span className="storyboard-card__stat-value">+{card.justOneLastDrinkMinutes}min</span>
                 </div>
                 <div className="storyboard-card__stat">
                     <span className="storyboard-card__stat-label">Chaos</span>

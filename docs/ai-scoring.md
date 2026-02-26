@@ -1,4 +1,4 @@
-# 🔮 Overstay — AI Scoring Heuristics
+# 🔮 JustOneLastDrink — AI Scoring Heuristics
 
 ## Overview
 
@@ -101,77 +101,77 @@ Analyze this nightlife/social photo and return a JSON object with:
 ```javascript
 function calculateExitTime(currentHour, signals) {
   // Base: 2 hours from now
-  let overstayMinutes = 120;
+  let justOneLastDrinkMinutes = 120;
 
   // === GROUP DYNAMICS ===
-  if (signals.estimated_group_size >= 8)      overstayMinutes += 90;
-  else if (signals.estimated_group_size >= 4) overstayMinutes += 40;
-  else if (signals.estimated_group_size >= 2) overstayMinutes += 15;
+  if (signals.estimated_group_size >= 8)      justOneLastDrinkMinutes += 90;
+  else if (signals.estimated_group_size >= 4) justOneLastDrinkMinutes += 40;
+  else if (signals.estimated_group_size >= 2) justOneLastDrinkMinutes += 15;
   // Solo = no modifier
 
   // === DRINKS ===
   const drinks = signals.drinks_visible;
-  if (drinks.types.includes("shot"))           overstayMinutes += 60;
-  if (drinks.types.includes("cocktail"))       overstayMinutes += 30;
-  if (drinks.types.includes("beer"))           overstayMinutes += 15;
-  if (drinks.count > 5)                        overstayMinutes += 45;
-  if (drinks.empty_glasses > 3)                overstayMinutes += 45;
+  if (drinks.types.includes("shot"))           justOneLastDrinkMinutes += 60;
+  if (drinks.types.includes("cocktail"))       justOneLastDrinkMinutes += 30;
+  if (drinks.types.includes("beer"))           justOneLastDrinkMinutes += 15;
+  if (drinks.count > 5)                        justOneLastDrinkMinutes += 45;
+  if (drinks.empty_glasses > 3)                justOneLastDrinkMinutes += 45;
 
   // === ENVIRONMENT ===
-  if (signals.lighting.neon_present)           overstayMinutes += 90;
-  if (signals.lighting.strobe_likely)          overstayMinutes += 120;
-  if (signals.lighting.brightness === "dark")  overstayMinutes += 60;
-  if (signals.crowd_density === "packed")      overstayMinutes += 60;
-  if (signals.crowd_density === "moderate")    overstayMinutes += 30;
+  if (signals.lighting.neon_present)           justOneLastDrinkMinutes += 90;
+  if (signals.lighting.strobe_likely)          justOneLastDrinkMinutes += 120;
+  if (signals.lighting.brightness === "dark")  justOneLastDrinkMinutes += 60;
+  if (signals.crowd_density === "packed")      justOneLastDrinkMinutes += 60;
+  if (signals.crowd_density === "moderate")    justOneLastDrinkMinutes += 30;
 
   // === VENUE TYPE ===
-  if (signals.setting === "club")              overstayMinutes += 120;
-  if (signals.setting === "house_party")       overstayMinutes += 90;
-  if (signals.setting === "bar")               overstayMinutes += 30;
+  if (signals.setting === "club")              justOneLastDrinkMinutes += 120;
+  if (signals.setting === "house_party")       justOneLastDrinkMinutes += 90;
+  if (signals.setting === "bar")               justOneLastDrinkMinutes += 30;
 
   // === VIBE ===
-  if (signals.emotional_vibe === "wild")       overstayMinutes += 90;
-  if (signals.emotional_vibe === "excited")    overstayMinutes += 45;
-  if (signals.emotional_vibe === "emotional")  overstayMinutes -= 30;
-  if (signals.emotional_vibe === "tired")      overstayMinutes -= 60;
+  if (signals.emotional_vibe === "wild")       justOneLastDrinkMinutes += 90;
+  if (signals.emotional_vibe === "excited")    justOneLastDrinkMinutes += 45;
+  if (signals.emotional_vibe === "emotional")  justOneLastDrinkMinutes -= 30;
+  if (signals.emotional_vibe === "tired")      justOneLastDrinkMinutes -= 60;
 
   // === OBJECTS ===
-  if (signals.objects_detected.includes("dj_booth"))    overstayMinutes += 180;
-  if (signals.objects_detected.includes("dance_floor")) overstayMinutes += 120;
+  if (signals.objects_detected.includes("dj_booth"))    justOneLastDrinkMinutes += 180;
+  if (signals.objects_detected.includes("dance_floor")) justOneLastDrinkMinutes += 120;
 
   // === RESPONSIBILITY SIGNALS ===
-  if (signals.food_visible)                    overstayMinutes -= 30;
-  if (signals.water_visible)                   overstayMinutes -= 45;
-  if (signals.objects_detected.includes("coat")) overstayMinutes -= 15;
+  if (signals.food_visible)                    justOneLastDrinkMinutes -= 30;
+  if (signals.water_visible)                   justOneLastDrinkMinutes -= 45;
+  if (signals.objects_detected.includes("coat")) justOneLastDrinkMinutes -= 15;
 
   // === CHAOS INDICATORS ===
-  overstayMinutes += signals.chaos_indicators.length * 30;
+  justOneLastDrinkMinutes += signals.chaos_indicators.length * 30;
 
   // === ACTIVITY ===
-  overstayMinutes += (signals.activity_level - 5) * 10;
+  justOneLastDrinkMinutes += (signals.activity_level - 5) * 10;
 
   // === TIME OF NIGHT ===
-  if (signals.time_cues === "late_night")      overstayMinutes += 60;
-  if (signals.time_cues === "early_evening")   overstayMinutes -= 30;
+  if (signals.time_cues === "late_night")      justOneLastDrinkMinutes += 60;
+  if (signals.time_cues === "early_evening")   justOneLastDrinkMinutes -= 30;
 
   // === RANDOMIZATION (±15 min) ===
-  overstayMinutes += Math.floor(Math.random() * 31) - 15;
+  justOneLastDrinkMinutes += Math.floor(Math.random() * 31) - 15;
 
   // Clamp to reasonable range
-  overstayMinutes = Math.max(30, Math.min(overstayMinutes, 600));
+  justOneLastDrinkMinutes = Math.max(30, Math.min(justOneLastDrinkMinutes, 600));
 
-  return overstayMinutes;
+  return justOneLastDrinkMinutes;
 }
 ```
 
 ### Chaos Rating Calculation
 
 ```javascript
-function calculateChaosRating(signals, overstayMinutes) {
+function calculateChaosRating(signals, justOneLastDrinkMinutes) {
   let score = 0;
 
   // Time-based (0-3 points)
-  score += Math.min(3, overstayMinutes / 120);
+  score += Math.min(3, justOneLastDrinkMinutes / 120);
 
   // Group-based (0-2 points)
   score += Math.min(2, signals.estimated_group_size / 4);

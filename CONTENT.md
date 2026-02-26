@@ -1,4 +1,4 @@
-# ✍️ Overstay — Content & Roast Templates
+# ✍️ JustOneLastDrink — Content & Roast Templates
 
 ## AI Prediction Lines
 
@@ -106,10 +106,10 @@ Rotate these randomly during image analysis (2-4 second display):
 Default text when sharing prediction card:
 
 ```
-"The AI predicted I'm not leaving until {time} 🕐 @overstayapp"
-"My chaos rating is {rating}/10. Am I winning? @overstayapp"
-"Overstay says I have a {percent}% chance of regretting a text tonight 💀"
-"According to @overstayapp, I'm seeing the sunrise tonight. Again."
+"The AI predicted I'm not leaving until {time} 🕐 @justOneLastDrinkapp"
+"My chaos rating is {rating}/10. Am I winning? @justOneLastDrinkapp"
+"JustOneLastDrink says I have a {percent}% chance of regretting a text tonight 💀"
+"According to @justOneLastDrinkapp, I'm seeing the sunrise tonight. Again."
 ```
 
 ---
@@ -140,6 +140,6 @@ Keep errors on-brand:
 ```
 "🕐 It's Friday. Ready to lie about leaving early again?"
 "Your friends are posting predictions. Don't let them out-chaos you."
-"Last week you overstayed by 3 hours. Let's make it 4."
+"Last week you justOneLastDrinked by 3 hours. Let's make it 4."
 "The Oracle has a feeling about tonight. Upload and find out."
 ```

@@ -317,7 +317,7 @@ ${visionSignals}
 Generate this JSON:
 {
   "exitTime": "<predicted time they'll actually leave, e.g. '2:47 AM'>",
-  "overstayMinutes": <minutes from now until they leave>,
+  "justOneLastDrinkMinutes": <minutes from now until they leave>,
   "chaosRating": <0.0-10.0 chaos level>,
   "textRegret": <0-100 % chance they'll send a regrettable text>,
   "barHop": <0-100 % chance they'll hop to another bar>,
@@ -365,7 +365,7 @@ Generate this JSON with your analysis AND prediction combined:
   },
   "prediction": {
     "exitTime": "<predicted time, e.g. '2:47 AM'>",
-    "overstayMinutes": <minutes from now until they leave>,
+    "justOneLastDrinkMinutes": <minutes from now until they leave>,
     "chaosRating": <0.0-10.0>,
     "textRegret": <0-100>,
     "barHop": <0-100>,

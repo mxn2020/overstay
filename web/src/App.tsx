@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { AuthGuard, RedirectIfAuth } from './components/AuthGuard'
+import { SubscriptionGuard } from './components/SubscriptionGuard'
+import CookieBanner from './components/CookieBanner'
 import LandingPage from './pages/LandingPage'
 import PredictionPage from './pages/PredictionPage'
 import ProfilePage from './pages/ProfilePage'
@@ -21,7 +23,7 @@ export type SuccessPrediction = {
     rejected?: false
     predictionId: string
     exitTime: string
-    overstayMinutes: number
+    justOneLastDrinkMinutes: number
     chaosRating: number
     textRegret: number
     barHop: number
@@ -57,18 +59,22 @@ function AppRoutes() {
                         ? <PredictionPage prediction={prediction} onBack={handleNewPrediction} />
                         : <LandingPage onPredict={(r) => setPrediction(r)} useConvex={true} />
                 } />
-                <Route path="/profile" element={<AuthGuard><ProfilePage /></AuthGuard>} />
-                <Route path="/settings" element={<AuthGuard><SettingsPage /></AuthGuard>} />
+                {/* Auth-only routes that also require a subscription */}
+                <Route path="/profile" element={<AuthGuard><SubscriptionGuard><ProfilePage /></SubscriptionGuard></AuthGuard>} />
+                <Route path="/settings" element={<AuthGuard><SubscriptionGuard><SettingsPage /></SubscriptionGuard></AuthGuard>} />
                 <Route path="/billing" element={<AuthGuard><BillingPage /></AuthGuard>} />
-                <Route path="/admin" element={<AuthGuard><AdminPage /></AuthGuard>} />
-                <Route path="/logs" element={<AuthGuard><LogsPage /></AuthGuard>} />
+                <Route path="/storyboard" element={<StoryboardPage />} />
+                {/* Admin routes — SubscriptionGuard allows admins */}
+                <Route path="/admin" element={<AuthGuard><SubscriptionGuard><AdminPage /></SubscriptionGuard></AuthGuard>} />
+                <Route path="/logs" element={<AuthGuard><SubscriptionGuard><LogsPage /></SubscriptionGuard></AuthGuard>} />
+                <Route path="/audit-logs" element={<AuthGuard><SubscriptionGuard><AuditLogsPage /></SubscriptionGuard></AuthGuard>} />
+                {/* Public routes */}
                 <Route path="/login" element={<RedirectIfAuth><LoginPage /></RedirectIfAuth>} />
                 <Route path="/pricing" element={<PricingPage />} />
-                <Route path="/storyboard" element={<StoryboardPage />} />
                 <Route path="/help" element={<HelpPage />} />
-                <Route path="/audit-logs" element={<AuthGuard><AuditLogsPage /></AuthGuard>} />
                 <Route path="*" element={<NotFoundPage onGoHome={() => navigate('/')} />} />
             </Routes>
+            <CookieBanner />
         </Layout>
     )
 }

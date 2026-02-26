@@ -1,8 +1,8 @@
-# 🛡️ Overstay — Safety & Responsible Messaging Guidelines
+# 🛡️ JustOneLastDrink — Safety & Responsible Messaging Guidelines
 
 ## Core Principle
 
-Overstay is an **entertainment app about time perception and nightlife humor**. It is NOT a drinking app, alcohol promotion tool, or encouragement to drink more.
+JustOneLastDrink is an **entertainment app about time perception and nightlife humor**. It is NOT a drinking app, alcohol promotion tool, or encouragement to drink more.
 
 ---
 
@@ -27,7 +27,7 @@ Overstay is an **entertainment app about time perception and nightlife humor**. 
 - ✅ "How long until you leave" (neutral)
 - ✅ "Your night predicted" (fun)
 - ✅ "Chaos rating" (playful)
-- ✅ "Overstay duration" (the universal lie)
+- ✅ "JustOneLastDrink duration" (the universal lie)
 - ✅ "Vibe analysis" (framing = analysis)
 
 ### Language — DON'T:

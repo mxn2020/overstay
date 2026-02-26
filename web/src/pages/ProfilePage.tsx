@@ -32,8 +32,8 @@ export default function ProfilePage() {
 
             <div className="profile__stats-grid" style={{ marginBottom: '32px' }}>
                 <div className="profile__stat-card">
-                    <div className="profile__stat-value">{me.overstayScore ?? 0}</div>
-                    <div className="profile__stat-label">Overstay Score</div>
+                    <div className="profile__stat-value">{me.justOneLastDrinkScore ?? 0}</div>
+                    <div className="profile__stat-label">JustOneLastDrink Score</div>
                 </div>
                 <div className="profile__stat-card">
                     <div className="profile__stat-value">{me.totalPredictions ?? 0}</div>

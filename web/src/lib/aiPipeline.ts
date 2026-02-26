@@ -43,7 +43,7 @@ async function runTwoModelPipeline(file: File): Promise<PredictionResult> {
     return {
         predictionId: `nvidia-2m-${Date.now()}`,
         exitTime: result.exitTime,
-        overstayMinutes: result.overstayMinutes,
+        justOneLastDrinkMinutes: result.justOneLastDrinkMinutes,
         chaosRating: result.chaosRating,
         textRegret: result.textRegret,
         barHop: result.barHop,
@@ -75,7 +75,7 @@ async function runSingleModelPipeline(file: File): Promise<PredictionResult> {
     return {
         predictionId: `nvidia-1m-${Date.now()}`,
         exitTime: result.exitTime,
-        overstayMinutes: result.overstayMinutes,
+        justOneLastDrinkMinutes: result.justOneLastDrinkMinutes,
         chaosRating: result.chaosRating,
         textRegret: result.textRegret,
         barHop: result.barHop,

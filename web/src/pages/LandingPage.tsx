@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import PhotoUpload from '../components/PhotoUpload'
 import LoadingScreen from '../components/LoadingScreen'
 import type { PredictionResult } from '../App'
@@ -10,6 +11,7 @@ interface LandingPageProps {
 }
 
 export default function LandingPage({ onPredict, useConvex }: LandingPageProps) {
+    const { t } = useTranslation()
     const [isAnalyzing, setIsAnalyzing] = useState(false)
     const [showUpload, setShowUpload] = useState(false)
     const navigate = useNavigate()
@@ -33,9 +35,9 @@ export default function LandingPage({ onPredict, useConvex }: LandingPageProps) 
         return (
             <div className="container container--narrow" style={{ padding: '48px 16px' }}>
                 <div className="animate-fade-in">
-                    <h2 style={{ textAlign: 'center', marginBottom: '8px' }}>Upload Your Night</h2>
+                    <h2 style={{ textAlign: 'center', marginBottom: '8px' }}>{t('landing.uploadBtn')}</h2>
                     <p style={{ textAlign: 'center', color: 'var(--color-smoke-gray)', marginBottom: '32px' }}>
-                        Bar selfie? Group shot? Table of drinks? We'll read the vibes.
+                        {t('landing.description')}
                     </p>
                     <PhotoUpload
                         onAnalysisStart={handleAnalysisStart}
@@ -44,7 +46,7 @@ export default function LandingPage({ onPredict, useConvex }: LandingPageProps) 
                     />
                     <div style={{ textAlign: 'center', marginTop: '24px' }}>
                         <button className="btn btn--ghost" onClick={() => setShowUpload(false)}>
-                            ← Back
+                            ← {t('common.back')}
                         </button>
                     </div>
                 </div>
@@ -55,17 +57,16 @@ export default function LandingPage({ onPredict, useConvex }: LandingPageProps) 
     return (
         <section className="hero">
             <div className="hero__content">
-                <p className="hero__tagline animate-fade-in">The Nightlife Oracle</p>
+                <p className="hero__tagline animate-fade-in">{t('landing.subtitle')}</p>
                 <h1 className="hero__title animate-fade-in-delay-1">
-                    "Just one last drink."
+                    "{t('landing.title')}"
                 </h1>
                 <p className="hero__subtitle animate-fade-in-delay-2">
-                    Upload a night-out photo. Our AI analyzes the vibes and predicts how long you'll
-                    <em> actually</em> stay — because we both know <strong>"just one last drink"</strong> is always a lie.
+                    {t('landing.description')}
                 </p>
                 <div className="hero__cta animate-fade-in-delay-3">
                     <button className="btn btn--primary btn--large" onClick={() => setShowUpload(true)}>
-                        🔮 Predict My Night
+                        🔮 {t('landing.uploadBtn')}
                     </button>
                 </div>
 
@@ -78,19 +79,19 @@ export default function LandingPage({ onPredict, useConvex }: LandingPageProps) 
                     </div>
                     <div className="demo-card__divider" />
                     <div className="stat">
-                        <span className="stat__label">Chaos Rating</span>
+                        <span className="stat__label">{t('prediction.chaosRating')}</span>
                         <span className="stat__value stat__value--pink">8.6/10</span>
                     </div>
                     <div className="stat">
-                        <span className="stat__label">Text Regret</span>
+                        <span className="stat__label">{t('prediction.textRegret')}</span>
                         <span className="stat__value stat__value--amber">74%</span>
                     </div>
                     <div className="stat">
-                        <span className="stat__label">Bar-Hop</span>
+                        <span className="stat__label">{t('prediction.barHop')}</span>
                         <span className="stat__value">61%</span>
                     </div>
                     <div className="stat">
-                        <span className="stat__label">Sunrise Risk</span>
+                        <span className="stat__label">{t('prediction.sunriseRisk')}</span>
                         <span className="stat__value">
                             <span className="risk-badge risk-badge--high">🔴 HIGH</span>
                         </span>

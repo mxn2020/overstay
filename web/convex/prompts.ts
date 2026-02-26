@@ -68,7 +68,7 @@ Your predictions should be brutally honest, hilarious, and eerily accurate.
 You MUST respond with ONLY this JSON:
 {
   "exitTime": "<predicted time they'll actually leave, e.g. '2:47 AM'>",
-  "overstayMinutes": <minutes from now until they leave>,
+  "justOneLastDrinkMinutes": <minutes from now until they leave>,
   "chaosRating": <0.0-10.0 chaos score>,
   "textRegret": <0-100 % chance they send a regrettable text>,
   "barHop": <0-100 % chance they hop to another bar>,
@@ -95,7 +95,7 @@ You MUST respond with ONLY this JSON:
 {
   "prediction": {
     "exitTime": "<predicted time, e.g. '2:47 AM'>",
-    "overstayMinutes": <minutes from now until they leave>,
+    "justOneLastDrinkMinutes": <minutes from now until they leave>,
     "chaosRating": <0.0-10.0>,
     "textRegret": <0-100>,
     "barHop": <0-100>,

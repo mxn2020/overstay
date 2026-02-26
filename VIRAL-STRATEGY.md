@@ -1,4 +1,4 @@
-# 🚀 Overstay — Viral Growth Strategy
+# 🚀 JustOneLastDrink — Viral Growth Strategy
 
 ## The Viral Loop
 
@@ -11,7 +11,7 @@
 │              ↓                                       │
 │   3. Friends see it → "I want to try this"           │
 │              ↓                                       │
-│   4. Friends use Overstay → Post their predictions   │
+│   4. Friends use JustOneLastDrink → Post their predictions   │
 │              ↓                                       │
 │   5. Morning-After: "AI WAS RIGHT 😭" post           │
 │              ↓                                       │
@@ -36,7 +36,7 @@
 - [ ] Create 10 prediction card mockups showing funny results
 - [ ] Post on Twitter/X, TikTok, Instagram Reels
 - [ ] Use format: "Would you trust this? 👀"
-- [ ] Create the "overstay" TikTok sound/audio
+- [ ] Create the "justOneLastDrink" TikTok sound/audio
 
 **Day 4–5: Influencer Seeding**
 - [ ] Send to 20 micro-influencers (10K–50K followers)
@@ -76,7 +76,7 @@
 - [ ] Create TikTok compilation of prediction results
 - [ ] Partner with first 5 bars/clubs
 - [ ] Reddit posts in r/funny, r/nightlife, r/mildlyinteresting
-- [ ] Twitter/X trend attempt with hashtag #Overstay
+- [ ] Twitter/X trend attempt with hashtag #JustOneLastDrink
 
 ### Week 4: Retention & Iteration
 
@@ -117,7 +117,7 @@
 
 ### Hashtag Strategy
 
-- **Primary:** #Overstay #WeKnowYoureNotLeaving
+- **Primary:** #JustOneLastDrink #WeKnowYoureNotLeaving
 - **Content:** #NightlifeOracle #ChaosRating #BeatTheAI
 - **Trending:** #LastOneLie #OneLastDrink #SunriseRisk
 

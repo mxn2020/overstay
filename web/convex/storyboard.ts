@@ -37,7 +37,7 @@ export const getMyCards = query({
 export const shareCard = mutation({
     args: {
         exitTime: v.string(),
-        overstayMinutes: v.number(),
+        justOneLastDrinkMinutes: v.number(),
         chaosRating: v.number(),
         textRegret: v.number(),
         barHop: v.number(),

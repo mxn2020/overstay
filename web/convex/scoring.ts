@@ -1,4 +1,4 @@
-// Overstay — AI Scoring Engine
+// JustOneLastDrink — AI Scoring Engine
 // Implements heuristics from docs/ai-scoring.md
 
 interface VisionSignals {
@@ -30,72 +30,72 @@ interface VisionSignals {
 
 export function calculateExitTime(currentHour: number, signals: VisionSignals): number {
     void currentHour; // reserved for future time-of-day modifiers
-    let overstayMinutes = 120;
+    let justOneLastDrinkMinutes = 120;
 
     // Group dynamics
-    if (signals.estimated_group_size >= 8) overstayMinutes += 90;
-    else if (signals.estimated_group_size >= 4) overstayMinutes += 40;
-    else if (signals.estimated_group_size >= 2) overstayMinutes += 15;
+    if (signals.estimated_group_size >= 8) justOneLastDrinkMinutes += 90;
+    else if (signals.estimated_group_size >= 4) justOneLastDrinkMinutes += 40;
+    else if (signals.estimated_group_size >= 2) justOneLastDrinkMinutes += 15;
 
     // Drinks
     const drinks = signals.drinks_visible;
-    if (drinks.types.includes("shot")) overstayMinutes += 60;
-    if (drinks.types.includes("cocktail")) overstayMinutes += 30;
-    if (drinks.types.includes("beer")) overstayMinutes += 15;
-    if (drinks.count > 5) overstayMinutes += 45;
-    if (drinks.empty_glasses > 3) overstayMinutes += 45;
+    if (drinks.types.includes("shot")) justOneLastDrinkMinutes += 60;
+    if (drinks.types.includes("cocktail")) justOneLastDrinkMinutes += 30;
+    if (drinks.types.includes("beer")) justOneLastDrinkMinutes += 15;
+    if (drinks.count > 5) justOneLastDrinkMinutes += 45;
+    if (drinks.empty_glasses > 3) justOneLastDrinkMinutes += 45;
 
     // Environment
-    if (signals.lighting.neon_present) overstayMinutes += 90;
-    if (signals.lighting.strobe_likely) overstayMinutes += 120;
-    if (signals.lighting.brightness === "dark") overstayMinutes += 60;
-    if (signals.crowd_density === "packed") overstayMinutes += 60;
-    if (signals.crowd_density === "moderate") overstayMinutes += 30;
+    if (signals.lighting.neon_present) justOneLastDrinkMinutes += 90;
+    if (signals.lighting.strobe_likely) justOneLastDrinkMinutes += 120;
+    if (signals.lighting.brightness === "dark") justOneLastDrinkMinutes += 60;
+    if (signals.crowd_density === "packed") justOneLastDrinkMinutes += 60;
+    if (signals.crowd_density === "moderate") justOneLastDrinkMinutes += 30;
 
     // Venue type
-    if (signals.setting === "club") overstayMinutes += 120;
-    if (signals.setting === "house_party") overstayMinutes += 90;
-    if (signals.setting === "bar") overstayMinutes += 30;
+    if (signals.setting === "club") justOneLastDrinkMinutes += 120;
+    if (signals.setting === "house_party") justOneLastDrinkMinutes += 90;
+    if (signals.setting === "bar") justOneLastDrinkMinutes += 30;
 
     // Vibe
-    if (signals.emotional_vibe === "wild") overstayMinutes += 90;
-    if (signals.emotional_vibe === "excited") overstayMinutes += 45;
-    if (signals.emotional_vibe === "emotional") overstayMinutes -= 30;
-    if (signals.emotional_vibe === "tired") overstayMinutes -= 60;
+    if (signals.emotional_vibe === "wild") justOneLastDrinkMinutes += 90;
+    if (signals.emotional_vibe === "excited") justOneLastDrinkMinutes += 45;
+    if (signals.emotional_vibe === "emotional") justOneLastDrinkMinutes -= 30;
+    if (signals.emotional_vibe === "tired") justOneLastDrinkMinutes -= 60;
 
     // Objects
-    if (signals.objects_detected.includes("dj_booth")) overstayMinutes += 180;
-    if (signals.objects_detected.includes("dance_floor")) overstayMinutes += 120;
+    if (signals.objects_detected.includes("dj_booth")) justOneLastDrinkMinutes += 180;
+    if (signals.objects_detected.includes("dance_floor")) justOneLastDrinkMinutes += 120;
 
     // Responsibility signals
-    if (signals.food_visible) overstayMinutes -= 30;
-    if (signals.water_visible) overstayMinutes -= 45;
-    if (signals.objects_detected.includes("coat")) overstayMinutes -= 15;
+    if (signals.food_visible) justOneLastDrinkMinutes -= 30;
+    if (signals.water_visible) justOneLastDrinkMinutes -= 45;
+    if (signals.objects_detected.includes("coat")) justOneLastDrinkMinutes -= 15;
 
     // Chaos indicators
-    overstayMinutes += signals.chaos_indicators.length * 30;
+    justOneLastDrinkMinutes += signals.chaos_indicators.length * 30;
 
     // Activity
-    overstayMinutes += (signals.activity_level - 5) * 10;
+    justOneLastDrinkMinutes += (signals.activity_level - 5) * 10;
 
     // Time cues
-    if (signals.time_cues === "late_night") overstayMinutes += 60;
-    if (signals.time_cues === "early_evening") overstayMinutes -= 30;
+    if (signals.time_cues === "late_night") justOneLastDrinkMinutes += 60;
+    if (signals.time_cues === "early_evening") justOneLastDrinkMinutes -= 30;
 
     // Randomization (±15 min)
-    overstayMinutes += Math.floor(Math.random() * 31) - 15;
+    justOneLastDrinkMinutes += Math.floor(Math.random() * 31) - 15;
 
     // Clamp
-    return Math.max(30, Math.min(overstayMinutes, 600));
+    return Math.max(30, Math.min(justOneLastDrinkMinutes, 600));
 }
 
 // --- Chaos Rating ---
 
-export function calculateChaosRating(signals: VisionSignals, overstayMinutes: number): number {
+export function calculateChaosRating(signals: VisionSignals, justOneLastDrinkMinutes: number): number {
     let score = 0;
 
     // Time-based (0-3)
-    score += Math.min(3, overstayMinutes / 120);
+    score += Math.min(3, justOneLastDrinkMinutes / 120);
 
     // Group-based (0-2)
     score += Math.min(2, signals.estimated_group_size / 4);
@@ -179,8 +179,8 @@ export function selectRoastLine(chaosRating: number, _signals: VisionSignals): s
 
 // --- Format Exit Time ---
 
-export function formatExitTime(now: Date, overstayMinutes: number): string {
-    const exit = new Date(now.getTime() + overstayMinutes * 60 * 1000);
+export function formatExitTime(now: Date, justOneLastDrinkMinutes: number): string {
+    const exit = new Date(now.getTime() + justOneLastDrinkMinutes * 60 * 1000);
     const hours = exit.getHours();
     const minutes = exit.getMinutes();
     const ampm = hours >= 12 ? "PM" : "AM";

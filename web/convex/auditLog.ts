@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, internalMutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { auth } from "./auth";
 
@@ -24,7 +24,7 @@ export const log = mutation({
 });
 
 // ---- Internal log (no auth required, for system events) ----
-export const logSystem = mutation({
+export const logSystem = internalMutation({
     args: {
         action: v.string(),
         category: v.union(v.literal("auth"), v.literal("admin"), v.literal("system"), v.literal("billing")),

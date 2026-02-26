@@ -1,4 +1,4 @@
-# 🏗️ Overstay — System Architecture
+# 🏗️ JustOneLastDrink — System Architecture
 
 ## High-Level Architecture
 
@@ -79,7 +79,7 @@
 | `name`          | string   | Display name               |
 | `email`         | string   | Email address              |
 | `authProvider`  | string   | "email" / "google" / "apple" |
-| `overstayScore` | number   | Lifetime chaos average     |
+| `justOneLastDrinkScore` | number   | Lifetime chaos average     |
 | `totalPredictions` | number | Count of predictions     |
 | `beatTheAiWins` | number   | Times user beat AI         |
 | `streak`        | number   | Current beat streak        |
@@ -93,7 +93,7 @@
 | `imageStorageId` | Id       | Ref to uploaded photo       |
 | `cardStorageId`  | Id?      | Ref to generated card image |
 | `exitTime`       | string   | Predicted exit time         |
-| `overstayMinutes`| number   | Minutes past "last drink"   |
+| `justOneLastDrinkMinutes`| number   | Minutes past "last drink"   |
 | `chaosRating`    | number   | 0–10                        |
 | `textRegret`     | number   | 0–100%                      |
 | `barHop`         | number   | 0–100%                      |

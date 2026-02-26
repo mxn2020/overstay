@@ -32,8 +32,8 @@ export const canPredict = query({
     handler: async (ctx) => {
         const userId = await auth.getUserId(ctx);
         if (!userId) {
-            // Anonymous user — frontend handles localStorage check
-            return { allowed: true, reason: "anonymous", credits: 0 };
+            // Anonymous user — not allowed (frontend handles 1 free trial via localStorage)
+            return { allowed: false, reason: "not_authenticated", credits: 0 };
         }
 
         const profile = await ctx.db

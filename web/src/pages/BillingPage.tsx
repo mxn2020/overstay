@@ -1,8 +1,9 @@
 import { useQuery, useAction, useConvexAuth } from 'convex/react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../convex/_generated/api'
-import { CreditCard, Zap, ArrowLeft } from 'lucide-react'
+import { CreditCard, Zap, ArrowLeft, ExternalLink } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useToast } from '../components/Toast'
 
 const TOP_UP_PACKAGES = [
     { id: 'topup_40', credits: 40, price: '$1' },
@@ -12,11 +13,13 @@ const TOP_UP_PACKAGES = [
 
 export default function BillingPage() {
     const { isAuthenticated } = useConvexAuth()
+    const { showToast } = useToast()
     const subscription = useQuery(api.stripe.getSubscription)
     const balance = useQuery(api.credits.getBalance)
     const transactions = useQuery(api.credits.getTransactionHistory, { limit: 20 })
     const createCheckout = useAction(api.stripe.createCheckoutSession)
     const createTopUp = useAction(api.stripe.createTopUpSession)
+    const createPortal = useAction(api.stripe.createPortalSession)
     const navigate = useNavigate()
 
     if (!isAuthenticated) {
@@ -26,13 +29,14 @@ export default function BillingPage() {
 
     const currentPlan = subscription?.plan ?? 'free'
     const credits = balance?.credits ?? 0
+    const hasStripeCustomer = !!subscription?.stripeCustomerId
 
     const handleSubscribe = async () => {
         try {
             const { url } = await createCheckout({ plan: 'paid' })
             if (url) window.location.href = url
         } catch (err) {
-            alert(err instanceof Error ? err.message : 'Failed to create checkout')
+            showToast(err instanceof Error ? err.message : 'Failed to create checkout', 'error')
         }
     }
 
@@ -41,7 +45,16 @@ export default function BillingPage() {
             const { url } = await createTopUp({ packageId })
             if (url) window.location.href = url
         } catch (err) {
-            alert(err instanceof Error ? err.message : 'Failed to create checkout')
+            showToast(err instanceof Error ? err.message : 'Failed to create checkout', 'error')
+        }
+    }
+
+    const handleManageSubscription = async () => {
+        try {
+            const { url } = await createPortal()
+            if (url) window.location.href = url
+        } catch (err) {
+            showToast(err instanceof Error ? err.message : 'Failed to open billing portal', 'error')
         }
     }
 
@@ -60,9 +73,11 @@ export default function BillingPage() {
             {/* Current Plan + Credits */}
             <div className="billing-current">
                 <div className="billing-current__info">
-                    <span className="plan-badge plan-badge--lg">{currentPlan.toUpperCase()}</span>
+                    <span className="plan-badge plan-badge--lg">
+                        {currentPlan === 'paid' ? "LET'S HAVE FUN" : currentPlan.toUpperCase()}
+                    </span>
                     <span style={{ color: 'var(--color-smoke-gray)' }}>
-                        {currentPlan === 'paid' ? 'Pro subscription active' : 'No active subscription'}
+                        {currentPlan === 'paid' ? '🍻 Subscription active' : 'No active subscription'}
                     </span>
                 </div>
                 <div className="pricing-balance" style={{ margin: 0 }}>
@@ -71,13 +86,25 @@ export default function BillingPage() {
                 </div>
             </div>
 
-            {/* Subscribe / Top-up */}
+            {/* Subscribe / Manage / Top-up */}
             <div style={{ marginTop: '32px' }}>
                 {currentPlan !== 'paid' && (
                     <div style={{ marginBottom: '24px' }}>
                         <button className="btn btn--primary" onClick={handleSubscribe}>
-                            Subscribe — $3/mo (100 credits)
+                            🍻 Subscribe — $3/mo (100 credits)
                         </button>
+                    </div>
+                )}
+
+                {hasStripeCustomer && (
+                    <div style={{ marginBottom: '24px' }}>
+                        <button className="btn btn--secondary" onClick={handleManageSubscription}>
+                            <ExternalLink size={14} style={{ marginRight: '6px' }} />
+                            Manage Subscription & Payment
+                        </button>
+                        <p style={{ color: 'var(--color-smoke-gray)', fontSize: '0.8rem', marginTop: '6px' }}>
+                            Update payment method, view invoices, or cancel subscription via Stripe.
+                        </p>
                     </div>
                 )}
 

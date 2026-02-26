@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import './i18n/i18n'
 import App from './App'
 import { getRandomTheme, applyTheme } from './lib/colorThemes'
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
@@ -41,7 +42,7 @@ if (!convexUrl) {
                     <div style={{ fontSize: 48, marginBottom: 16 }}>🔌</div>
                     <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: 8 }}>Backend Not Connected</h1>
                     <p style={{ color: '#94A3B8', fontSize: '0.95rem', marginBottom: 24 }}>
-                        Overstay requires a Convex backend to function.
+                        JustOneLastDrink requires a Convex backend to function.
                     </p>
                     <div style={{
                         background: 'rgba(26, 10, 46, 0.6)',

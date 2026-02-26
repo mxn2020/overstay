@@ -10,7 +10,8 @@ export default defineSchema({
         userId: v.string(), // references authTables users._id
         name: v.optional(v.string()),
         role: v.union(v.literal("user"), v.literal("admin")),
-        overstayScore: v.number(),
+        justOneLastDrinkScore: v.optional(v.number()),
+        overstayScore: v.optional(v.number()),
         totalPredictions: v.number(),
         beatTheAiWins: v.number(),
         streak: v.number(),
@@ -47,7 +48,7 @@ export default defineSchema({
         imageStorageId: v.id("_storage"),
         cardStorageId: v.optional(v.id("_storage")),
         exitTime: v.string(),
-        overstayMinutes: v.number(),
+        justOneLastDrinkMinutes: v.number(),
         chaosRating: v.number(),
         textRegret: v.number(),
         barHop: v.number(),
@@ -70,7 +71,7 @@ export default defineSchema({
         userName: v.optional(v.string()),
         // Prediction snapshot (hard-saved so card persists even if prediction deleted)
         exitTime: v.string(),
-        overstayMinutes: v.number(),
+        justOneLastDrinkMinutes: v.number(),
         chaosRating: v.number(),
         textRegret: v.number(),
         barHop: v.number(),

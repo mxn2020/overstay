@@ -1,8 +1,8 @@
-# 🎨 Overstay — Brand Guidelines
+# 🎨 JustOneLastDrink — Brand Guidelines
 
 ## Name
 
-**Overstay** — clean, one-word, instantly understood. It's both a verb and a lifestyle.
+**JustOneLastDrink** — clean, one-word, instantly understood. It's both a verb and a lifestyle.
 
 **Alternatives considered:** LastOne, 2:43AM, NotLeaving, The Oracle, Chaos Clock
 
@@ -22,7 +22,7 @@
 ## Tone of Voice
 
 ### The Personality
-Overstay speaks like your **funniest, most savage friend** — the one who calls you out but you can't be mad at. Think: roast comedy meets astrology memes.
+JustOneLastDrink speaks like your **funniest, most savage friend** — the one who calls you out but you can't be mad at. Think: roast comedy meets astrology memes.
 
 ### Tone Principles
 

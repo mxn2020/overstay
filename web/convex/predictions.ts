@@ -43,16 +43,16 @@ export const analyzeUploaded = mutation({
         // Generate plausible random signals for MVP demo
         const signals = generateDemoSignals();
 
-        const overstayMinutes = calculateExitTime(currentHour, signals);
-        const exitTime = formatExitTime(new Date(), overstayMinutes);
-        const chaosRating = calculateChaosRating(signals, overstayMinutes);
+        const justOneLastDrinkMinutes = calculateExitTime(currentHour, signals);
+        const exitTime = formatExitTime(new Date(), justOneLastDrinkMinutes);
+        const chaosRating = calculateChaosRating(signals, justOneLastDrinkMinutes);
         const secondary = calculateSecondaryPredictions(signals, chaosRating);
         const roastLine = selectRoastLine(chaosRating, signals);
 
         const predictionId = await ctx.db.insert("predictions", {
             imageStorageId: storageId,
             exitTime,
-            overstayMinutes,
+            justOneLastDrinkMinutes,
             chaosRating,
             textRegret: secondary.textRegret,
             barHop: secondary.barHop,
@@ -66,7 +66,7 @@ export const analyzeUploaded = mutation({
         return {
             predictionId,
             exitTime,
-            overstayMinutes,
+            justOneLastDrinkMinutes,
             chaosRating,
             textRegret: secondary.textRegret,
             barHop: secondary.barHop,

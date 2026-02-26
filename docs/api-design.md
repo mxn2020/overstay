@@ -1,4 +1,4 @@
-# 🌐 Overstay — API Design
+# 🌐 JustOneLastDrink — API Design
 
 ## Overview
 
@@ -102,7 +102,7 @@ mutation({
   args: {
     imageStorageId: v.id("_storage"),
     exitTime: v.string(),
-    overstayMinutes: v.number(),
+    justOneLastDrinkMinutes: v.number(),
     chaosRating: v.number(),
     textRegret: v.number(),
     barHop: v.number(),
@@ -199,9 +199,9 @@ action({
     const signals = response.parsed;
 
     // 4. Calculate predictions
-    const overstayMinutes = calculateExitTime(new Date().getHours(), signals);
-    const exitTime = formatExitTime(new Date(), overstayMinutes);
-    const chaosRating = calculateChaosRating(signals, overstayMinutes);
+    const justOneLastDrinkMinutes = calculateExitTime(new Date().getHours(), signals);
+    const exitTime = formatExitTime(new Date(), justOneLastDrinkMinutes);
+    const chaosRating = calculateChaosRating(signals, justOneLastDrinkMinutes);
     const secondary = calculateSecondaryPredictions(signals, chaosRating);
     const roastLine = selectRoastLine(chaosRating, signals);
 
@@ -211,7 +211,7 @@ action({
       {
         imageStorageId: storageId,
         exitTime,
-        overstayMinutes,
+        justOneLastDrinkMinutes,
         chaosRating,
         ...secondary,
         roastLine,
@@ -235,7 +235,7 @@ action({
       { id: predictionId }
     );
     // Generate OG image server-side if needed
-    const shareUrl = `https://overstay.app/p/${predictionId}`;
+    const shareUrl = `https://justOneLastDrink.app/p/${predictionId}`;
     await ctx.runMutation(internal.predictions.setShareUrl, {
       id: predictionId,
       shareUrl,

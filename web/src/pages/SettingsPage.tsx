@@ -4,8 +4,10 @@ import { useAuthActions } from '@convex-dev/auth/react'
 import { useNavigate, Link } from 'react-router-dom'
 import { api } from '../../convex/_generated/api'
 import { User, Shield, CreditCard, Trash2, Save } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function SettingsPage() {
+    const { t } = useTranslation()
     const { isAuthenticated } = useConvexAuth()
     const { signOut } = useAuthActions()
     const me = useQuery(api.users.getMe)
@@ -30,7 +32,7 @@ export default function SettingsPage() {
     if (!isAuthenticated || !me) {
         return (
             <div style={{ textAlign: 'center', padding: '64px 16px', color: 'var(--color-smoke-gray)' }}>
-                Loading...
+                {t('common.loading')}
             </div>
         )
     }
@@ -63,37 +65,37 @@ export default function SettingsPage() {
 
     return (
         <div className="settings-page">
-            <h1 style={{ marginBottom: '8px' }}>⚙️ Settings</h1>
+            <h1 style={{ marginBottom: '8px' }}>⚙️ {t('settings.title')}</h1>
             <p style={{ color: 'var(--color-smoke-gray)', marginBottom: '32px' }}>
-                Manage your account. Or delete it. We won't judge.
+                {t('settings.subtitle')}
             </p>
 
             {/* Profile Section */}
             <div className="settings-section">
                 <div className="settings-section__header">
                     <User size={20} />
-                    <h2>Profile</h2>
+                    <h2>{t('settings.profile')}</h2>
                 </div>
                 <div className="settings-section__body">
                     <div className="settings-field">
-                        <label className="settings-field__label">Display Name</label>
+                        <label className="settings-field__label">{t('settings.displayName')}</label>
                         <input
                             type="text"
                             value={name}
                             onChange={(e) => { setName(e.target.value); setSaved(false); }}
                             className="settings-field__input"
-                            placeholder="Your name"
+                            placeholder={t('settings.displayName')}
                         />
                     </div>
                     <div className="settings-field">
-                        <label className="settings-field__label">Email</label>
+                        <label className="settings-field__label">{t('settings.email')}</label>
                         <input
                             type="email"
                             value={me.email ?? ''}
                             className="settings-field__input"
                             disabled
                         />
-                        <span className="settings-field__hint">Email cannot be changed</span>
+                        <span className="settings-field__hint">{t('settings.emailHint')}</span>
                     </div>
                     <button
                         className="btn btn--primary"
@@ -101,7 +103,7 @@ export default function SettingsPage() {
                         disabled={saving || saved}
                         style={{ marginTop: '8px' }}
                     >
-                        {saved ? '✅ Saved' : saving ? '⏳ Saving...' : <><Save size={16} /> Save Changes</>}
+                        {saved ? `✅ ${t('settings.saved')}` : saving ? `⏳ ${t('settings.saving')}` : <><Save size={16} /> {t('settings.saveChanges')}</>}
                     </button>
                 </div>
             </div>
@@ -110,18 +112,17 @@ export default function SettingsPage() {
             <div className="settings-section">
                 <div className="settings-section__header">
                     <Shield size={20} />
-                    <h2>Plan</h2>
+                    <h2>{t('settings.plan')}</h2>
                 </div>
                 <div className="settings-section__body">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                        <span className="plan-badge">{(me.plan ?? 'free').toUpperCase()}</span>
+                        <span className="plan-badge">{me.plan === 'paid' ? "LET'S HAVE FUN" : 'FREE'}</span>
                         <span style={{ color: 'var(--color-smoke-gray)' }}>
-                            {me.plan === 'paid' ? 'Pro — 100 credits/month + top-ups' :
-                                '3 predictions per day'}
+                            {me.plan === 'paid' ? '🍻 100 credits/month + top-ups' : t('settings.freePlan')}
                         </span>
                     </div>
                     <Link to="/billing" className="btn btn--secondary">
-                        <CreditCard size={16} /> Manage Billing
+                        <CreditCard size={16} /> {t('settings.manageBilling')}
                     </Link>
                 </div>
             </div>
@@ -130,23 +131,23 @@ export default function SettingsPage() {
             <div className="settings-section settings-section--danger">
                 <div className="settings-section__header">
                     <Trash2 size={20} />
-                    <h2>Danger Zone</h2>
+                    <h2>{t('settings.dangerZone')}</h2>
                 </div>
                 <div className="settings-section__body">
                     <p style={{ color: 'var(--color-smoke-gray)', marginBottom: '16px' }}>
-                        Permanently delete your account, predictions, and badges. This action cannot be undone.
+                        {t('settings.deleteWarning')}
                     </p>
                     {!showDeleteConfirm ? (
                         <button
                             className="btn btn--danger"
                             onClick={() => setShowDeleteConfirm(true)}
                         >
-                            <Trash2 size={16} /> Delete Account
+                            <Trash2 size={16} /> {t('settings.deleteAccount')}
                         </button>
                     ) : (
                         <div className="delete-confirm">
                             <p style={{ color: '#EF4444', fontWeight: 600, marginBottom: '12px' }}>
-                                Type "DELETE" to confirm:
+                                {t('settings.typeDelete')}
                             </p>
                             <input
                                 type="text"
@@ -162,13 +163,13 @@ export default function SettingsPage() {
                                     onClick={handleDelete}
                                     disabled={deleteConfirmText !== 'DELETE' || deleting}
                                 >
-                                    {deleting ? '⏳ Deleting...' : '🗑️ Permanently Delete'}
+                                    {deleting ? `⏳ ${t('common.loading')}` : `🗑️ ${t('settings.permanentlyDelete')}`}
                                 </button>
                                 <button
                                     className="btn btn--secondary"
                                     onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }}
                                 >
-                                    Cancel
+                                    {t('settings.cancel')}
                                 </button>
                             </div>
                         </div>
