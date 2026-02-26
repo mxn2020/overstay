@@ -16,7 +16,6 @@ export type PipelineMode = 'two-model' | 'single-model' | 'demo'
 
 export function getPipelineMode(): PipelineMode {
     const mode = import.meta.env.VITE_AI_PIPELINE as string | undefined
-    console.log("Pipeline mode:", mode)
     if (mode === 'two-model' || mode === 'single-model') return mode
     return 'demo'
 }
@@ -91,8 +90,6 @@ async function runSingleModelPipeline(file: File): Promise<PredictionResult> {
 // ============================================
 export async function analyzeImage(file: File): Promise<PredictionResult> {
     const mode = getPipelineMode()
-
-    console.log("Pipeline mode:", mode)
 
     switch (mode) {
         case 'two-model':

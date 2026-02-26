@@ -35,9 +35,6 @@ export const runPipeline = action({
 
         if (!guardrailSystem || !guardrailUser) throw new Error("Guardrail prompts not found in DB");
 
-        console.log("Guardrail system:", guardrailSystem);
-        console.log("Guardrail user:", guardrailUser);
-
         const guardrailResponse = await performNvidiaCall(ctx, {
             model: GUARDRAIL_MODEL,
             messages: [
@@ -54,8 +51,6 @@ export const runPipeline = action({
             maxTokens: 512, // Small JSON response only — phi-4 is fast
             caller: 'pipeline:guardrail',
         });
-
-        console.log("Guardrail response:", guardrailResponse);
 
         const guardrailData = parseJsonResponse(guardrailResponse);
         if (guardrailData?.valid === false) {
@@ -77,10 +72,6 @@ export const runPipeline = action({
             const visionSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "vision_system" }) || "";
             const visionUser = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "vision_user" }) || "";
             const predictSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "predict_system" }) || "";
-
-            console.log("Vision system:", visionSystem);
-            console.log("Vision user:", visionUser);
-            console.log("Predict system:", predictSystem);
 
             // Step 1: Vision
             const visionResponse = await performNvidiaCall(ctx, {
@@ -119,8 +110,6 @@ export const runPipeline = action({
             // "Combined" mode (1 model: Kimi K2.5)
             const MODEL_VISION = 'microsoft/phi-3.5-vision-instruct'; // ~700ms, reliable
             const combinedSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "combined_system" }) || "";
-
-            console.log("Combined mode system:", combinedSystem);
 
             const response = await performNvidiaCall(ctx, {
                 model: MODEL_VISION,
