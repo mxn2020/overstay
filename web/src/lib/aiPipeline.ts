@@ -5,9 +5,10 @@
 //   "demo"         → Local random scoring (default, no API key needed)
 
 import { fileToBase64 } from './nvidiaApi'
-import { analyzeImageLocally, type LocalPredictionResult } from './localScoring'
+import { analyzeImageLocally } from './localScoring'
 import { convex } from './convexClient'
 import { api } from '../../convex/_generated/api'
+import type { PredictionResult } from '../App'
 
 // Backend handles model identifiers and exact prompts automatically now.
 
@@ -19,29 +20,35 @@ export function getPipelineMode(): PipelineMode {
     return 'demo'
 }
 
-// Removed parseJsonResponse as backend handles parsing
-
 // ============================================
 // Option A: Two-Model Pipeline
 // Kimi K2.5 → extracts scene signals
 // Nemotron-3-Nano → generates prediction from signals
 // ============================================
-async function runTwoModelPipeline(file: File): Promise<LocalPredictionResult> {
+async function runTwoModelPipeline(file: File): Promise<PredictionResult> {
     if (!convex) throw new Error("Convex client not initialized")
 
     const base64 = await fileToBase64(file)
-    const prediction: any = await convex.action(api.nvidia.runPipeline, { imageBase64: base64, mode: 'single' })
+    const result: any = await convex.action(api.nvidia.runPipeline, { imageBase64: base64, mode: 'single' })
+
+    // Check for guardrail rejection
+    if (result.rejected) {
+        return {
+            rejected: true,
+            rejectReason: result.rejectReason || "Image rejected by AI guardrails.",
+        }
+    }
 
     return {
         predictionId: `nvidia-2m-${Date.now()}`,
-        exitTime: prediction.exitTime,
-        overstayMinutes: prediction.overstayMinutes,
-        chaosRating: prediction.chaosRating,
-        textRegret: prediction.textRegret,
-        barHop: prediction.barHop,
-        cryRisk: prediction.cryRisk,
-        sunriseRisk: prediction.sunriseRisk,
-        roastLine: prediction.roastLine,
+        exitTime: result.exitTime,
+        overstayMinutes: result.overstayMinutes,
+        chaosRating: result.chaosRating,
+        textRegret: result.textRegret,
+        barHop: result.barHop,
+        cryRisk: result.cryRisk,
+        sunriseRisk: result.sunriseRisk,
+        roastLine: result.roastLine,
     }
 }
 
@@ -49,29 +56,37 @@ async function runTwoModelPipeline(file: File): Promise<LocalPredictionResult> {
 // Option B: Single-Model Pipeline
 // Kimi K2.5 → analyzes AND predicts in one call
 // ============================================
-async function runSingleModelPipeline(file: File): Promise<LocalPredictionResult> {
+async function runSingleModelPipeline(file: File): Promise<PredictionResult> {
     if (!convex) throw new Error("Convex client not initialized")
 
     const base64 = await fileToBase64(file)
-    const pred: any = await convex.action(api.nvidia.runPipeline, { imageBase64: base64, mode: 'combined' })
+    const result: any = await convex.action(api.nvidia.runPipeline, { imageBase64: base64, mode: 'combined' })
+
+    // Check for guardrail rejection
+    if (result.rejected) {
+        return {
+            rejected: true,
+            rejectReason: result.rejectReason || "Image rejected by AI guardrails.",
+        }
+    }
 
     return {
         predictionId: `nvidia-1m-${Date.now()}`,
-        exitTime: pred.exitTime,
-        overstayMinutes: pred.overstayMinutes,
-        chaosRating: pred.chaosRating,
-        textRegret: pred.textRegret,
-        barHop: pred.barHop,
-        cryRisk: pred.cryRisk,
-        sunriseRisk: pred.sunriseRisk,
-        roastLine: pred.roastLine,
+        exitTime: result.exitTime,
+        overstayMinutes: result.overstayMinutes,
+        chaosRating: result.chaosRating,
+        textRegret: result.textRegret,
+        barHop: result.barHop,
+        cryRisk: result.cryRisk,
+        sunriseRisk: result.sunriseRisk,
+        roastLine: result.roastLine,
     }
 }
 
 // ============================================
 // Main entry point — routes to correct pipeline
 // ============================================
-export async function analyzeImage(file: File): Promise<LocalPredictionResult> {
+export async function analyzeImage(file: File): Promise<PredictionResult> {
     const mode = getPipelineMode()
 
     switch (mode) {
@@ -84,3 +99,4 @@ export async function analyzeImage(file: File): Promise<LocalPredictionResult> {
             return analyzeImageLocally()
     }
 }
+

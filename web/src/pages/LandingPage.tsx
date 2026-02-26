@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import PhotoUpload from '../components/PhotoUpload'
 import LoadingScreen from '../components/LoadingScreen'
 import type { PredictionResult } from '../App'
@@ -11,11 +12,13 @@ interface LandingPageProps {
 export default function LandingPage({ onPredict, useConvex }: LandingPageProps) {
     const [isAnalyzing, setIsAnalyzing] = useState(false)
     const [showUpload, setShowUpload] = useState(false)
+    const navigate = useNavigate()
 
     const handleUploadComplete = (result: PredictionResult) => {
         setIsAnalyzing(false)
         setShowUpload(false)
         onPredict(result)
+        navigate('/prediction')
     }
 
     const handleAnalysisStart = () => {

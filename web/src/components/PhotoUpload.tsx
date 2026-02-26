@@ -67,7 +67,11 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
             console.log('[PhotoUpload] Calling analyzeImage()...')
             const result = await analyzeImage(processedFile)
             console.log('[PhotoUpload] Got result:', result)
-            onResult({ ...result, imageUrl: previewUrl })
+            if ('rejected' in result && result.rejected) {
+                onResult(result)
+            } else {
+                onResult({ ...result, imageUrl: previewUrl })
+            }
         } catch (err) {
             console.error('[PhotoUpload] ERROR:', err)
             const message = err instanceof Error ? err.message : 'Unknown error'
