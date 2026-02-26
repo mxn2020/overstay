@@ -391,7 +391,7 @@ export default function AdminPage() {
                         <h2 className="admin-section__title">📜 Test History</h2>
                         {testRuns && testRuns.length > 0 ? (
                             <div className="admin-history">
-                                {testRuns.map(run => (
+                                {testRuns.map((run: any) => (
                                     <div
                                         key={run.testRunId}
                                         className={`admin-history__run ${selectedRunId === run.testRunId ? 'admin-history__run--selected' : ''}`}
@@ -419,8 +419,8 @@ export default function AdminPage() {
                                         {selectedRunId === run.testRunId && selectedRunTests && (
                                             <div className="admin-history__details">
                                                 {selectedRunTests
-                                                    .sort((a, b) => a.durationMs - b.durationMs)
-                                                    .map(test => (
+                                                    .sort((a: any, b: any) => a.durationMs - b.durationMs)
+                                                    .map((test: any) => (
                                                         <div key={test._id} className={`admin-history__test admin-history__test--${test.status}`}>
                                                             <span className="admin-history__model">{test.model.split('/').pop()}</span>
                                                             <span className="admin-metric">{(test.durationMs / 1000).toFixed(1)}s</span>

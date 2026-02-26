@@ -77,7 +77,7 @@ export default function LogsPage() {
                     <label className="admin-label">Model</label>
                     <select value={modelFilter} onChange={e => setModelFilter(e.target.value)} className="logs-select">
                         <option value="">All Models</option>
-                        {stats?.models.map(m => <option key={m} value={m}>{modelShort(m)}</option>)}
+                        {stats?.models.map((m: string) => <option key={m} value={m}>{modelShort(m)}</option>)}
                     </select>
                 </div>
                 <div className="logs-filter">
@@ -92,7 +92,7 @@ export default function LogsPage() {
                     <label className="admin-label">Caller</label>
                     <select value={callerFilter} onChange={e => setCallerFilter(e.target.value)} className="logs-select">
                         <option value="">All Callers</option>
-                        {stats?.callers.map(c => <option key={c} value={c}>{c}</option>)}
+                        {stats?.callers.map((c: string) => <option key={c} value={c}>{c}</option>)}
                     </select>
                 </div>
                 <div className="logs-filter logs-filter--actions">
@@ -107,7 +107,7 @@ export default function LogsPage() {
 
             {/* Log Entries */}
             <div className="logs-timeline">
-                {logs && logs.length > 0 ? logs.map(log => {
+                {logs && logs.length > 0 ? logs.map((log: any) => {
                     const isExpanded = expandedLog === log.requestId
                     return (
                         <div

@@ -17,5 +17,3 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Convex generated
-convex/_generated/

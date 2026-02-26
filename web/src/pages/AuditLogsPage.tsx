@@ -73,9 +73,9 @@ export default function AuditLogsPage() {
                         <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>{stats.total24h}</div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--color-smoke-gray)', marginTop: '4px' }}>Last 24h</div>
                     </div>
-                    {Object.entries(stats.byCategory).map(([cat, count]) => (
+                    {Object.entries(stats.byCategory).map(([cat, count]: [string, unknown]) => (
                         <div className="card" key={cat} style={{ textAlign: 'center', padding: 'var(--space-lg)' }}>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: CATEGORY_COLORS[cat] }}>{count}</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: CATEGORY_COLORS[cat] }}>{count as number}</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-smoke-gray)', marginTop: '4px' }}>
                                 {CATEGORY_ICONS[cat]} {cat}
                             </div>
@@ -124,7 +124,7 @@ export default function AuditLogsPage() {
                     <div className="card" style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--color-smoke-gray)' }}>
                         No audit logs found for this category.
                     </div>
-                ) : logs.map((log) => {
+                ) : logs.map((log: any) => {
                     const details = parseDetails(log.details)
                     return (
                         <div
