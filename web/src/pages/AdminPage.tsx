@@ -56,6 +56,15 @@ export default function AdminPage() {
     const [activeTab, setActiveTab] = useState<'models' | 'prompts'>('models')
     const fileInputRef = useRef<HTMLInputElement>(null)
 
+    // Prompt source state
+    const [promptSource, setPromptSource] = useState<'db' | 'custom'>('db')
+    const [selectedSystemPromptId, setSelectedSystemPromptId] = useState<string>('vision_system')
+    const [selectedUserPromptId, setSelectedUserPromptId] = useState<string>('vision_user')
+    const [customSystemPrompt, setCustomSystemPrompt] = useState<string>('')
+    const [customUserPrompt, setCustomUserPrompt] = useState<string>('')
+    const [testMaxTokens, setTestMaxTokens] = useState<number>(4000)
+    const MAX_TOKEN_OPTIONS = [1000, 2000, 4000, 8000] as const
+
     const saveTestResult = useMutation(api.modelTests.saveTestResult)
     const testRuns = useQuery(api.modelTests.getTestRuns)
     const selectedRunTests = useQuery(
@@ -135,27 +144,23 @@ export default function AdminPage() {
             ))
 
             try {
-                const visionSystemPrompt = prompts?.find((p: any) => p.promptId === 'vision_system')?.content || 'You are a vision AI.'
-                const visionUserPrompt = prompts?.find((p: any) => p.promptId === 'vision_user')?.content || 'Analyze this image.'
-                const combinedSystemPrompt = prompts?.find((p: any) => p.promptId === 'combined_system')?.content || 'You are a combined AI.'
-                const combinedUserPrompt = prompts?.find((p: any) => p.promptId === 'vision_user')?.content || 'Analyze this image.' // Using vision_user as fallback for combined
+                let systemPrompt: string
+                let userPrompt: string
 
-                const isVisionOnly = mode === 'single'
-                const messages = isVisionOnly ? [
-                    { role: 'system' as const, content: visionSystemPrompt },
+                if (promptSource === 'custom') {
+                    systemPrompt = customSystemPrompt || 'You are a vision AI.'
+                    userPrompt = customUserPrompt || 'Analyze this image.'
+                } else {
+                    systemPrompt = prompts?.find((p: any) => p.promptId === selectedSystemPromptId)?.content || 'You are a vision AI.'
+                    userPrompt = prompts?.find((p: any) => p.promptId === selectedUserPromptId)?.content || 'Analyze this image.'
+                }
+
+                const messages = [
+                    { role: 'system' as const, content: systemPrompt },
                     {
                         role: 'user' as const,
                         content: [
-                            { type: 'text' as const, text: visionUserPrompt },
-                            { type: 'image_url' as const, image_url: { url: base64 } },
-                        ],
-                    },
-                ] : [
-                    { role: 'system' as const, content: combinedSystemPrompt },
-                    {
-                        role: 'user' as const,
-                        content: [
-                            { type: 'text' as const, text: combinedUserPrompt },
+                            { type: 'text' as const, text: userPrompt },
                             { type: 'image_url' as const, image_url: { url: base64 } },
                         ],
                     },
@@ -165,7 +170,7 @@ export default function AdminPage() {
                     model: model.id,
                     messages,
                     temperature: 0.3,
-                    maxTokens: 4096,
+                    maxTokens: testMaxTokens,
                     caller: `admin-test:${mode}`,
                 })
 
@@ -236,7 +241,7 @@ export default function AdminPage() {
         }))
 
         setIsRunning(false)
-    }, [testImage, selectedModels, mode, saveTestResult, callModelAction])
+    }, [testImage, selectedModels, mode, saveTestResult, callModelAction, promptSource, selectedSystemPromptId, selectedUserPromptId, customSystemPrompt, customUserPrompt, prompts, testMaxTokens])
 
     return (
         <div className="admin-page">
@@ -305,6 +310,97 @@ export default function AdminPage() {
                                         Combined (Analyze + Predict)
                                     </button>
                                 </div>
+                            </div>
+
+                            {/* Prompt Configuration */}
+                            <div className="admin-config__prompts">
+                                <label className="admin-label">Prompt Source</label>
+                                <div className="admin-toggle">
+                                    <button
+                                        className={`admin-toggle__btn ${promptSource === 'db' ? 'admin-toggle__btn--active' : ''}`}
+                                        onClick={() => setPromptSource('db')}
+                                    >
+                                        📋 DB Prompt
+                                    </button>
+                                    <button
+                                        className={`admin-toggle__btn ${promptSource === 'custom' ? 'admin-toggle__btn--active' : ''}`}
+                                        onClick={() => setPromptSource('custom')}
+                                    >
+                                        ✏️ Custom Prompt
+                                    </button>
+                                </div>
+
+                                {promptSource === 'db' ? (
+                                    <div className="admin-prompt-selectors">
+                                        <div className="admin-prompt-selector">
+                                            <label className="admin-label--small">System Prompt</label>
+                                            <select
+                                                className="admin-select"
+                                                value={selectedSystemPromptId}
+                                                onChange={(e) => setSelectedSystemPromptId(e.target.value)}
+                                            >
+                                                {prompts?.map((p: any) => (
+                                                    <option key={p.promptId} value={p.promptId}>
+                                                        {p.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="admin-prompt-selector">
+                                            <label className="admin-label--small">User Prompt</label>
+                                            <select
+                                                className="admin-select"
+                                                value={selectedUserPromptId}
+                                                onChange={(e) => setSelectedUserPromptId(e.target.value)}
+                                            >
+                                                {prompts?.map((p: any) => (
+                                                    <option key={p.promptId} value={p.promptId}>
+                                                        {p.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="admin-prompt-custom">
+                                        <div className="admin-prompt-custom__field">
+                                            <label className="admin-label--small">System Prompt</label>
+                                            <textarea
+                                                className="admin-prompt-textarea"
+                                                rows={4}
+                                                placeholder="Enter a custom system prompt..."
+                                                value={customSystemPrompt}
+                                                onChange={(e) => setCustomSystemPrompt(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="admin-prompt-custom__field">
+                                            <label className="admin-label--small">User Prompt</label>
+                                            <textarea
+                                                className="admin-prompt-textarea"
+                                                rows={4}
+                                                placeholder="Enter a custom user prompt (sent with the image)..."
+                                                value={customUserPrompt}
+                                                onChange={(e) => setCustomUserPrompt(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Max Tokens */}
+                        <div className="admin-config__tokens">
+                            <label className="admin-label">Max Tokens</label>
+                            <div className="admin-toggle admin-toggle--tokens">
+                                {MAX_TOKEN_OPTIONS.map(opt => (
+                                    <button
+                                        key={opt}
+                                        className={`admin-toggle__btn ${testMaxTokens === opt ? 'admin-toggle__btn--active' : ''}`}
+                                        onClick={() => setTestMaxTokens(opt)}
+                                    >
+                                        {opt >= 1000 ? `${opt / 1000}k` : opt}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 

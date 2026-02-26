@@ -2078,6 +2078,82 @@ h3 {
   margin-bottom: var(--space-xl);
 }
 
+.admin-config__tokens {
+  margin-top: var(--space-lg);
+}
+
+.admin-toggle--tokens {
+  display: flex;
+  gap: 0;
+}
+
+.admin-toggle--tokens .admin-toggle__btn {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+/* --- Admin Prompt Config (Testing Lab) --- */
+.admin-config__prompts {
+  margin-top: var(--space-lg);
+}
+
+.admin-prompt-selectors {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.admin-prompt-selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.admin-select {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  color: var(--color-chalk-white);
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.admin-select:focus {
+  border-color: rgb(var(--color-accent-rgb));
+}
+
+.admin-select option {
+  background: #1a1a2e;
+  color: var(--color-chalk-white);
+}
+
+.admin-label--small {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-smoke-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.admin-prompt-custom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.admin-prompt-custom__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
 /* --- Admin Prompt CMS --- */
 .admin-prompts {
   display: flex;

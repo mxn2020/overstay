@@ -25,7 +25,11 @@ export const runPipeline = action({
         const { imageBase64, mode } = args;
 
         // --- STEP 0: GUARDRAIL CHECK ---
-        const GUARDRAIL_MODEL = 'microsoft/phi-4-multimodal-instruct';
+        // Model token limits (NVIDIA API):
+        //   moonshotai/kimi-k2.5:                context 256k, max output 8,192
+        //   microsoft/phi-4-multimodal-instruct:  context 128k, max output 4,000
+        //   nvidia/nemotron-3-nano-30b-a3b:       context 262k, max output 8,192
+        const GUARDRAIL_MODEL = 'moonshotai/kimi-k2.5';
         const guardrailSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "guardrail_system" });
         const guardrailUser = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "guardrail_user" });
 
@@ -44,7 +48,7 @@ export const runPipeline = action({
                 },
             ],
             temperature: 0.1,
-            maxTokens: 512,
+            maxTokens: 4096, // was 512 — too low, caused empty responses
             caller: 'pipeline:guardrail',
         });
 
@@ -60,9 +64,9 @@ export const runPipeline = action({
         // --- GUARDRAIL PASSED. PROCEED TO PIPELINE ---
 
         if (mode === "single") {
-            // "Vision Only" mode in admin (2 models: Kimi K2.5 -> Nemotron-3-Nano)
-            const MODEL_VISION = 'microsoft/phi-4-multimodal-instruct'
-            const MODEL_PREDICTION = 'nvidia/nemotron-3-nano-30b-a3b'
+            // "Vision Only" mode (2 models: Kimi K2.5 -> Nemotron-3-Nano)
+            const MODEL_VISION = 'moonshotai/kimi-k2.5'           // max output: 8,192
+            const MODEL_PREDICTION = 'nvidia/nemotron-3-nano-30b-a3b' // max output: 8,192
 
             const visionSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "vision_system" }) || "";
             const visionUser = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "vision_user" }) || "";
@@ -82,7 +86,7 @@ export const runPipeline = action({
                     },
                 ],
                 temperature: 0.3,
-                maxTokens: 4096,
+                maxTokens: 8192, // kimi-k2.5 max output on NVIDIA API
                 caller: 'pipeline:two-model:vision',
             });
 
@@ -96,14 +100,14 @@ export const runPipeline = action({
                     { role: 'user', content: buildPredictionUserPrompt(JSON.stringify(visionSignals, null, 2)) },
                 ],
                 temperature: 0.8,
-                maxTokens: 2048,
+                maxTokens: 8192, // nemotron-3-nano max output on NVIDIA API
                 caller: 'pipeline:two-model:prediction',
             });
 
             return parseJsonResponse(predictionResponse);
         } else {
-            // "Combined" mode in admin (1 model: Kimi K2.5)
-            const MODEL_VISION = 'microsoft/phi-4-multimodal-instruct'
+            // "Combined" mode (1 model: Kimi K2.5)
+            const MODEL_VISION = 'moonshotai/kimi-k2.5'           // max output: 8,192
             const combinedSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "combined_system" }) || "";
 
             const response = await performNvidiaCall(ctx, {
@@ -119,7 +123,7 @@ export const runPipeline = action({
                     },
                 ],
                 temperature: 0.7,
-                maxTokens: 2048,
+                maxTokens: 8192, // kimi-k2.5 max output on NVIDIA API
                 caller: 'pipeline:single-model',
             });
 
