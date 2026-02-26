@@ -306,7 +306,14 @@ export const handleSubscriptionActive = action({
     },
     handler: async (ctx, { userId, stripeCustomerId }) => {
         // Set plan to paid
-        const profile = await ctx.runQuery(internal.users.getProfileByUserId, { userId });
+        let profile = await ctx.runQuery(internal.users.getProfileByUserId, { userId });
+
+        // If no profile exists yet, create one (new user who subscribed before visiting the app)
+        if (!profile) {
+            await ctx.runMutation(internal.users.ensureProfileInternal, { userId });
+            profile = await ctx.runQuery(internal.users.getProfileByUserId, { userId });
+        }
+
         if (profile) {
             await ctx.runMutation(internal.users.updatePlanInternal, {
                 profileId: profile._id,

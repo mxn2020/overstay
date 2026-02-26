@@ -254,3 +254,68 @@ export const bootstrapAdmin = mutation({
         }
     },
 });
+
+// Internal: create profile if it doesn't exist (for use from actions like webhooks)
+export const ensureProfileInternal = internalMutation({
+    args: { userId: v.string() },
+    handler: async (ctx, { userId }) => {
+        const existing = await ctx.db
+            .query("userProfiles")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .first();
+
+        if (!existing) {
+            await ctx.db.insert("userProfiles", {
+                userId,
+                name: "",
+                role: "user",
+                justOneLastDrinkScore: 0,
+                totalPredictions: 0,
+                beatTheAiWins: 0,
+                streak: 0,
+                plan: "free",
+                createdAt: Date.now(),
+            });
+        }
+    },
+});
+
+// Temp utility: fix a user's plan and grant credits by email (no auth needed, remove after use)
+export const fixUserProfile = mutation({
+    args: {
+        email: v.string(),
+        plan: v.union(v.literal("free"), v.literal("paid")),
+        role: v.union(v.literal("user"), v.literal("admin")),
+        grantCredits: v.optional(v.number()),
+    },
+    handler: async (ctx, { email, plan, role, grantCredits: creditsToGrant }) => {
+        const users = await ctx.db.query("users").collect();
+        const user = users.find((u: any) => u.email === email);
+        if (!user) throw new Error(`No user found: ${email}`);
+
+        const profile = await ctx.db
+            .query("userProfiles")
+            .withIndex("by_userId", (q) => q.eq("userId", user._id))
+            .first();
+
+        if (!profile) throw new Error(`No profile found for: ${email}`);
+
+        await ctx.db.patch(profile._id, { plan, role });
+
+        if (creditsToGrant && creditsToGrant > 0) {
+            const currentBalance = profile.creditBalance ?? 0;
+            await ctx.db.patch(profile._id, { creditBalance: currentBalance + creditsToGrant });
+            await ctx.db.insert("creditTransactions", {
+                userId: user._id,
+                type: "purchase",
+                amount: creditsToGrant,
+                balanceBefore: currentBalance,
+                balanceAfter: currentBalance + creditsToGrant,
+                description: `Manual fix: ${creditsToGrant} credits granted`,
+                timestamp: Date.now(),
+            });
+        }
+
+        return { status: "fixed", profileId: profile._id, plan, role, credits: (profile.creditBalance ?? 0) + (creditsToGrant ?? 0) };
+    },
+});
