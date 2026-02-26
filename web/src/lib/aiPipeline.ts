@@ -16,6 +16,7 @@ export type PipelineMode = 'two-model' | 'single-model' | 'demo'
 
 export function getPipelineMode(): PipelineMode {
     const mode = import.meta.env.VITE_AI_PIPELINE as string | undefined
+    console.log("Pipeline mode:", mode)
     if (mode === 'two-model' || mode === 'single-model') return mode
     return 'demo'
 }

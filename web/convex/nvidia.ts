@@ -35,6 +35,9 @@ export const runPipeline = action({
 
         if (!guardrailSystem || !guardrailUser) throw new Error("Guardrail prompts not found in DB");
 
+        console.log("Guardrail system:", guardrailSystem);
+        console.log("Guardrail user:", guardrailUser);
+
         const guardrailResponse = await performNvidiaCall(ctx, {
             model: GUARDRAIL_MODEL,
             messages: [
@@ -51,6 +54,8 @@ export const runPipeline = action({
             maxTokens: 512, // Small JSON response only — phi-4 is fast
             caller: 'pipeline:guardrail',
         });
+
+        console.log("Guardrail response:", guardrailResponse);
 
         const guardrailData = parseJsonResponse(guardrailResponse);
         if (guardrailData?.valid === false) {
