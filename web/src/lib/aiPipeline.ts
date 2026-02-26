@@ -92,6 +92,8 @@ async function runSingleModelPipeline(file: File): Promise<PredictionResult> {
 export async function analyzeImage(file: File): Promise<PredictionResult> {
     const mode = getPipelineMode()
 
+    console.log("Pipeline mode:", mode)
+
     switch (mode) {
         case 'two-model':
             return runTwoModelPipeline(file)
