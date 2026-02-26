@@ -115,7 +115,7 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
             color: 'var(--color-smoke-gray)',
             opacity: 0.6,
         }}>
-            🤖 AI: {pipelineMode === 'two-model' ? 'Kimi K2.5 → Nemotron' : 'Kimi K2.5'}
+            🤖 AI: {pipelineMode === 'two-model' ? 'Phi 4 → Nemotron' : 'Phi 4'}
         </div>
     )
 

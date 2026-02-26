@@ -66,7 +66,7 @@ export const runPipeline = action({
 
         if (mode === "single") {
             // "Vision Only" mode (2 models: Kimi K2.5 -> Nemotron-3-Nano)
-            const MODEL_VISION = 'moonshotai/kimi-k2.5'           // max output: 8,192
+            const MODEL_VISION = 'microsoft/phi-4-multimodal-instruct'; // Fast! ~1s vs kimi's ~287s 'moonshotai/kimi-k2.5'
             const MODEL_PREDICTION = 'nvidia/nemotron-3-nano-30b-a3b' // max output: 8,192
 
             const visionSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "vision_system" }) || "";
@@ -87,7 +87,7 @@ export const runPipeline = action({
                     },
                 ],
                 temperature: 0.3,
-                maxTokens: 8192, // kimi-k2.5 max output on NVIDIA API
+                maxTokens: 4000, // kimi-k2.5 max output on NVIDIA API
                 caller: 'pipeline:two-model:vision',
             });
 
@@ -101,14 +101,14 @@ export const runPipeline = action({
                     { role: 'user', content: buildPredictionUserPrompt(JSON.stringify(visionSignals, null, 2)) },
                 ],
                 temperature: 0.8,
-                maxTokens: 8192, // nemotron-3-nano max output on NVIDIA API
+                maxTokens: 4000, // nemotron-3-nano max output on NVIDIA API
                 caller: 'pipeline:two-model:prediction',
             });
 
             return parseJsonResponse(predictionResponse);
         } else {
             // "Combined" mode (1 model: Kimi K2.5)
-            const MODEL_VISION = 'moonshotai/kimi-k2.5'           // max output: 8,192
+            const MODEL_VISION = 'microsoft/phi-4-multimodal-instruct'; // Fast! ~1s vs kimi's ~287s 'moonshotai/kimi-k2.5'
             const combinedSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "combined_system" }) || "";
 
             const response = await performNvidiaCall(ctx, {
@@ -124,7 +124,7 @@ export const runPipeline = action({
                     },
                 ],
                 temperature: 0.7,
-                maxTokens: 8192, // kimi-k2.5 max output on NVIDIA API
+                maxTokens: 4000, // kimi-k2.5 max output on NVIDIA API
                 caller: 'pipeline:single-model',
             });
 

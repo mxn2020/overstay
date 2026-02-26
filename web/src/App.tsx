@@ -33,6 +33,7 @@ export type SuccessPrediction = {
 export type PredictionResult =
     | {
         rejected: true
+        reason: 'roast' | 'harmful'
         rejectReason: string
     }
     | SuccessPrediction
@@ -64,7 +65,7 @@ function AppRoutes() {
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/help" element={<HelpPage />} />
                 <Route path="/audit-logs" element={<AuthGuard><AuditLogsPage /></AuthGuard>} />
-                <Route path="*" element={<NotFoundPage />} />
+                <Route path="*" element={<NotFoundPage onGoHome={() => navigate('/')} />} />
             </Routes>
         </Layout>
     )
