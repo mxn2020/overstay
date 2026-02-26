@@ -298,6 +298,73 @@ export const handleTopUpSuccess = action({
     },
 });
 
+// Internal mutation: atomically activate subscription (create profile if needed + set paid + grant credits)
+export const activateSubscription = internalMutation({
+    args: {
+        userId: v.string(),
+        stripeCustomerId: v.string(),
+    },
+    handler: async (ctx, { userId, stripeCustomerId }) => {
+        // 1. Find or create profile
+        let profile = await ctx.db
+            .query("userProfiles")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .first();
+
+        if (!profile) {
+            console.log(`[activateSubscription] No profile for userId=${userId}, creating one...`);
+            const profileId = await ctx.db.insert("userProfiles", {
+                userId,
+                name: "",
+                role: "user",
+                justOneLastDrinkScore: 0,
+                totalPredictions: 0,
+                beatTheAiWins: 0,
+                streak: 0,
+                plan: "paid",
+                stripeCustomerId,
+                creditBalance: 100,
+                createdAt: Date.now(),
+            });
+            // Log the credit grant
+            await ctx.db.insert("creditTransactions", {
+                userId,
+                type: "purchase",
+                amount: 100,
+                balanceBefore: 0,
+                balanceAfter: 100,
+                description: "Let's Have Fun plan activated — 100 monthly credits",
+                timestamp: Date.now(),
+            });
+            console.log(`[activateSubscription] Created profile ${profileId} with plan=paid, 100 credits`);
+            return;
+        }
+
+        // 2. Update existing profile
+        console.log(`[activateSubscription] Updating profile ${profile._id} → plan=paid`);
+        const currentBalance = profile.creditBalance ?? 0;
+        const newBalance = currentBalance + 100;
+
+        await ctx.db.patch(profile._id, {
+            plan: "paid",
+            stripeCustomerId,
+            creditBalance: newBalance,
+        });
+
+        // Log the credit grant
+        await ctx.db.insert("creditTransactions", {
+            userId,
+            type: "purchase",
+            amount: 100,
+            balanceBefore: currentBalance,
+            balanceAfter: newBalance,
+            description: "Let's Have Fun plan activated — 100 monthly credits",
+            timestamp: Date.now(),
+        });
+        console.log(`[activateSubscription] Done. Credits: ${currentBalance} → ${newBalance}`);
+    },
+});
+
 // Handle subscription activation (called from webhook)
 export const handleSubscriptionActive = action({
     args: {
@@ -305,27 +372,11 @@ export const handleSubscriptionActive = action({
         stripeCustomerId: v.string(),
     },
     handler: async (ctx, { userId, stripeCustomerId }) => {
-        // Set plan to paid
-        let profile = await ctx.runQuery(internal.users.getProfileByUserId, { userId });
-
-        // If no profile exists yet, create one (new user who subscribed before visiting the app)
-        if (!profile) {
-            await ctx.runMutation(internal.users.ensureProfileInternal, { userId });
-            profile = await ctx.runQuery(internal.users.getProfileByUserId, { userId });
-        }
-
-        if (profile) {
-            await ctx.runMutation(internal.users.updatePlanInternal, {
-                profileId: profile._id,
-                plan: "paid",
-                stripeCustomerId,
-            });
-            // Grant initial 100 credits
-            await ctx.runMutation(internal.credits.addPurchasedCredits, {
-                userId,
-                amount: 100,
-                description: "Pro plan activated — 100 monthly credits",
-            });
-        }
+        console.log(`[handleSubscriptionActive] userId=${userId}, customerId=${stripeCustomerId}`);
+        await ctx.runMutation(internal.stripe.activateSubscription, {
+            userId,
+            stripeCustomerId,
+        });
+        console.log(`[handleSubscriptionActive] Done`);
     },
 });

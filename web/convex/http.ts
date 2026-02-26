@@ -87,13 +87,14 @@ http.route({
 
         try {
             const event = JSON.parse(body);
-
+            console.log(`[Stripe Webhook] Received event: ${event.type}, id: ${event.id}`);
 
             // ---- checkout.session.completed ----
             if (event.type === "checkout.session.completed") {
                 const session = event.data.object;
                 const userId = session.metadata?.userId;
                 const customerId = session.customer;
+                console.log(`[Stripe Webhook] checkout.session.completed — userId: ${userId}, customerId: ${customerId}, metadata:`, JSON.stringify(session.metadata));
 
                 if (!userId) {
                     console.warn("Stripe webhook: missing userId in session metadata");
