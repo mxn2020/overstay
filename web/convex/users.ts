@@ -189,3 +189,37 @@ export const deleteAccount = mutation({
     },
 });
 
+// Bootstrap: promote user to admin by email (no auth check — use once then remove)
+export const bootstrapAdmin = mutation({
+    args: { email: v.string() },
+    handler: async (ctx, { email }) => {
+        // Find user by email in auth users table
+        const users = await ctx.db.query("users").collect();
+        const user = users.find((u: any) => u.email === email);
+        if (!user) throw new Error(`No user found with email: ${email}`);
+
+        // Find or create their profile
+        const profile = await ctx.db
+            .query("userProfiles")
+            .withIndex("by_userId", (q) => q.eq("userId", user._id))
+            .first();
+
+        if (profile) {
+            await ctx.db.patch(profile._id, { role: "admin" });
+            return { status: "updated", profileId: profile._id };
+        } else {
+            const id = await ctx.db.insert("userProfiles", {
+                userId: user._id,
+                name: user.name ?? "",
+                role: "admin",
+                overstayScore: 0,
+                totalPredictions: 0,
+                beatTheAiWins: 0,
+                streak: 0,
+                plan: "free",
+                createdAt: Date.now(),
+            });
+            return { status: "created", profileId: id };
+        }
+    },
+});

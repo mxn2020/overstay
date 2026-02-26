@@ -71,12 +71,16 @@ export const runPipeline = action({
 
         if (mode === "single") {
             // "Vision Only" mode (2 models: Kimi K2.5 -> Nemotron-3-Nano)
-            const MODEL_VISION = 'microsoft/phi-4-multimodal-instruct'; // Fast! ~1s vs kimi's ~287s 'moonshotai/kimi-k2.5'
+            const MODEL_VISION = 'microsoft/phi-3.5-vision-instruct'; // ~700ms, reliable
             const MODEL_PREDICTION = 'nvidia/nemotron-3-nano-30b-a3b' // max output: 8,192
 
             const visionSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "vision_system" }) || "";
             const visionUser = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "vision_user" }) || "";
             const predictSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "predict_system" }) || "";
+
+            console.log("Vision system:", visionSystem);
+            console.log("Vision user:", visionUser);
+            console.log("Predict system:", predictSystem);
 
             // Step 1: Vision
             const visionResponse = await performNvidiaCall(ctx, {
@@ -113,8 +117,10 @@ export const runPipeline = action({
             return parseJsonResponse(predictionResponse);
         } else {
             // "Combined" mode (1 model: Kimi K2.5)
-            const MODEL_VISION = 'microsoft/phi-4-multimodal-instruct'; // Fast! ~1s vs kimi's ~287s 'moonshotai/kimi-k2.5'
+            const MODEL_VISION = 'microsoft/phi-3.5-vision-instruct'; // ~700ms, reliable
             const combinedSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "combined_system" }) || "";
+
+            console.log("Combined mode system:", combinedSystem);
 
             const response = await performNvidiaCall(ctx, {
                 model: MODEL_VISION,
