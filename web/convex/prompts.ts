@@ -14,7 +14,7 @@ You MUST respond ONLY with valid JSON in this exact format:
 }
 No markdown formatting or extra text.`;
 
-const GUARDRAIL_USER_PROMPT = `Analyze this image. Is it a picture of people, a night out, or drinks? Return the valid JSON {"valid": true} or {"valid": false, "roast": "Your roast here"}.`;
+const GUARDRAIL_USER_PROMPT = `Analyze this image. Is it a picture of people, a night out, or drinks? Return the valid JSON {"valid": true} or {"valid": false, "roast": "<generate a savage roast here>"}.`;
 
 const VISION_SYSTEM_PROMPT = `You are a nightlife scene analyzer for the app "JustOneLastDrink". 
 You analyze photos from nights out and extract structured data about the scene.

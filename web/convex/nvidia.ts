@@ -25,7 +25,7 @@ export const runPipeline = action({
         const { imageBase64, mode } = args;
 
         // --- STEP 0: GUARDRAIL CHECK ---
-        const GUARDRAIL_MODEL = 'nvidia/nemotron-mini-4b-instruct';
+        const GUARDRAIL_MODEL = 'microsoft/phi-4-multimodal-instruct';
         const guardrailSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "guardrail_system" });
         const guardrailUser = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "guardrail_user" });
 
@@ -61,7 +61,7 @@ export const runPipeline = action({
 
         if (mode === "single") {
             // "Vision Only" mode in admin (2 models: Kimi K2.5 -> Nemotron-3-Nano)
-            const MODEL_VISION = 'moonshotai/kimi-k2.5'
+            const MODEL_VISION = 'microsoft/phi-4-multimodal-instruct'
             const MODEL_PREDICTION = 'nvidia/nemotron-3-nano-30b-a3b'
 
             const visionSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "vision_system" }) || "";
@@ -103,7 +103,7 @@ export const runPipeline = action({
             return parseJsonResponse(predictionResponse);
         } else {
             // "Combined" mode in admin (1 model: Kimi K2.5)
-            const MODEL_VISION = 'moonshotai/kimi-k2.5'
+            const MODEL_VISION = 'microsoft/phi-4-multimodal-instruct'
             const combinedSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "combined_system" }) || "";
 
             const response = await performNvidiaCall(ctx, {

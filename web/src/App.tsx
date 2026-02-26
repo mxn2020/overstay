@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import LandingPage from './pages/LandingPage'
 import PredictionPage from './pages/PredictionPage'
@@ -32,28 +32,40 @@ export type PredictionResult =
     }
     | SuccessPrediction
 
-function App() {
+function AppRoutes() {
     const [prediction, setPrediction] = useState<PredictionResult | null>(null)
+    const navigate = useNavigate()
+
+    const handleNewPrediction = () => {
+        setPrediction(null)
+        navigate('/')
+    }
 
     return (
+        <Layout>
+            <Routes>
+                <Route path="/" element={<LandingPage onPredict={(r) => setPrediction(r)} useConvex={true} />} />
+                <Route path="/prediction" element={
+                    prediction
+                        ? <PredictionPage prediction={prediction} onBack={handleNewPrediction} />
+                        : <LandingPage onPredict={(r) => setPrediction(r)} useConvex={true} />
+                } />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/admin" element={<AdminPage />} />
+                <Route path="/logs" element={<LogsPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/help" element={<HelpPage />} />
+                <Route path="/audit-logs" element={<AuditLogsPage />} />
+            </Routes>
+        </Layout>
+    )
+}
+
+function App() {
+    return (
         <BrowserRouter>
-            <Layout>
-                <Routes>
-                    <Route path="/" element={<LandingPage onPredict={(r) => setPrediction(r)} useConvex={true} />} />
-                    <Route path="/prediction" element={
-                        prediction
-                            ? <PredictionPage prediction={prediction} onBack={() => window.history.back()} />
-                            : <LandingPage onPredict={(r) => setPrediction(r)} useConvex={true} />
-                    } />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/admin" element={<AdminPage />} />
-                    <Route path="/logs" element={<LogsPage />} />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/pricing" element={<PricingPage />} />
-                    <Route path="/help" element={<HelpPage />} />
-                    <Route path="/audit-logs" element={<AuditLogsPage />} />
-                </Routes>
-            </Layout>
+            <AppRoutes />
         </BrowserRouter>
     )
 }
