@@ -3,7 +3,7 @@ import { useMutation, useQuery, useAction } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { VISION_MODELS, type ModelInfo } from '../lib/modelRegistry'
 import { fileToBase64 } from '../lib/nvidiaApi'
-// Using prompts from Database now
+import LogsPage from './LogsPage'
 
 interface TestResult {
     model: string
@@ -53,7 +53,7 @@ export default function AdminPage() {
     const [isRunning, setIsRunning] = useState(false)
     const [expandedResult, setExpandedResult] = useState<string | null>(null)
     const [selectedRunId, setSelectedRunId] = useState<string | null>(null)
-    const [activeTab, setActiveTab] = useState<'models' | 'prompts'>('models')
+    const [activeTab, setActiveTab] = useState<'models' | 'prompts' | 'logs'>('models')
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Prompt source state
@@ -259,6 +259,12 @@ export default function AdminPage() {
                     onClick={() => setActiveTab('prompts')}
                 >
                     📝 Prompt Management
+                </button>
+                <button
+                    className={`admin-tab ${activeTab === 'logs' ? 'admin-tab--active' : ''}`}
+                    onClick={() => setActiveTab('logs')}
+                >
+                    📋 AI Logs
                 </button>
             </div>
 
@@ -607,6 +613,10 @@ export default function AdminPage() {
                         ))}
                     </div>
                 </div>
+            )}
+
+            {activeTab === 'logs' && (
+                <LogsPage />
             )}
         </div>
     )

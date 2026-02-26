@@ -120,3 +120,72 @@ export const setRole = mutation({
         });
     },
 });
+
+// Update user profile (name)
+export const updateProfile = mutation({
+    args: {
+        name: v.string(),
+    },
+    handler: async (ctx, { name }) => {
+        const userId = await auth.getUserId(ctx);
+        if (!userId) throw new Error("Not authenticated");
+
+        const profile = await ctx.db
+            .query("userProfiles")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .first();
+
+        if (profile) {
+            await ctx.db.patch(profile._id, { name });
+        }
+    },
+});
+
+// Delete user account and all associated data
+export const deleteAccount = mutation({
+    args: {},
+    handler: async (ctx) => {
+        const userId = await auth.getUserId(ctx);
+        if (!userId) throw new Error("Not authenticated");
+
+        // Delete user profile
+        const profile = await ctx.db
+            .query("userProfiles")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .first();
+
+        if (profile) {
+            await ctx.db.delete(profile._id);
+        }
+
+        // Delete all user predictions
+        const predictions = await ctx.db
+            .query("predictions")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .collect();
+
+        for (const prediction of predictions) {
+            await ctx.db.delete(prediction._id);
+        }
+
+        // Delete all user badges
+        const badges = await ctx.db
+            .query("badges")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .collect();
+
+        for (const badge of badges) {
+            await ctx.db.delete(badge._id);
+        }
+
+        // Audit log
+        await ctx.db.insert("auditLogs", {
+            action: "user.account_deleted",
+            category: "auth",
+            userId,
+            details: JSON.stringify({ message: "User deleted their account" }),
+            timestamp: Date.now(),
+        });
+    },
+});
+

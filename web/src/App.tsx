@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import Layout from './components/Layout'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { AuthGuard, RedirectIfAuth } from './components/AuthGuard'
 import LandingPage from './pages/LandingPage'
 import PredictionPage from './pages/PredictionPage'
 import ProfilePage from './pages/ProfilePage'
@@ -9,6 +11,9 @@ import LoginPage from './pages/LoginPage'
 import PricingPage from './pages/PricingPage'
 import HelpPage from './pages/HelpPage'
 import AuditLogsPage from './pages/AuditLogsPage'
+import SettingsPage from './pages/SettingsPage'
+import BillingPage from './pages/BillingPage'
+import NotFoundPage from './pages/NotFoundPage'
 import { useState } from 'react'
 
 export type SuccessPrediction = {
@@ -28,7 +33,6 @@ export type SuccessPrediction = {
 export type PredictionResult =
     | {
         rejected: true
-        reason: 'roast' | 'harmful'
         rejectReason: string
     }
     | SuccessPrediction
@@ -51,13 +55,16 @@ function AppRoutes() {
                         ? <PredictionPage prediction={prediction} onBack={handleNewPrediction} />
                         : <LandingPage onPredict={(r) => setPrediction(r)} useConvex={true} />
                 } />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/logs" element={<LogsPage />} />
-                <Route path="/login" element={<LoginPage />} />
+                <Route path="/profile" element={<AuthGuard><ProfilePage /></AuthGuard>} />
+                <Route path="/settings" element={<AuthGuard><SettingsPage /></AuthGuard>} />
+                <Route path="/billing" element={<AuthGuard><BillingPage /></AuthGuard>} />
+                <Route path="/admin" element={<AuthGuard><AdminPage /></AuthGuard>} />
+                <Route path="/logs" element={<AuthGuard><LogsPage /></AuthGuard>} />
+                <Route path="/login" element={<RedirectIfAuth><LoginPage /></RedirectIfAuth>} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/help" element={<HelpPage />} />
-                <Route path="/audit-logs" element={<AuditLogsPage />} />
+                <Route path="/audit-logs" element={<AuthGuard><AuditLogsPage /></AuthGuard>} />
+                <Route path="*" element={<NotFoundPage />} />
             </Routes>
         </Layout>
     )
@@ -65,9 +72,11 @@ function AppRoutes() {
 
 function App() {
     return (
-        <BrowserRouter>
-            <AppRoutes />
-        </BrowserRouter>
+        <ErrorBoundary>
+            <BrowserRouter>
+                <AppRoutes />
+            </BrowserRouter>
+        </ErrorBoundary>
     )
 }
 
