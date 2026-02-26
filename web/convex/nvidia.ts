@@ -29,7 +29,7 @@ export const runPipeline = action({
         //   moonshotai/kimi-k2.5:                context 256k, max output 8,192
         //   microsoft/phi-4-multimodal-instruct:  context 128k, max output 4,000
         //   nvidia/nemotron-3-nano-30b-a3b:       context 262k, max output 8,192
-        const GUARDRAIL_MODEL = 'moonshotai/kimi-k2.5';
+        const GUARDRAIL_MODEL = 'microsoft/phi-4-multimodal-instruct'; // Fast! ~1s vs kimi's ~287s
         const guardrailSystem = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "guardrail_system" });
         const guardrailUser = await ctx.runQuery(internal.prompts.getPromptContent, { promptId: "guardrail_user" });
 
@@ -48,7 +48,7 @@ export const runPipeline = action({
                 },
             ],
             temperature: 0.1,
-            maxTokens: 4096, // was 512 — too low, caused empty responses
+            maxTokens: 512, // Small JSON response only — phi-4 is fast
             caller: 'pipeline:guardrail',
         });
 
