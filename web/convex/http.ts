@@ -22,13 +22,13 @@ http.route({
 
             if (event.type === "checkout.session.completed") {
                 const session = event.data.object;
-                const plan = session.metadata?.plan ?? "pro";
+                const plan = session.metadata?.plan === "paid" ? "paid" : "paid"; // Any subscription = paid
                 const customerId = session.customer;
 
                 if (customerId && plan) {
                     await ctx.runMutation(api.stripe.updateSubscription, {
                         stripeCustomerId: customerId,
-                        plan: plan as "free" | "pro" | "enterprise",
+                        plan: plan as "free" | "paid",
                     });
                 }
             }

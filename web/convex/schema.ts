@@ -15,9 +15,32 @@ export default defineSchema({
         beatTheAiWins: v.number(),
         streak: v.number(),
         stripeCustomerId: v.optional(v.string()),
-        plan: v.optional(v.union(v.literal("free"), v.literal("pro"), v.literal("enterprise"))),
+        plan: v.optional(v.union(v.literal("free"), v.literal("paid"))),
+        creditBalance: v.optional(v.number()),    // current credits
+        lastCreditRefill: v.optional(v.number()), // timestamp of last monthly refill
         createdAt: v.number(),
     }).index("by_userId", ["userId"]),
+
+    // Credit transaction history
+    creditTransactions: defineTable({
+        userId: v.string(),
+        type: v.union(
+            v.literal("purchase"),  // Stripe top-up
+            v.literal("refill"),    // Monthly allowance
+            v.literal("deduct"),    // Prediction usage
+            v.literal("bonus"),     // Admin grant
+            v.literal("refund"),    // Failed prediction refund
+        ),
+        amount: v.number(),         // positive = add, negative = deduct
+        balanceBefore: v.number(),
+        balanceAfter: v.number(),
+        description: v.string(),
+        stripeSessionId: v.optional(v.string()),
+        timestamp: v.number(),
+    })
+        .index("by_userId", ["userId", "timestamp"])
+        .index("by_type", ["type", "timestamp"])
+        .index("by_timestamp", ["timestamp"]),
 
     predictions: defineTable({
         userId: v.optional(v.id("users")),
@@ -40,6 +63,28 @@ export default defineSchema({
         .index("by_userId", ["userId"])
         .index("by_createdAt", ["createdAt"])
         .index("by_shareUrl", ["shareUrl"]),
+
+    // Public storyboard — shared prediction cards
+    sharedCards: defineTable({
+        userId: v.string(),
+        userName: v.optional(v.string()),
+        // Prediction snapshot (hard-saved so card persists even if prediction deleted)
+        exitTime: v.string(),
+        overstayMinutes: v.number(),
+        chaosRating: v.number(),
+        textRegret: v.number(),
+        barHop: v.number(),
+        cryRisk: v.number(),
+        sunriseRisk: v.string(),
+        roastLine: v.string(),
+        imageStorageId: v.optional(v.id("_storage")), // card screenshot
+        isPublic: v.boolean(),
+        likes: v.number(),
+        sharedAt: v.number(),
+    })
+        .index("by_userId", ["userId"])
+        .index("by_public_date", ["isPublic", "sharedAt"])
+        .index("by_likes", ["isPublic", "likes"]),
 
     badges: defineTable({
         userId: v.id("users"),
@@ -104,6 +149,10 @@ export default defineSchema({
         promptTokens: v.optional(v.number()),
         completionTokens: v.optional(v.number()),
         totalTokens: v.optional(v.number()),
+        // Cost (hard-saved at time of call using modelCosts rates)
+        inputCostUsd: v.optional(v.number()),
+        outputCostUsd: v.optional(v.number()),
+        totalCostUsd: v.optional(v.number()),
         // Error
         errorMessage: v.optional(v.string()),
     })
@@ -112,20 +161,29 @@ export default defineSchema({
         .index("by_caller", ["caller"])
         .index("by_status", ["status"]),
 
+    // Admin: model pricing per 1k tokens
+    modelCosts: defineTable({
+        model: v.string(),           // e.g. "microsoft/phi-3.5-vision-instruct"
+        displayName: v.optional(v.string()),
+        inputCostPer1k: v.number(),  // USD per 1,000 input tokens
+        outputCostPer1k: v.number(), // USD per 1,000 output tokens
+        updatedAt: v.number(),
+    }).index("by_model", ["model"]),
+
     aiPrompts: defineTable({
-        promptId: v.string(),          // e.g., 'guardrail_system', 'vision_user'
-        name: v.string(),        // Human readable name e.g., 'Guardrail System Prompt'
-        content: v.string(),     // The actual prompt text
-        description: v.string(), // What this prompt does
+        promptId: v.string(),
+        name: v.string(),
+        content: v.string(),
+        description: v.string(),
         updatedAt: v.number(),
     }).index("by_prompt_id", ["promptId"]),
 
     auditLogs: defineTable({
-        action: v.string(),           // e.g. "user.login", "admin.role_change", "prompt.update", "stripe.checkout"
+        action: v.string(),
         category: v.union(v.literal("auth"), v.literal("admin"), v.literal("system"), v.literal("billing")),
         userId: v.optional(v.string()),
         targetId: v.optional(v.string()),
-        details: v.string(),          // JSON stringified details
+        details: v.string(),
         ipAddress: v.optional(v.string()),
         timestamp: v.number(),
     })

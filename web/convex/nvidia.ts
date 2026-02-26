@@ -254,6 +254,22 @@ async function performNvidiaCall(ctx: any, args: {
     } finally {
         const durationMs = Date.now() - timestamp;
 
+        // Look up model cost for this model
+        let inputCostUsd: number | undefined;
+        let outputCostUsd: number | undefined;
+        let totalCostUsd: number | undefined;
+
+        try {
+            const modelCost = await ctx.runQuery(internal.modelCosts.getModelCostInternal, { model });
+            if (modelCost && promptTokens && completionTokens) {
+                inputCostUsd = (promptTokens / 1000) * modelCost.inputCostPer1k;
+                outputCostUsd = (completionTokens / 1000) * modelCost.outputCostPer1k;
+                totalCostUsd = inputCostUsd + outputCostUsd;
+            }
+        } catch {
+            // Model cost lookup failed — not critical, just skip
+        }
+
         try {
             await ctx.runMutation(internal.aiLogs.saveLog, {
                 requestId,
@@ -277,6 +293,9 @@ async function performNvidiaCall(ctx: any, args: {
                 completionTokens,
                 totalTokens,
                 errorMessage,
+                inputCostUsd,
+                outputCostUsd,
+                totalCostUsd,
             });
         } catch (logErr) {
             console.error("[NVIDIA API Action] Failed to save log entry:", logErr);

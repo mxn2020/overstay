@@ -24,6 +24,10 @@ export const saveLog = internalMutation({
         completionTokens: v.optional(v.number()),
         totalTokens: v.optional(v.number()),
         errorMessage: v.optional(v.string()),
+        // Cost (hard-saved at time of call)
+        inputCostUsd: v.optional(v.number()),
+        outputCostUsd: v.optional(v.number()),
+        totalCostUsd: v.optional(v.number()),
     },
     handler: async (ctx, args) => {
         return await ctx.db.insert("aiLogs", args);

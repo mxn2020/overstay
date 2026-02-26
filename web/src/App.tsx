@@ -13,6 +13,7 @@ import HelpPage from './pages/HelpPage'
 import AuditLogsPage from './pages/AuditLogsPage'
 import SettingsPage from './pages/SettingsPage'
 import BillingPage from './pages/BillingPage'
+import StoryboardPage from './pages/StoryboardPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { useState } from 'react'
 
@@ -63,6 +64,7 @@ function AppRoutes() {
                 <Route path="/logs" element={<AuthGuard><LogsPage /></AuthGuard>} />
                 <Route path="/login" element={<RedirectIfAuth><LoginPage /></RedirectIfAuth>} />
                 <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/storyboard" element={<StoryboardPage />} />
                 <Route path="/help" element={<HelpPage />} />
                 <Route path="/audit-logs" element={<AuthGuard><AuditLogsPage /></AuthGuard>} />
                 <Route path="*" element={<NotFoundPage onGoHome={() => navigate('/')} />} />

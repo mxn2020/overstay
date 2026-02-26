@@ -5,6 +5,7 @@ import App from './App'
 import { getRandomTheme, applyTheme } from './lib/colorThemes'
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
+import { ToastProvider } from './components/Toast'
 
 // Apply a random color theme on each visit
 const theme = getRandomTheme()
@@ -68,7 +69,9 @@ if (!convexUrl) {
     root.render(
         <StrictMode>
             <ConvexAuthProvider client={convex}>
-                <App />
+                <ToastProvider>
+                    <App />
+                </ToastProvider>
             </ConvexAuthProvider>
         </StrictMode>,
     );

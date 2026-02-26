@@ -116,9 +116,8 @@ export default function SettingsPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                         <span className="plan-badge">{(me.plan ?? 'free').toUpperCase()}</span>
                         <span style={{ color: 'var(--color-smoke-gray)' }}>
-                            {me.plan === 'pro' ? 'Unlimited predictions + Premium cards' :
-                                me.plan === 'enterprise' ? 'Everything + API access' :
-                                    '3 predictions per day'}
+                            {me.plan === 'paid' ? 'Pro — 100 credits/month + top-ups' :
+                                '3 predictions per day'}
                         </span>
                     </div>
                     <Link to="/billing" className="btn btn--secondary">

@@ -2287,3 +2287,322 @@ h3 {
 .admin-section__title {
   margin-bottom: var(--space-md);
 }
+
+/* ========== CREDITS BADGE ========== */
+.credits-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(255, 215, 0, 0.15);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ffd700;
+}
+
+.credits-badge__count {
+  font-variant-numeric: tabular-nums;
+}
+
+.credits-badge__plan {
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  color: #000;
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  border-radius: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ========== PRICING BALANCE ========== */
+.pricing-balance {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px 20px;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: 24px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffd700;
+}
+
+.pricing-balance__plan {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255, 215, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+/* ========== TOP-UP CARDS ========== */
+.topup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.topup-card {
+  background: var(--glass-background, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.topup-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 215, 0, 0.4);
+}
+
+.topup-card--popular {
+  border-color: rgba(255, 215, 0, 0.4);
+}
+
+.topup-card--best {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.topup-card__badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  color: #000;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+}
+
+.topup-card__badge--best {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #fff;
+}
+
+.topup-card__credits {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ffd700;
+  margin-bottom: 4px;
+}
+
+.topup-card__price {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.topup-card__per {
+  font-size: 0.75rem;
+  color: var(--color-smoke-gray, #999);
+  margin-bottom: 12px;
+}
+
+/* ========== STORYBOARD ========== */
+.storyboard-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-lg, 24px);
+}
+
+.storyboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.storyboard-card {
+  background: var(--glass-background, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.storyboard-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.storyboard-card--mine {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.storyboard-card--private {
+  opacity: 0.6;
+}
+
+.storyboard-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.storyboard-card__name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.storyboard-card__time {
+  font-size: 0.75rem;
+  color: var(--color-smoke-gray, #999);
+}
+
+.storyboard-card__actions {
+  display: flex;
+  gap: 4px;
+}
+
+.storyboard-card__content {
+  padding: 16px;
+}
+
+.storyboard-card__prediction {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.storyboard-card__stat {
+  text-align: center;
+}
+
+.storyboard-card__stat-label {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--color-smoke-gray, #999);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.storyboard-card__stat-value {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffd700;
+}
+
+.storyboard-card__roast {
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--color-smoke-gray, #ccc);
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border-left: 3px solid rgba(255, 215, 0, 0.3);
+}
+
+.storyboard-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.8rem;
+  color: var(--color-smoke-gray, #999);
+}
+
+.storyboard-card__like {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.storyboard-card__like:hover {
+  color: #ef4444;
+}
+
+/* ========== ADMIN: COST DASHBOARD ========== */
+.cost-dashboard {
+  display: grid;
+  gap: 24px;
+}
+
+.cost-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.cost-stat {
+  text-align: center;
+  padding: 16px;
+  background: var(--glass-background, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+  border-radius: 12px;
+}
+
+.cost-stat__value {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #10B981;
+}
+
+.cost-stat__label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-smoke-gray, #999);
+  margin-top: 4px;
+}
+
+.cost-model-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cost-model-table th,
+.cost-model-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.85rem;
+}
+
+.cost-model-table th {
+  color: var(--color-smoke-gray, #999);
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cost-model-table input {
+  width: 80px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: inherit;
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.cost-model-table input:focus {
+  border-color: rgba(255, 215, 0, 0.5);
+  outline: none;
+}
+
+.btn--icon {
+  padding: 4px 8px;
+  min-width: auto;
+}

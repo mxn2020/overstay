@@ -1,9 +1,14 @@
-export default function ProfilePage() {
-    // In the full version, this would use Convex auth + queries
-    // For MVP, show a placeholder encouraging sign-up
+import { useQuery, useConvexAuth } from 'convex/react'
+import { api } from '../../convex/_generated/api'
+import { Link } from 'react-router-dom'
+import { Settings } from 'lucide-react'
 
-    return (
-        <div className="profile">
+export default function ProfilePage() {
+    const { isAuthenticated } = useConvexAuth()
+    const me = useQuery(api.users.getMe)
+
+    if (!isAuthenticated || !me) {
+        return (
             <div style={{ textAlign: 'center', padding: '64px 16px' }}>
                 <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🔮</div>
                 <h2 style={{ marginBottom: '12px' }}>Your Night, Tracked</h2>
@@ -11,41 +16,49 @@ export default function ProfilePage() {
                     Sign up to save your predictions, track your chaos score over time,
                     earn badges, and compete with friends in Beat the AI.
                 </p>
-
-                {/* Demo stats to show what they'd get */}
-                <div className="profile__stats-grid" style={{ marginBottom: '32px' }}>
-                    <div className="profile__stat-card">
-                        <div className="profile__stat-value">—</div>
-                        <div className="profile__stat-label">Overstay Score</div>
-                    </div>
-                    <div className="profile__stat-card">
-                        <div className="profile__stat-value">0</div>
-                        <div className="profile__stat-label">Predictions</div>
-                    </div>
-                    <div className="profile__stat-card">
-                        <div className="profile__stat-value">0</div>
-                        <div className="profile__stat-label">AI Beaten</div>
-                    </div>
-                    <div className="profile__stat-card">
-                        <div className="profile__stat-value">0</div>
-                        <div className="profile__stat-label">Streak</div>
-                    </div>
-                </div>
-
-                <h3 style={{ marginBottom: '16px' }}>🏅 Badges</h3>
-                <div className="badges" style={{ justifyContent: 'center', marginBottom: '32px' }}>
-                    <span className="badge" style={{ opacity: 0.4 }}>🏃 Early Escape</span>
-                    <span className="badge" style={{ opacity: 0.4 }}>⏰ On the Dot</span>
-                    <span className="badge" style={{ opacity: 0.4 }}>🌅 Sunrise Survivor</span>
-                    <span className="badge" style={{ opacity: 0.4 }}>🔮 AI's Pet</span>
-                    <span className="badge" style={{ opacity: 0.4 }}>💪 Unbeatable</span>
-                    <span className="badge" style={{ opacity: 0.4 }}>👻 Ghost</span>
-                </div>
-
-                <p style={{ color: 'var(--color-smoke-gray)', fontSize: '0.85rem', fontStyle: 'italic' }}>
-                    Authentication coming soon — for now, just enjoy the predictions.
-                </p>
+                <Link to="/login" className="btn btn--primary">Sign In</Link>
             </div>
+        )
+    }
+
+    return (
+        <div className="profile">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                <h2>👤 {me.name || 'Anonymous Drinker'}</h2>
+                <Link to="/settings" className="btn btn--ghost btn--sm">
+                    <Settings size={16} /> Settings
+                </Link>
+            </div>
+
+            <div className="profile__stats-grid" style={{ marginBottom: '32px' }}>
+                <div className="profile__stat-card">
+                    <div className="profile__stat-value">{me.overstayScore ?? 0}</div>
+                    <div className="profile__stat-label">Overstay Score</div>
+                </div>
+                <div className="profile__stat-card">
+                    <div className="profile__stat-value">{me.totalPredictions ?? 0}</div>
+                    <div className="profile__stat-label">Predictions</div>
+                </div>
+                <div className="profile__stat-card">
+                    <div className="profile__stat-value">{me.beatTheAiWins ?? 0}</div>
+                    <div className="profile__stat-label">AI Beaten</div>
+                </div>
+                <div className="profile__stat-card">
+                    <div className="profile__stat-value">{me.streak ?? 0}</div>
+                    <div className="profile__stat-label">Streak</div>
+                </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <span className="plan-badge">{(me.plan ?? 'free').toUpperCase()}</span>
+                <span style={{ color: 'var(--color-smoke-gray)' }}>
+                    {me.email}
+                </span>
+            </div>
+
+            <p style={{ color: 'var(--color-smoke-gray)', fontSize: '0.85rem', fontStyle: 'italic' }}>
+                Member since {new Date(me.createdAt ?? Date.now()).toLocaleDateString()}
+            </p>
         </div>
     )
 }

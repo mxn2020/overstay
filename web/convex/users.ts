@@ -1,6 +1,31 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalQuery, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { auth } from "./auth";
+
+// Internal: get profile by userId (for actions like stripe webhooks)
+export const getProfileByUserId = internalQuery({
+    args: { userId: v.string() },
+    handler: async (ctx, { userId }) => {
+        return await ctx.db
+            .query("userProfiles")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .first();
+    },
+});
+
+// Internal: update plan and stripeCustomerId
+export const updatePlanInternal = internalMutation({
+    args: {
+        profileId: v.id("userProfiles"),
+        plan: v.union(v.literal("free"), v.literal("paid")),
+        stripeCustomerId: v.optional(v.string()),
+    },
+    handler: async (ctx, { profileId, plan, stripeCustomerId }) => {
+        const patch: any = { plan };
+        if (stripeCustomerId) patch.stripeCustomerId = stripeCustomerId;
+        await ctx.db.patch(profileId, patch);
+    },
+});
 
 // Get the current authenticated user's profile
 export const getMe = query({
@@ -22,6 +47,12 @@ export const getMe = query({
                 name: authUser?.name ?? "",
                 role: "user" as const,
                 plan: "free" as const,
+                overstayScore: 0,
+                totalPredictions: 0,
+                beatTheAiWins: 0,
+                streak: 0,
+                creditBalance: 0,
+                createdAt: Date.now(),
                 hasProfile: false,
             };
         }

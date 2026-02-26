@@ -53,7 +53,7 @@ export default function AdminPage() {
     const [isRunning, setIsRunning] = useState(false)
     const [expandedResult, setExpandedResult] = useState<string | null>(null)
     const [selectedRunId, setSelectedRunId] = useState<string | null>(null)
-    const [activeTab, setActiveTab] = useState<'models' | 'prompts' | 'logs'>('models')
+    const [activeTab, setActiveTab] = useState<'models' | 'prompts' | 'logs' | 'costs'>('models')
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Prompt source state
@@ -265,6 +265,12 @@ export default function AdminPage() {
                     onClick={() => setActiveTab('logs')}
                 >
                     📋 AI Logs
+                </button>
+                <button
+                    className={`admin-tab ${activeTab === 'costs' ? 'admin-tab--active' : ''}`}
+                    onClick={() => setActiveTab('costs')}
+                >
+                    💰 Costs
                 </button>
             </div>
 
@@ -618,6 +624,177 @@ export default function AdminPage() {
             {activeTab === 'logs' && (
                 <LogsPage />
             )}
+
+            {activeTab === 'costs' && (
+                <CostsDashboard />
+            )}
+        </div>
+    )
+}
+
+function CostsDashboard() {
+    const modelCosts = useQuery(api.modelCosts.getModelCosts)
+    const costDashboard = useQuery(api.modelCosts.getCostDashboard, { days: 30 })
+    const setModelCost = useMutation(api.modelCosts.setModelCost)
+    const seedCosts = useMutation(api.modelCosts.seedModelCosts)
+    const [editingModel, setEditingModel] = useState<string | null>(null)
+    const [editInput, setEditInput] = useState('')
+    const [editOutput, setEditOutput] = useState('')
+
+    const handleSave = async (model: string) => {
+        await setModelCost({
+            model,
+            inputCostPer1k: parseFloat(editInput) || 0,
+            outputCostPer1k: parseFloat(editOutput) || 0,
+        })
+        setEditingModel(null)
+    }
+
+    return (
+        <div className="cost-dashboard" style={{ marginTop: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2>💰 AI Cost Tracking</h2>
+                <button className="btn btn--secondary" onClick={() => seedCosts({})}>
+                    Seed Default Models
+                </button>
+            </div>
+
+            {/* Summary Stats */}
+            {costDashboard && (
+                <div className="cost-stats">
+                    <div className="cost-stat">
+                        <span className="cost-stat__value">${costDashboard.totalCost.toFixed(5)}</span>
+                        <span className="cost-stat__label">Total Spend (30d)</span>
+                    </div>
+                    <div className="cost-stat">
+                        <span className="cost-stat__value">${costDashboard.totalInputCost.toFixed(5)}</span>
+                        <span className="cost-stat__label">Input Cost</span>
+                    </div>
+                    <div className="cost-stat">
+                        <span className="cost-stat__value">${costDashboard.totalOutputCost.toFixed(5)}</span>
+                        <span className="cost-stat__label">Output Cost</span>
+                    </div>
+                    <div className="cost-stat">
+                        <span className="cost-stat__value">{costDashboard.totalCalls}</span>
+                        <span className="cost-stat__label">Total Calls</span>
+                    </div>
+                </div>
+            )}
+
+            {/* Model Cost Editor */}
+            <div>
+                <h3 style={{ marginBottom: '12px' }}>📊 Model Pricing (per 1K tokens)</h3>
+                <table className="cost-model-table">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Input $/1K</th>
+                            <th>Output $/1K</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {modelCosts?.map((mc) => (
+                            <tr key={mc._id}>
+                                <td>{mc.displayName || mc.model}</td>
+                                <td>
+                                    {editingModel === mc.model ? (
+                                        <input
+                                            value={editInput}
+                                            onChange={(e) => setEditInput(e.target.value)}
+                                            placeholder="0.00000"
+                                        />
+                                    ) : (
+                                        `$${mc.inputCostPer1k.toFixed(5)}`
+                                    )}
+                                </td>
+                                <td>
+                                    {editingModel === mc.model ? (
+                                        <input
+                                            value={editOutput}
+                                            onChange={(e) => setEditOutput(e.target.value)}
+                                            placeholder="0.00000"
+                                        />
+                                    ) : (
+                                        `$${mc.outputCostPer1k.toFixed(5)}`
+                                    )}
+                                </td>
+                                <td>
+                                    {editingModel === mc.model ? (
+                                        <div style={{ display: 'flex', gap: '4px' }}>
+                                            <button className="btn btn--primary btn--icon" onClick={() => handleSave(mc.model)}>💾</button>
+                                            <button className="btn btn--secondary btn--icon" onClick={() => setEditingModel(null)}>✕</button>
+                                        </div>
+                                    ) : (
+                                        <button className="btn btn--secondary btn--icon" onClick={() => {
+                                            setEditingModel(mc.model)
+                                            setEditInput(mc.inputCostPer1k.toString())
+                                            setEditOutput(mc.outputCostPer1k.toString())
+                                        }}>✏️</button>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Per-Model Breakdown */}
+            {costDashboard && costDashboard.byModel.length > 0 && (
+                <div>
+                    <h3 style={{ marginBottom: '12px' }}>📈 Cost by Model (30d)</h3>
+                    <table className="cost-model-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Calls</th>
+                                <th>Input Tokens</th>
+                                <th>Output Tokens</th>
+                                <th>Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {costDashboard.byModel.map((m) => (
+                                <tr key={m.model}>
+                                    <td>{m.model.split('/').pop()}</td>
+                                    <td>{m.calls}</td>
+                                    <td>{m.inputTokens.toLocaleString()}</td>
+                                    <td>{m.outputTokens.toLocaleString()}</td>
+                                    <td style={{ color: '#10B981', fontWeight: 600 }}>${m.totalCost.toFixed(5)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* Daily Cost Chart */}
+            {costDashboard && costDashboard.byDay.length > 0 && (
+                <div>
+                    <h3 style={{ marginBottom: '12px' }}>📅 Daily Spend</h3>
+                    <div style={{ display: 'flex', gap: '4px', alignItems: 'flex-end', height: '120px' }}>
+                        {costDashboard.byDay.map((d) => {
+                            const maxCost = Math.max(...costDashboard.byDay.map(x => x.cost), 0.00001)
+                            const height = Math.max((d.cost / maxCost) * 100, 2)
+                            return (
+                                <div key={d.date} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <div
+                                        style={{
+                                            width: '100%', maxWidth: '24px', height: `${height}px`,
+                                            background: 'linear-gradient(to top, #10B981, #059669)',
+                                            borderRadius: '4px 4px 0 0',
+                                        }}
+                                        title={`${d.date}: $${d.cost.toFixed(5)}`}
+                                    />
+                                    <span style={{ fontSize: '0.55rem', color: '#999', marginTop: '2px' }}>
+                                        {d.date.slice(-2)}
+                                    </span>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
@@ -642,3 +819,4 @@ function ModelCard({ model, selected, onToggle }: { model: ModelInfo; selected: 
         </div>
     )
 }
+

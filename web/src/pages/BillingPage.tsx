@@ -1,13 +1,22 @@
 import { useQuery, useAction, useConvexAuth } from 'convex/react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../convex/_generated/api'
-import { CreditCard, Check, ArrowLeft } from 'lucide-react'
+import { CreditCard, Zap, ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
+
+const TOP_UP_PACKAGES = [
+    { id: 'topup_40', credits: 40, price: '$1' },
+    { id: 'topup_100', credits: 100, price: '$2' },
+    { id: 'topup_250', credits: 250, price: '$4' },
+]
 
 export default function BillingPage() {
     const { isAuthenticated } = useConvexAuth()
     const subscription = useQuery(api.stripe.getSubscription)
+    const balance = useQuery(api.credits.getBalance)
+    const transactions = useQuery(api.credits.getTransactionHistory, { limit: 20 })
     const createCheckout = useAction(api.stripe.createCheckoutSession)
+    const createTopUp = useAction(api.stripe.createTopUpSession)
     const navigate = useNavigate()
 
     if (!isAuthenticated) {
@@ -16,56 +25,25 @@ export default function BillingPage() {
     }
 
     const currentPlan = subscription?.plan ?? 'free'
+    const credits = balance?.credits ?? 0
 
-    const handleUpgrade = async (plan: 'pro' | 'enterprise') => {
+    const handleSubscribe = async () => {
         try {
-            const { url } = await createCheckout({ plan })
+            const { url } = await createCheckout({ plan: 'paid' })
             if (url) window.location.href = url
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Failed to create checkout')
         }
     }
 
-    const plans = [
-        {
-            id: 'free' as const,
-            name: 'Free',
-            price: '$0',
-            features: [
-                '3 predictions per day',
-                'Basic analysis',
-                'Share predictions',
-            ],
-            missing: ['History tracking', 'Beat the AI mode'],
-        },
-        {
-            id: 'pro' as const,
-            name: 'Pro',
-            price: '$9/mo',
-            popular: true,
-            features: [
-                'Unlimited predictions',
-                'Advanced analysis',
-                'Full history',
-                'Beat the AI mode',
-                'Priority support',
-            ],
-            missing: [],
-        },
-        {
-            id: 'enterprise' as const,
-            name: 'Enterprise',
-            price: '$29/mo',
-            features: [
-                'Everything in Pro',
-                'API access',
-                'Custom branding',
-                'Team management',
-                'SLA support',
-            ],
-            missing: [],
-        },
-    ]
+    const handleTopUp = async (packageId: string) => {
+        try {
+            const { url } = await createTopUp({ packageId })
+            if (url) window.location.href = url
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Failed to create checkout')
+        }
+    }
 
     return (
         <div className="billing-page">
@@ -73,58 +51,89 @@ export default function BillingPage() {
                 <Link to="/settings" className="btn btn--ghost" style={{ marginBottom: '16px', display: 'inline-flex' }}>
                     <ArrowLeft size={16} /> Back to Settings
                 </Link>
-                <h1><CreditCard size={28} style={{ verticalAlign: 'middle', marginRight: '8px' }} />Billing & Subscription</h1>
+                <h1><CreditCard size={28} style={{ verticalAlign: 'middle', marginRight: '8px' }} />Billing & Credits</h1>
                 <p style={{ color: 'var(--color-smoke-gray)', marginTop: '8px' }}>
-                    Manage your subscription. Your wallet will thank you. Or not.
+                    Manage your subscription and credits.
                 </p>
             </div>
 
-            {/* Current Plan Banner */}
+            {/* Current Plan + Credits */}
             <div className="billing-current">
                 <div className="billing-current__info">
                     <span className="plan-badge plan-badge--lg">{currentPlan.toUpperCase()}</span>
                     <span style={{ color: 'var(--color-smoke-gray)' }}>
-                        {currentPlan === 'free' ? 'You are on the free plan' : `Your ${currentPlan} subscription is active`}
+                        {currentPlan === 'paid' ? 'Pro subscription active' : 'No active subscription'}
                     </span>
+                </div>
+                <div className="pricing-balance" style={{ margin: 0 }}>
+                    <Zap size={18} />
+                    <span>{credits} credits</span>
                 </div>
             </div>
 
-            {/* Plan Cards */}
-            <div className="pricing-grid" style={{ marginTop: '32px' }}>
-                {plans.map((plan) => (
-                    <div key={plan.id} className={`pricing-card ${plan.popular ? 'pricing-card--popular' : ''}`}>
-                        {plan.popular && <div className="pricing-card__badge">Most Popular</div>}
-                        <div className="pricing-card__header">
-                            <h2>{plan.name}</h2>
-                            <div className="pricing-card__price">{plan.price}</div>
-                        </div>
-                        <ul className="pricing-card__features">
-                            {plan.features.map((f) => (
-                                <li key={f}><Check size={16} style={{ color: 'var(--color-neon-emerald, #10B981)' }} /> {f}</li>
-                            ))}
-                            {plan.missing.map((f) => (
-                                <li key={f} style={{ opacity: 0.5 }}>✕ {f}</li>
-                            ))}
-                        </ul>
-                        {currentPlan === plan.id ? (
-                            <button className="btn btn--secondary pricing-card__btn" disabled>
-                                ✅ Current Plan
-                            </button>
-                        ) : plan.id === 'free' ? (
-                            <button className="btn btn--secondary pricing-card__btn" disabled>
-                                Free Tier
-                            </button>
-                        ) : (
-                            <button
-                                className="btn btn--primary pricing-card__btn"
-                                onClick={() => handleUpgrade(plan.id as 'pro' | 'enterprise')}
-                            >
-                                Upgrade to {plan.name}
-                            </button>
-                        )}
+            {/* Subscribe / Top-up */}
+            <div style={{ marginTop: '32px' }}>
+                {currentPlan !== 'paid' && (
+                    <div style={{ marginBottom: '24px' }}>
+                        <button className="btn btn--primary" onClick={handleSubscribe}>
+                            Subscribe — $3/mo (100 credits)
+                        </button>
                     </div>
-                ))}
+                )}
+
+                <h3 style={{ marginBottom: '12px' }}>⚡ Top-up Credits</h3>
+                <div className="topup-grid">
+                    {TOP_UP_PACKAGES.map((pkg) => (
+                        <div key={pkg.id} className="topup-card">
+                            <div className="topup-card__credits">
+                                <Zap size={16} />{pkg.credits}
+                            </div>
+                            <div className="topup-card__price">{pkg.price}</div>
+                            <button className="btn btn--secondary" onClick={() => handleTopUp(pkg.id)}>
+                                Buy
+                            </button>
+                        </div>
+                    ))}
+                </div>
             </div>
+
+            {/* Transaction History */}
+            {transactions && transactions.length > 0 && (
+                <div style={{ marginTop: '32px' }}>
+                    <h3 style={{ marginBottom: '12px' }}>📋 Recent Transactions</h3>
+                    <div style={{ display: 'grid', gap: '8px' }}>
+                        {transactions.map((tx) => (
+                            <div key={tx._id} style={{
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                padding: '10px 14px',
+                                background: 'var(--glass-background, rgba(255,255,255,0.05))',
+                                border: '1px solid var(--glass-border, rgba(255,255,255,0.1))',
+                                borderRadius: '8px', fontSize: '0.85rem',
+                            }}>
+                                <div>
+                                    <span style={{
+                                        padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600,
+                                        marginRight: '8px',
+                                        background: tx.type === 'deduct' ? 'rgba(239,68,68,0.2)' :
+                                            tx.type === 'purchase' ? 'rgba(16,185,129,0.2)' :
+                                                tx.type === 'refill' ? 'rgba(59,130,246,0.2)' : 'rgba(255,215,0,0.2)',
+                                        color: tx.type === 'deduct' ? '#ef4444' :
+                                            tx.type === 'purchase' ? '#10B981' :
+                                                tx.type === 'refill' ? '#3b82f6' : '#ffd700',
+                                    }}>{tx.type.toUpperCase()}</span>
+                                    {tx.description}
+                                </div>
+                                <span style={{
+                                    fontWeight: 600,
+                                    color: tx.amount > 0 ? '#10B981' : '#ef4444',
+                                }}>
+                                    {tx.amount > 0 ? '+' : ''}{tx.amount}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

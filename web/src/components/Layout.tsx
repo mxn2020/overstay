@@ -5,6 +5,7 @@ import { useAuthActions } from "@convex-dev/auth/react"
 import { useQuery } from "convex/react"
 import { api } from '../../convex/_generated/api'
 import { getRandomRide, getRandomSafetyMessage } from '../lib/safeRide'
+import { Menu, X } from 'lucide-react'
 
 interface LayoutProps {
     children: ReactNode
@@ -17,6 +18,7 @@ export default function Layout({ children }: LayoutProps) {
     const { signOut } = useAuthActions()
     const me = useQuery(api.users.getMe)
     const navigate = useNavigate()
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -33,23 +35,35 @@ export default function Layout({ children }: LayoutProps) {
                     <span className="app__logo-icon">🍺</span>
                     JustOneLastDrink
                 </Link>
-                <nav className="app__nav">
-                    <Link to="/" className="app__nav-link">Home</Link>
-                    <Link to="/pricing" className="app__nav-link">Pricing</Link>
-                    <Link to="/help" className="app__nav-link">Help</Link>
+
+                <button
+                    className="app__mobile-toggle"
+                    onClick={() => setMobileMenuOpen(o => !o)}
+                    aria-label="Toggle menu"
+                >
+                    {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+
+                <nav className={`app__nav ${mobileMenuOpen ? 'app__nav--open' : ''}`}>
+                    <Link to="/" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>Home</Link>
+                    <Link to="/pricing" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
+                    <Link to="/help" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>Help</Link>
                     {isAuthenticated && me?.role === 'admin' && (
                         <>
-                            <Link to="/admin" className="app__nav-link">🔬 Admin</Link>
-                            <Link to="/logs" className="app__nav-link">📋 AI Logs</Link>
-                            <Link to="/audit-logs" className="app__nav-link">🔍 Audit</Link>
+                            <Link to="/admin" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>🔬 Admin</Link>
+                            <Link to="/logs" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>📋 AI Logs</Link>
+                            <Link to="/audit-logs" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>🔍 Audit</Link>
                         </>
                     )}
                     {isAuthenticated ? (
-                        <button className="app__nav-link" onClick={() => { signOut(); navigate('/'); }}>
-                            Sign Out
-                        </button>
+                        <>
+                            <Link to="/settings" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>Settings</Link>
+                            <button className="app__nav-link" onClick={() => { signOut(); navigate('/'); setMobileMenuOpen(false); }}>
+                                Sign Out
+                            </button>
+                        </>
                     ) : (
-                        <Link to="/login" className="app__nav-link">Sign In</Link>
+                        <Link to="/login" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
                     )}
                 </nav>
             </header>
