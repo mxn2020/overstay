@@ -1,4 +1,6 @@
 import { useRef, useState } from 'react'
+import { useConvexAuth, useMutation } from 'convex/react'
+import { api } from '../../convex/_generated/api'
 import PredictionCard from '../components/PredictionCard'
 import ShareButtons from '../components/ShareButtons'
 import BeatTheAI from '../components/BeatTheAI'
@@ -12,6 +14,32 @@ interface PredictionPageProps {
 export default function PredictionPage({ prediction, onBack }: PredictionPageProps) {
     const cardRef = useRef<HTMLDivElement>(null)
     const [showBeatAI, setShowBeatAI] = useState(false)
+    const [wallShared, setWallShared] = useState(false)
+    const [wallSharing, setWallSharing] = useState(false)
+    const { isAuthenticated } = useConvexAuth()
+    const shareCard = useMutation(api.storyboard.shareCard)
+
+    const handleShareToWall = async () => {
+        if (prediction.rejected || wallShared) return
+        setWallSharing(true)
+        try {
+            await shareCard({
+                exitTime: prediction.exitTime,
+                justOneLastDrinkMinutes: prediction.justOneLastDrinkMinutes,
+                chaosRating: prediction.chaosRating,
+                textRegret: prediction.textRegret,
+                barHop: prediction.barHop,
+                cryRisk: prediction.cryRisk,
+                sunriseRisk: prediction.sunriseRisk,
+                roastLine: prediction.roastLine,
+            })
+            setWallShared(true)
+        } catch (err) {
+            console.error('Failed to share to Wall of Fame:', err)
+        } finally {
+            setWallSharing(false)
+        }
+    }
 
     if (prediction.rejected) {
         const isHarmful = prediction.reason === 'harmful'
@@ -111,19 +139,55 @@ export default function PredictionPage({ prediction, onBack }: PredictionPagePro
 
             <ShareButtons prediction={prediction} cardRef={cardRef} />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+            {/* Primary actions */}
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                alignItems: 'center',
+                width: '100%',
+                maxWidth: '420px',
+            }}>
+                {/* New Prediction — most prominent */}
+                <button
+                    className="btn btn--primary"
+                    onClick={onBack}
+                    style={{
+                        width: '100%',
+                        padding: '14px 24px',
+                        fontSize: '1.05rem',
+                        fontWeight: '700',
+                    }}
+                >
+                    🔮 New Prediction
+                </button>
+
+                {/* Share to Wall of Fame */}
+                {isAuthenticated && (
+                    <button
+                        className={`btn ${wallShared ? 'btn--ghost' : 'btn--secondary'}`}
+                        onClick={handleShareToWall}
+                        disabled={wallShared || wallSharing}
+                        style={{ width: '100%' }}
+                    >
+                        {wallShared
+                            ? '✅ Shared to Wall of Fame!'
+                            : wallSharing
+                                ? '⏳ Sharing...'
+                                : '🏆 Share to Wall of Fame'}
+                    </button>
+                )}
+
+                {/* Beat the AI */}
                 {!showBeatAI && (
                     <button
                         className="btn btn--secondary"
                         onClick={() => setShowBeatAI(true)}
+                        style={{ width: '100%' }}
                     >
                         💪 Beat the AI
                     </button>
                 )}
-
-                <button className="btn btn--ghost" onClick={onBack}>
-                    🔮 New Prediction
-                </button>
             </div>
 
             {showBeatAI && (

@@ -108,7 +108,7 @@ export default function SettingsPage() {
                 </div>
             </div>
 
-            {/* Plan Section */}
+            {/* Plan & Credits Section */}
             <div className="settings-section">
                 <div className="settings-section__header">
                     <Shield size={20} />
@@ -121,6 +121,51 @@ export default function SettingsPage() {
                             {me.plan === 'paid' ? '🍻 100 credits/month + top-ups' : t('settings.freePlan')}
                         </span>
                     </div>
+
+                    {/* Credit Balance */}
+                    <div style={{
+                        background: 'rgba(255,255,255,0.03)',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '16px',
+                        border: '1px solid rgba(255,255,255,0.06)',
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--color-smoke-gray)' }}>Credits Available</span>
+                            <span style={{
+                                fontSize: '1.5rem',
+                                fontWeight: '800',
+                                color: (me.creditBalance ?? 0) > 0 ? 'var(--color-neon-amber)' : 'var(--color-hot-red)',
+                            }}>
+                                {me.creditBalance ?? 0}
+                            </span>
+                        </div>
+                        <div style={{
+                            height: '6px',
+                            borderRadius: '3px',
+                            background: 'rgba(255,255,255,0.06)',
+                            overflow: 'hidden',
+                        }}>
+                            <div style={{
+                                height: '100%',
+                                width: `${Math.min(100, ((me.creditBalance ?? 0) / 100) * 100)}%`,
+                                borderRadius: '3px',
+                                background: (me.creditBalance ?? 0) > 20
+                                    ? 'linear-gradient(90deg, var(--color-neon-amber), var(--color-neon-orange))'
+                                    : 'var(--color-hot-red)',
+                                transition: 'width 0.5s ease',
+                            }} />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--color-smoke-gray)', opacity: 0.6 }}>
+                                4 credits per prediction
+                            </span>
+                            <Link to="/pricing" style={{ fontSize: '0.75rem', color: 'var(--color-neon-amber)', textDecoration: 'none' }}>
+                                + Top up credits
+                            </Link>
+                        </div>
+                    </div>
+
                     <Link to="/billing" className="btn btn--secondary">
                         <CreditCard size={16} /> {t('settings.manageBilling')}
                     </Link>
