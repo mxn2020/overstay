@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { logger } from '../lib/logger'
 import { useQuery, useMutation, useConvexAuth } from 'convex/react'
 import { useAuthActions } from '@convex-dev/auth/react'
 import { useNavigate, Link } from 'react-router-dom'
@@ -44,7 +45,7 @@ export default function SettingsPage() {
             setSaved(true)
             setTimeout(() => setSaved(false), 3000)
         } catch (err) {
-            console.error('Failed to update profile:', err)
+            logger.error('Failed to update profile:', err)
         } finally {
             setSaving(false)
         }
@@ -58,7 +59,7 @@ export default function SettingsPage() {
             await signOut()
             navigate('/')
         } catch (err) {
-            console.error('Failed to delete account:', err)
+            logger.error('Failed to delete account:', err)
             setDeleting(false)
         }
     }

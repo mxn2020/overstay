@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { logger } from '../lib/logger'
 import { useAuthActions } from "@convex-dev/auth/react"
 import { useMutation, useConvexAuth } from 'convex/react'
 import { useNavigate } from 'react-router-dom'
@@ -21,7 +22,7 @@ export default function LoginPage() {
         if (isAuthenticated) {
             ensureProfile({}).then(() => {
                 navigate('/', { replace: true })
-            }).catch(console.error)
+            }).catch(logger.error)
         }
     }, [isAuthenticated, ensureProfile, navigate])
 

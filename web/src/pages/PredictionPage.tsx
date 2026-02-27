@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { logger } from '../lib/logger'
 import { useConvexAuth, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import PredictionCard from '../components/PredictionCard'
@@ -35,7 +36,7 @@ export default function PredictionPage({ prediction, onBack }: PredictionPagePro
             })
             setWallShared(true)
         } catch (err) {
-            console.error('Failed to share to Wall of Fame:', err)
+            logger.error('Failed to share to Wall of Fame:', err)
         } finally {
             setWallSharing(false)
         }

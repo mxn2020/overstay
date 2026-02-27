@@ -8,6 +8,7 @@ import { getRandomRide, getRandomSafetyMessage } from '../lib/safeRide'
 import { Menu, X, Globe } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGES, RTL_LANGUAGES } from '../i18n/i18n'
+import { logger } from '../lib/logger'
 
 interface LayoutProps {
     children: ReactNode
@@ -30,7 +31,7 @@ export default function Layout({ children }: LayoutProps) {
     // Auto-create profile if authenticated user doesn't have one
     useEffect(() => {
         if (isAuthenticated && me && !me.hasProfile) {
-            ensureProfile({}).catch(console.error)
+            ensureProfile({}).catch(logger.error)
         }
     }, [isAuthenticated, me, ensureProfile])
 
@@ -73,6 +74,9 @@ export default function Layout({ children }: LayoutProps) {
                 <nav className={`app__nav ${mobileMenuOpen ? 'app__nav--open' : ''}`}>
                     <Link to="/" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.home')}</Link>
                     <Link to="/storyboard" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.storyboard')}</Link>
+                    {isAuthenticated && (
+                        <Link to="/my-wall" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>🏆 {t('nav.myWall')}</Link>
+                    )}
                     <Link to="/pricing" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.pricing')}</Link>
                     <Link to="/help" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>{t('nav.help')}</Link>
                     {isAuthenticated && me?.role === 'admin' && (

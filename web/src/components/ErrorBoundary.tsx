@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { AlertCircle, RotateCcw } from 'lucide-react'
+import { logger } from '../lib/logger'
 
 interface Props {
     children: ReactNode
@@ -18,7 +19,7 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     componentDidCatch(error: Error, info: ErrorInfo) {
-        console.error('[ErrorBoundary] Caught:', error, info.componentStack)
+        logger.error('[ErrorBoundary] Caught:', error, info.componentStack)
     }
 
     handleReset = () => {

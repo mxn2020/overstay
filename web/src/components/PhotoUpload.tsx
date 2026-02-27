@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import { logger } from '../lib/logger'
 import { useConvexAuth, useQuery, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { analyzeImage, getPipelineMode } from '../lib/aiPipeline'
@@ -83,7 +84,7 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
         setPreview(previewUrl)
 
         try {
-            console.log('[PhotoUpload] Starting analysis...', { pipelineMode, useConvex, fileSize: file.size, fileType: file.type })
+            logger.log('[PhotoUpload] Starting analysis...', { pipelineMode, useConvex, fileSize: file.size, fileType: file.type })
             onAnalysisStart()
 
             let processedFile = file
@@ -91,29 +92,29 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
             // Compress image before sending to AI (saves bandwidth + faster)
             if (pipelineMode !== 'demo') {
                 try {
-                    console.log('[PhotoUpload] Compressing image...')
+                    logger.log('[PhotoUpload] Compressing image...')
                     const { default: imageCompression } = await import('browser-image-compression')
                     processedFile = await imageCompression(file, {
                         maxSizeMB: 1,
                         maxWidthOrHeight: 1920,
                         useWebWorker: true,
                     })
-                    console.log('[PhotoUpload] Compressed:', { originalSize: file.size, compressedSize: processedFile.size })
+                    logger.log('[PhotoUpload] Compressed:', { originalSize: file.size, compressedSize: processedFile.size })
                 } catch (compressErr) {
-                    console.warn('[PhotoUpload] Image compression failed, using original:', compressErr)
+                    logger.warn('[PhotoUpload] Image compression failed, using original:', compressErr)
                 }
             }
 
-            console.log('[PhotoUpload] Calling analyzeImage()...')
+            logger.log('[PhotoUpload] Calling analyzeImage()...')
             const result = await analyzeImage(processedFile)
-            console.log('[PhotoUpload] Got result:', result)
+            logger.log('[PhotoUpload] Got result:', result)
 
             // Deduct credits / mark free trial AFTER successful analysis
             if (isAuthenticated) {
                 try {
                     await deductCredits({ description: 'Prediction' })
                 } catch (creditErr) {
-                    console.error('[PhotoUpload] Credit deduction failed:', creditErr)
+                    logger.error('[PhotoUpload] Credit deduction failed:', creditErr)
                     // Still show result — credits might have been deducted server-side
                 }
             } else {
@@ -127,14 +128,14 @@ export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: Ph
                 onResult({ ...result, imageUrl: previewUrl })
             }
         } catch (err) {
-            console.error('[PhotoUpload] ERROR:', err)
+            logger.error('[PhotoUpload] ERROR:', err)
             const message = err instanceof Error ? err.message : 'Unknown error'
             if (message.includes('NVIDIA API') || message.includes('NVIDIA_API_KEY')) {
                 setError(`AI error: ${message}`)
             } else {
                 setError(`Something went wrong: ${message}`)
             }
-            console.error('Upload error:', err)
+            logger.error('Upload error:', err)
         }
     }
 

@@ -16,6 +16,7 @@ import AuditLogsPage from './pages/AuditLogsPage'
 import SettingsPage from './pages/SettingsPage'
 import BillingPage from './pages/BillingPage'
 import StoryboardPage from './pages/StoryboardPage'
+import MyWallPage from './pages/MyWallPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { useState } from 'react'
 
@@ -64,6 +65,7 @@ function AppRoutes() {
                 <Route path="/settings" element={<AuthGuard><SettingsPage /></AuthGuard>} />
                 <Route path="/billing" element={<AuthGuard><BillingPage /></AuthGuard>} />
                 <Route path="/storyboard" element={<StoryboardPage />} />
+                <Route path="/my-wall" element={<AuthGuard><SubscriptionGuard><MyWallPage /></SubscriptionGuard></AuthGuard>} />
                 {/* Admin routes — SubscriptionGuard allows admins */}
                 <Route path="/admin" element={<AuthGuard><SubscriptionGuard><AdminPage /></SubscriptionGuard></AuthGuard>} />
                 <Route path="/logs" element={<AuthGuard><SubscriptionGuard><LogsPage /></SubscriptionGuard></AuthGuard>} />

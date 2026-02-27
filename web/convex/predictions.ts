@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { auth } from "./auth";
 import { calculateExitTime, calculateChaosRating, calculateSecondaryPredictions, selectRoastLine, formatExitTime } from "./scoring";
 
 // === Queries ===
@@ -10,6 +11,22 @@ export const getById = query({
         return await ctx.db.get(id);
     },
 });
+
+// Get the current user's predictions (for My Wall of Shame)
+export const getMyPredictions = query({
+    args: { limit: v.optional(v.number()) },
+    handler: async (ctx, { limit }) => {
+        const userId = await auth.getUserId(ctx);
+        if (!userId) return [];
+
+        return await ctx.db
+            .query("predictions")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .order("desc")
+            .take(limit ?? 50);
+    },
+});
+
 
 export const getPublicRecent = query({
     args: { limit: v.optional(v.number()) },
@@ -98,7 +115,36 @@ export const markAccuracy = mutation({
     },
 });
 
-// === Demo Signal Generator ===
+// Save a prediction result for the authenticated user (called by frontend after AI pipeline)
+export const savePrediction = mutation({
+    args: {
+        exitTime: v.string(),
+        justOneLastDrinkMinutes: v.number(),
+        chaosRating: v.number(),
+        textRegret: v.number(),
+        barHop: v.number(),
+        cryRisk: v.number(),
+        sunriseRisk: v.string(),
+        roastLine: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const userId = await auth.getUserId(ctx);
+        if (!userId) throw new Error("Not authenticated");
+
+        // Generate a placeholder storageId isn't available from frontend
+        // The image was processed server-side but not stored per-prediction
+        // We'll store the prediction data for the user's history
+        const predictionId = await ctx.db.insert("predictions", {
+            userId,
+            ...args,
+            aiRawResponse: "{}",
+            createdAt: Date.now(),
+        });
+
+        return { predictionId };
+    },
+});
+
 // This simulates what the Vision API would return
 // Replace with real AI analysis in production
 

@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { logger } from '../lib/logger'
 import type { SuccessPrediction } from '../App'
 
 interface ShareButtonsProps {
@@ -22,7 +23,7 @@ export default function ShareButtons({ prediction, cardRef }: ShareButtonsProps)
             link.href = canvas.toDataURL('image/png')
             link.click()
         } catch (err) {
-            console.error('Download failed:', err)
+            logger.error('Download failed:', err)
         }
     }, [cardRef])
 

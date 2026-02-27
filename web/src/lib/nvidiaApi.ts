@@ -2,6 +2,8 @@
 // Calls go through /api/nvidia server-side proxy (keeps API key secret)
 // Every call is logged to Convex aiLogs for audit trail
 
+import { logger } from './logger'
+
 export interface NvidiaMessage {
     role: 'system' | 'user' | 'assistant'
     content: string | NvidiaContentPart[]
@@ -113,7 +115,7 @@ export async function callNvidiaModel(
     const temperature = options.temperature ?? 0.7
     const maxTokens = options.maxTokens ?? 2048
 
-    console.log(`[NVIDIA API] [${requestId}] Calling model: ${model} (caller: ${caller})`)
+    logger.log(`[NVIDIA API] [${requestId}] Calling model: ${model} (caller: ${caller})`)
 
     const body = JSON.stringify({
         model,
@@ -125,7 +127,7 @@ export async function callNvidiaModel(
     })
 
     const requestBodySize = body.length
-    console.log(`[NVIDIA API] [${requestId}] Request body: ${requestBodySize} bytes`)
+    logger.log(`[NVIDIA API] [${requestId}] Request body: ${requestBodySize} bytes`)
 
     const promptInfo = extractPromptText(messages)
 
@@ -146,7 +148,7 @@ export async function callNvidiaModel(
         })
 
         httpStatus = response.status
-        console.log(`[NVIDIA API] [${requestId}] Response status: ${httpStatus}`)
+        logger.log(`[NVIDIA API] [${requestId}] Response status: ${httpStatus}`)
 
         if (!response.ok) {
             const errorText = await response.text()
@@ -203,7 +205,7 @@ export async function callNvidiaModel(
             errorMessage,
         }
 
-        console.log(`[NVIDIA API] [${requestId}] ${status} in ${durationMs}ms | ${totalTokens ?? 0} tokens`)
+        logger.log(`[NVIDIA API] [${requestId}] ${status} in ${durationMs}ms | ${totalTokens ?? 0} tokens`)
 
         if (_logCallback) {
             try { _logCallback(logEntry) } catch { /* don't fail on log save */ }

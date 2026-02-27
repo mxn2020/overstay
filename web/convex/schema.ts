@@ -45,7 +45,7 @@ export default defineSchema({
 
     predictions: defineTable({
         userId: v.optional(v.id("users")),
-        imageStorageId: v.id("_storage"),
+        imageStorageId: v.optional(v.id("_storage")),
         cardStorageId: v.optional(v.id("_storage")),
         exitTime: v.string(),
         justOneLastDrinkMinutes: v.number(),
