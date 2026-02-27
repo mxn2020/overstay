@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { logger } from '../lib/logger'
 import { useConvexAuth, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
@@ -21,6 +21,24 @@ export default function PredictionPage({ prediction, onBack }: PredictionPagePro
     const [wallSharing, setWallSharing] = useState(false)
     const { isAuthenticated } = useConvexAuth()
     const shareCard = useMutation(api.storyboard.shareCard)
+    const savePrediction = useMutation(api.predictions.savePrediction)
+
+    // Auto-save prediction to user history on mount
+    useEffect(() => {
+        if (isAuthenticated && !prediction.rejected) {
+            savePrediction({
+                exitTime: prediction.exitTime,
+                justOneLastDrinkMinutes: prediction.justOneLastDrinkMinutes,
+                chaosRating: prediction.chaosRating,
+                textRegret: prediction.textRegret,
+                barHop: prediction.barHop,
+                cryRisk: prediction.cryRisk,
+                sunriseRisk: prediction.sunriseRisk,
+                roastLine: prediction.roastLine,
+            }).catch((err) => logger.error('Failed to save prediction:', err))
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []) // Only run once on mount
 
     const handleShareToWall = async () => {
         if (prediction.rejected || wallShared) return

@@ -64,7 +64,7 @@ function AppRoutes() {
                 <Route path="/profile" element={<AuthGuard><SubscriptionGuard><ProfilePage /></SubscriptionGuard></AuthGuard>} />
                 <Route path="/settings" element={<AuthGuard><SettingsPage /></AuthGuard>} />
                 <Route path="/billing" element={<AuthGuard><BillingPage /></AuthGuard>} />
-                <Route path="/storyboard" element={<StoryboardPage />} />
+                <Route path="/storyboard" element={<AuthGuard><StoryboardPage /></AuthGuard>} />
                 <Route path="/my-wall" element={<AuthGuard><SubscriptionGuard><MyWallPage /></SubscriptionGuard></AuthGuard>} />
                 {/* Admin routes — SubscriptionGuard allows admins */}
                 <Route path="/admin" element={<AuthGuard><SubscriptionGuard><AdminPage /></SubscriptionGuard></AuthGuard>} />
