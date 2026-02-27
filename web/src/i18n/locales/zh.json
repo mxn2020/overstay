@@ -9,7 +9,8 @@
         "audit": "审计",
         "settings": "设置",
         "signOut": "退出",
-        "signIn": "登录"
+        "signIn": "登录",
+        "myWall": "My Wall"
     },
     "landing": {
         "title": "就再喝一杯",
@@ -42,7 +43,19 @@
         "downloadCard": "下载卡片",
         "shareToStoryboard": "分享",
         "rejected": "抱歉！",
-        "rejectedReason": "我们的AI无法处理这张照片。"
+        "rejectedReason": "我们的AI无法处理这张照片。",
+        "leavingAt": "Leaving at {{time}}",
+        "shareToWall": "Share to Wall of Fame",
+        "sharedToWall": "Shared to Wall of Fame!",
+        "sharing": "Sharing...",
+        "beatTheAi": "Beat the AI",
+        "notAllowed": "Not Allowed",
+        "notAllowedDesc": "This image was flagged as inappropriate. Keep it classy — this app is for fun nights out, not whatever that was.",
+        "tryDifferent": "Try a Different Photo",
+        "aiRoastIncoming": "AI Roast Incoming",
+        "aiBouncerSaid": "Our AI bouncer took one look and said:",
+        "uploadActualPhoto": "Upload a photo of an actual night out and we'll predict your fate. 🍺",
+        "tryAnother": "Try Another Image"
     },
     "pricing": {
         "title": "简单公平的价格",
@@ -84,7 +97,9 @@
         "private": "私密",
         "deleteConfirm": "删除此卡片？",
         "makePrivate": "设为私密",
-        "makePublic": "设为公开"
+        "makePublic": "设为公开",
+        "exitTime": "Exit Time",
+        "chaos": "Chaos"
     },
     "billing": {
         "title": "账单和积分",
@@ -115,7 +130,11 @@
         "deleteAccount": "删除账户",
         "typeDelete": "输入'DELETE'确认：",
         "permanentlyDelete": "永久删除",
-        "cancel": "取消"
+        "cancel": "取消",
+        "proPlanDesc": "🍻 100 credits/month + top-ups",
+        "creditsAvailable": "Credits Available",
+        "creditsPerPrediction": "4 credits per prediction",
+        "topUpCredits": "+ Top up credits"
     },
     "help": {
         "title": "帮助与常见问题",
@@ -130,7 +149,25 @@
         "title": "登录",
         "subtitle": "继续你的夜晚",
         "withGithub": "通过GitHub继续",
-        "withGoogle": "通过Google继续"
+        "withGoogle": "通过Google继续",
+        "registerTitle": "Create Account",
+        "registerSubtitle": "to join the chaos",
+        "name": "Name",
+        "email": "Email",
+        "password": "Password",
+        "signInBtn": "Sign In",
+        "createAccountBtn": "Create Account",
+        "signingIn": "Signing in...",
+        "creatingAccount": "Creating account...",
+        "noAccount": "Don't have an account?",
+        "haveAccount": "Already have an account?",
+        "signUp": "Sign up",
+        "signIn": "Sign in",
+        "errorNoAccount": "No account found with this email. Check your email or create a new account.",
+        "errorWrongPassword": "Wrong password. Please try again.",
+        "errorAccountExists": "An account with this email already exists. Try signing in instead.",
+        "errorTooMany": "Too many failed attempts. Please wait a minute and try again.",
+        "errorGeneric": "Login failed. Please check your credentials and try again."
     },
     "profile": {
         "title": "个人资料",
@@ -160,6 +197,48 @@
         "save": "保存",
         "delete": "删除",
         "confirm": "确认",
-        "minutes": "分钟"
+        "minutes": "分钟",
+        "signIn": "Sign In"
+    },
+    "upload": {
+        "title": "Upload Photo",
+        "description": "Upload a photo from your night out. Get a savage, funny, and eerily accurate prediction of how your night will end.",
+        "dropHere": "Drop your night-out photo here",
+        "tapToSelect": "or tap to select from your gallery",
+        "fileTypes": "JPEG, PNG, HEIC • Max 10MB",
+        "creditsAvailable": "{{count}} credits available",
+        "loginForMore": "Log in to get credits",
+        "analyzing": "Analyzing...",
+        "back": "← Back"
+    },
+    "myWall": {
+        "title": "My Wall of Shame",
+        "subtitle": "{{count}} prediction(s) — relive the chaos.",
+        "signInRequired": "Sign in to see your Wall of Shame",
+        "signInDesc": "Your prediction history is waiting for you.",
+        "loading": "Loading your shameful history...",
+        "empty": "No predictions yet",
+        "emptyDesc": "Upload a photo to get your first prediction and start your Wall of Shame!",
+        "firstPrediction": "Make Your First Prediction",
+        "leavingAt": "Leaving at {{time}}"
+    },
+    "share": {
+        "download": "Download",
+        "share": "Share",
+        "post": "Post"
+    },
+    "beatTheAi": {
+        "title": "Beat the AI",
+        "question": "Did you actually leave at the predicted time?",
+        "earlier": "Left Earlier",
+        "onTime": "Spot On",
+        "later": "Stayed Later",
+        "submitted": "Thanks! Your feedback helps improve predictions."
+    },
+    "errorBoundary": {
+        "title": "Something went wrong",
+        "message": "Something went wrong. Like your decision to go out on a Tuesday.",
+        "tryAgain": "Try Again",
+        "goHome": "Go Home"
     }
 }

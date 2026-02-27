@@ -4,6 +4,7 @@ import { useAuthActions } from "@convex-dev/auth/react"
 import { useMutation, useConvexAuth } from 'convex/react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../convex/_generated/api'
+import { useTranslation } from 'react-i18next'
 
 export default function LoginPage() {
     const { signIn } = useAuthActions()
@@ -16,6 +17,7 @@ export default function LoginPage() {
     const [name, setName] = useState('')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+    const { t } = useTranslation()
 
     // Once authenticated, create profile and redirect
     useEffect(() => {
@@ -42,15 +44,15 @@ export default function LoginPage() {
             const message = err instanceof Error ? err.message : String(err)
             // Map Convex auth errors to friendly messages
             if (message.includes('InvalidAccountId') || message.includes('Could not find')) {
-                setError('No account found with this email. Check your email or create a new account.')
+                setError(t('login.errorNoAccount'))
             } else if (message.includes('InvalidSecret') || message.includes('Invalid password')) {
-                setError('Wrong password. Please try again.')
+                setError(t('login.errorWrongPassword'))
             } else if (message.includes('AccountAlreadyExists')) {
-                setError('An account with this email already exists. Try signing in instead.')
+                setError(t('login.errorAccountExists'))
             } else if (message.includes('TooManyFailedAttempts')) {
-                setError('Too many failed attempts. Please wait a moment and try again.')
+                setError(t('login.errorTooMany'))
             } else {
-                setError('Authentication failed. Please check your credentials and try again.')
+                setError(t('login.errorGeneric'))
             }
         } finally {
             setLoading(false)
@@ -62,19 +64,19 @@ export default function LoginPage() {
             <div className="login-card">
                 <div className="login-card__header">
                     <h1 className="login-card__title">
-                        {mode === 'login' ? '🍺 Welcome Back' : '🍺 Join the Party'}
+                        {mode === 'login' ? `🍺 ${t('login.title')}` : `🍺 ${t('login.registerTitle')}`}
                     </h1>
                     <p className="login-card__subtitle">
                         {mode === 'login'
-                            ? 'Sign in to track your predictions'
-                            : 'Create an account to save your stats'}
+                            ? t('login.subtitle')
+                            : t('login.registerSubtitle')}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="login-form">
                     {mode === 'register' && (
                         <div className="login-form__field">
-                            <label className="login-form__label">Name</label>
+                            <label className="login-form__label">{t('login.name')}</label>
                             <input
                                 type="text"
                                 value={name}
@@ -87,7 +89,7 @@ export default function LoginPage() {
                     )}
 
                     <div className="login-form__field">
-                        <label className="login-form__label">Email</label>
+                        <label className="login-form__label">{t('login.email')}</label>
                         <input
                             type="email"
                             value={email}
@@ -99,7 +101,7 @@ export default function LoginPage() {
                     </div>
 
                     <div className="login-form__field">
-                        <label className="login-form__label">Password</label>
+                        <label className="login-form__label">{t('login.password')}</label>
                         <input
                             type="password"
                             value={password}
@@ -122,7 +124,9 @@ export default function LoginPage() {
                         className="btn btn--primary login-form__submit"
                         disabled={loading}
                     >
-                        {loading ? '⏳ Loading...' : mode === 'login' ? 'Sign In' : 'Create Account'}
+                        {loading
+                            ? `⏳ ${mode === 'login' ? t('login.signingIn') : t('login.creatingAccount')}`
+                            : mode === 'login' ? t('login.signInBtn') : t('login.createAccountBtn')}
                     </button>
                 </form>
 
@@ -135,8 +139,8 @@ export default function LoginPage() {
                         }}
                     >
                         {mode === 'login'
-                            ? "Don't have an account? Sign up"
-                            : 'Already have an account? Sign in'}
+                            ? `${t('login.noAccount')} ${t('login.signUp')}`
+                            : `${t('login.haveAccount')} ${t('login.signIn')}`}
                     </button>
                 </div>
             </div>

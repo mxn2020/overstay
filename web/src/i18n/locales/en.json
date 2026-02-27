@@ -4,6 +4,7 @@
         "pricing": "Pricing",
         "help": "Help",
         "storyboard": "Wall of Shame",
+        "myWall": "My Wall",
         "admin": "Admin",
         "aiLogs": "AI Logs",
         "audit": "Audit",
@@ -30,6 +31,7 @@
     "prediction": {
         "title": "Your Prediction",
         "exitTime": "Exit Time",
+        "leavingAt": "Leaving at {{time}}",
         "justOneLastDrink": "JustOneLastDrink",
         "justOneLastDrinkMin": "+{{minutes}}min",
         "chaosRating": "Chaos Rating",
@@ -41,8 +43,30 @@
         "newPrediction": "New Prediction",
         "downloadCard": "Download Card",
         "shareToStoryboard": "Share to Storyboard",
+        "shareToWall": "Share to Wall of Fame",
+        "sharedToWall": "Shared to Wall of Fame!",
+        "sharing": "Sharing...",
+        "beatTheAi": "Beat the AI",
+        "notAllowed": "Not Allowed",
+        "notAllowedDesc": "This image was flagged as inappropriate. Keep it classy — this app is for fun nights out, not whatever that was.",
+        "tryDifferent": "Try a Different Photo",
+        "aiRoastIncoming": "AI Roast Incoming",
+        "aiBouncerSaid": "Our AI bouncer took one look and said:",
+        "uploadActualPhoto": "Upload a photo of an actual night out and we'll predict your fate. 🍺",
+        "tryAnother": "Try Another Image",
         "rejected": "Sorry!",
         "rejectedReason": "Our AI couldn't process this photo."
+    },
+    "upload": {
+        "title": "Upload Photo",
+        "description": "Upload a photo from your night out. Get a savage, funny, and eerily accurate prediction of how your night will end.",
+        "dropHere": "Drop your night-out photo here",
+        "tapToSelect": "or tap to select from your gallery",
+        "fileTypes": "JPEG, PNG, HEIC • Max 10MB",
+        "creditsAvailable": "{{count}} credits available",
+        "loginForMore": "Log in to get credits",
+        "analyzing": "Analyzing...",
+        "back": "← Back"
     },
     "pricing": {
         "title": "Simple, Fair Pricing",
@@ -84,7 +108,20 @@
         "private": "Private",
         "deleteConfirm": "Delete this card?",
         "makePrivate": "Make private",
-        "makePublic": "Make public"
+        "makePublic": "Make public",
+        "exitTime": "Exit Time",
+        "chaos": "Chaos"
+    },
+    "myWall": {
+        "title": "My Wall of Shame",
+        "subtitle": "{{count}} prediction(s) — relive the chaos.",
+        "signInRequired": "Sign in to see your Wall of Shame",
+        "signInDesc": "Your prediction history is waiting for you.",
+        "loading": "Loading your shameful history...",
+        "empty": "No predictions yet",
+        "emptyDesc": "Upload a photo to get your first prediction and start your Wall of Shame!",
+        "firstPrediction": "Make Your First Prediction",
+        "leavingAt": "Leaving at {{time}}"
     },
     "billing": {
         "title": "Billing & Credits",
@@ -107,8 +144,12 @@
         "saving": "Saving...",
         "saved": "Saved",
         "plan": "Plan",
-        "proPlan": "Pro — 100 credits/month + top-ups",
+        "proPlan": "LET'S HAVE FUN",
+        "proPlanDesc": "🍻 100 credits/month + top-ups",
         "freePlan": "3 predictions per day",
+        "creditsAvailable": "Credits Available",
+        "creditsPerPrediction": "4 credits per prediction",
+        "topUpCredits": "+ Top up credits",
         "manageBilling": "Manage Billing",
         "dangerZone": "Danger Zone",
         "deleteWarning": "Permanently delete your account, predictions, and badges. This action cannot be undone.",
@@ -129,8 +170,26 @@
     "login": {
         "title": "Sign In",
         "subtitle": "to continue your night",
+        "registerTitle": "Create Account",
+        "registerSubtitle": "to join the chaos",
+        "name": "Name",
+        "email": "Email",
+        "password": "Password",
+        "signInBtn": "Sign In",
+        "createAccountBtn": "Create Account",
+        "signingIn": "Signing in...",
+        "creatingAccount": "Creating account...",
+        "noAccount": "Don't have an account?",
+        "haveAccount": "Already have an account?",
+        "signUp": "Sign up",
+        "signIn": "Sign in",
         "withGithub": "Continue with GitHub",
-        "withGoogle": "Continue with Google"
+        "withGoogle": "Continue with Google",
+        "errorNoAccount": "No account found with this email. Check your email or create a new account.",
+        "errorWrongPassword": "Wrong password. Please try again.",
+        "errorAccountExists": "An account with this email already exists. Try signing in instead.",
+        "errorTooMany": "Too many failed attempts. Please wait a minute and try again.",
+        "errorGeneric": "Login failed. Please check your credentials and try again."
     },
     "profile": {
         "title": "Your Profile",
@@ -139,6 +198,25 @@
         "beatTheAi": "Beat the AI",
         "streak": "Streak",
         "memberSince": "Member since"
+    },
+    "share": {
+        "download": "Download",
+        "share": "Share",
+        "post": "Post"
+    },
+    "beatTheAi": {
+        "title": "Beat the AI",
+        "question": "Did you actually leave at the predicted time?",
+        "earlier": "Left Earlier",
+        "onTime": "Spot On",
+        "later": "Stayed Later",
+        "submitted": "Thanks! Your feedback helps improve predictions."
+    },
+    "errorBoundary": {
+        "title": "Something went wrong",
+        "message": "Something went wrong. Like your decision to go out on a Tuesday.",
+        "tryAgain": "Try Again",
+        "goHome": "Go Home"
     },
     "notFound": {
         "title": "404",
@@ -160,6 +238,7 @@
         "save": "Save",
         "delete": "Delete",
         "confirm": "Confirm",
-        "minutes": "min"
+        "minutes": "min",
+        "signIn": "Sign In"
     }
 }

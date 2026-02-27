@@ -2,8 +2,10 @@ import { useQuery, useMutation } from 'convex/react'
 import { useConvexAuth } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { Heart, Eye, EyeOff, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function StoryboardPage() {
+    const { t } = useTranslation()
     const { isAuthenticated } = useConvexAuth()
     const publicCards = useQuery(api.storyboard.getPublicCards, { limit: 50 })
     const myCards = useQuery(api.storyboard.getMyCards)
@@ -20,16 +22,16 @@ export default function StoryboardPage() {
     return (
         <div className="storyboard-page">
             <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                <h1>🎭 The Wall of Shame</h1>
+                <h1>🎭 {t('storyboard.title')}</h1>
                 <p style={{ color: 'var(--color-smoke-gray)', marginTop: '8px' }}>
-                    See what happens when people say "just one last drink"
+                    {t('storyboard.subtitle')}
                 </p>
             </div>
 
             {/* My Cards (if logged in) */}
             {isAuthenticated && myCards && myCards.length > 0 && (
                 <div style={{ marginBottom: '48px' }}>
-                    <h2 style={{ marginBottom: '16px' }}>📌 My Shared Cards</h2>
+                    <h2 style={{ marginBottom: '16px' }}>📌 {t('storyboard.myCards')}</h2>
                     <div className="storyboard-grid">
                         {myCards.map((card) => (
                             <div key={card._id} className={`storyboard-card storyboard-card--mine ${!card.isPublic ? 'storyboard-card--private' : ''}`}>
@@ -39,14 +41,14 @@ export default function StoryboardPage() {
                                         <button
                                             className="btn btn--ghost btn--icon"
                                             onClick={() => toggleVisibility({ cardId: card._id })}
-                                            title={card.isPublic ? 'Make private' : 'Make public'}
+                                            title={card.isPublic ? t('storyboard.makePrivate') : t('storyboard.makePublic')}
                                         >
                                             {card.isPublic ? <Eye size={16} /> : <EyeOff size={16} />}
                                         </button>
                                         <button
                                             className="btn btn--ghost btn--icon btn--danger"
-                                            onClick={() => { if (confirm('Delete this card?')) deleteCard({ cardId: card._id }) }}
-                                            title="Delete"
+                                            onClick={() => { if (confirm(t('storyboard.deleteConfirm'))) deleteCard({ cardId: card._id }) }}
+                                            title={t('common.delete')}
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -54,7 +56,7 @@ export default function StoryboardPage() {
                                 </div>
                                 <StoryboardCardContent card={card} />
                                 <div className="storyboard-card__footer">
-                                    <span>{card.isPublic ? '🌍 Public' : '🔒 Private'}</span>
+                                    <span>{card.isPublic ? `🌍 ${t('storyboard.public')}` : `🔒 ${t('storyboard.private')}`}</span>
                                     <span>❤️ {card.likes}</span>
                                 </div>
                             </div>
@@ -64,7 +66,7 @@ export default function StoryboardPage() {
             )}
 
             {/* Public Feed */}
-            <h2 style={{ marginBottom: '16px' }}>🔥 Latest Cards</h2>
+            <h2 style={{ marginBottom: '16px' }}>🔥 {t('storyboard.latestCards')}</h2>
             <div className="storyboard-grid">
                 {publicCards && publicCards.length > 0 ? publicCards.map((card) => (
                     <div key={card._id} className="storyboard-card">
@@ -84,7 +86,7 @@ export default function StoryboardPage() {
                     </div>
                 )) : (
                     <p style={{ color: 'var(--color-smoke-gray)', textAlign: 'center', gridColumn: '1 / -1' }}>
-                        No cards shared yet. Be the first to share your prediction! 🎉
+                        {t('storyboard.noCards')}
                     </p>
                 )}
             </div>

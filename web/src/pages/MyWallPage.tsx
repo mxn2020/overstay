@@ -1,8 +1,10 @@
 import { useQuery, useConvexAuth } from 'convex/react'
 import { Link } from 'react-router-dom'
 import { api } from '../../convex/_generated/api'
+import { useTranslation } from 'react-i18next'
 
 export default function MyWallPage() {
+    const { t } = useTranslation()
     const { isAuthenticated } = useConvexAuth()
     const predictions = useQuery(api.predictions.getMyPredictions, isAuthenticated ? { limit: 50 } : "skip")
 
@@ -10,11 +12,11 @@ export default function MyWallPage() {
         return (
             <div style={{ textAlign: 'center', padding: '64px 16px' }}>
                 <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔒</div>
-                <h2 style={{ marginBottom: '8px' }}>Sign in to see your Wall of Shame</h2>
+                <h2 style={{ marginBottom: '8px' }}>{t('myWall.signInRequired')}</h2>
                 <p style={{ color: 'var(--color-smoke-gray)', marginBottom: '24px' }}>
-                    Your prediction history is waiting for you.
+                    {t('myWall.signInDesc')}
                 </p>
-                <Link to="/login" className="btn btn--primary">Sign In</Link>
+                <Link to="/login" className="btn btn--primary">{t('common.signIn')}</Link>
             </div>
         )
     }
@@ -22,7 +24,7 @@ export default function MyWallPage() {
     if (!predictions) {
         return (
             <div style={{ textAlign: 'center', padding: '64px 16px', color: 'var(--color-smoke-gray)' }}>
-                Loading your shameful history...
+                {t('myWall.loading')}
             </div>
         )
     }
@@ -31,20 +33,20 @@ export default function MyWallPage() {
         return (
             <div style={{ textAlign: 'center', padding: '64px 16px' }}>
                 <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🍺</div>
-                <h2 style={{ marginBottom: '8px' }}>No predictions yet</h2>
+                <h2 style={{ marginBottom: '8px' }}>{t('myWall.empty')}</h2>
                 <p style={{ color: 'var(--color-smoke-gray)', marginBottom: '24px' }}>
-                    Upload a photo to get your first prediction and start your Wall of Shame!
+                    {t('myWall.emptyDesc')}
                 </p>
-                <Link to="/" className="btn btn--primary">🔮 Make Your First Prediction</Link>
+                <Link to="/" className="btn btn--primary">🔮 {t('myWall.firstPrediction')}</Link>
             </div>
         )
     }
 
     return (
         <div style={{ maxWidth: '720px', margin: '0 auto', padding: '24px 16px' }}>
-            <h1 style={{ marginBottom: '4px' }}>🏆 My Wall of Shame</h1>
+            <h1 style={{ marginBottom: '4px' }}>🏆 {t('myWall.title')}</h1>
             <p style={{ color: 'var(--color-smoke-gray)', marginBottom: '32px', fontSize: '0.9rem' }}>
-                {predictions.length} prediction{predictions.length !== 1 ? 's' : ''} — relive the chaos.
+                {t('myWall.subtitle', { count: predictions.length })}
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -88,7 +90,7 @@ export default function MyWallPage() {
                                         fontWeight: '700',
                                         color: 'var(--color-neon-amber)',
                                     }}>
-                                        Leaving at {p.exitTime}
+                                        {t('myWall.leavingAt', { time: p.exitTime })}
                                     </div>
                                 </div>
                                 <div style={{
@@ -132,10 +134,10 @@ export default function MyWallPage() {
                                 fontSize: '0.8rem',
                                 color: 'var(--color-smoke-gray)',
                             }}>
-                                <span>📱 Text regret: {Math.round(p.textRegret)}%</span>
-                                <span>🍻 Bar hop: {Math.round(p.barHop)}%</span>
-                                <span>😢 Cry risk: {Math.round(p.cryRisk)}%</span>
-                                <span>🌅 Sunrise: {p.sunriseRisk}</span>
+                                <span>📱 {t('prediction.textRegret')}: {Math.round(p.textRegret)}%</span>
+                                <span>🍻 {t('prediction.barHop')}: {Math.round(p.barHop)}%</span>
+                                <span>😢 {t('prediction.cryRisk')}: {Math.round(p.cryRisk)}%</span>
+                                <span>🌅 {t('prediction.sunriseRisk')}: {p.sunriseRisk}</span>
                             </div>
                         </div>
                     )

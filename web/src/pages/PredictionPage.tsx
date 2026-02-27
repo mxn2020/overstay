@@ -5,6 +5,7 @@ import { api } from '../../convex/_generated/api'
 import PredictionCard from '../components/PredictionCard'
 import ShareButtons from '../components/ShareButtons'
 import BeatTheAI from '../components/BeatTheAI'
+import { useTranslation } from 'react-i18next'
 import type { PredictionResult } from '../App'
 
 interface PredictionPageProps {
@@ -14,6 +15,7 @@ interface PredictionPageProps {
 
 export default function PredictionPage({ prediction, onBack }: PredictionPageProps) {
     const cardRef = useRef<HTMLDivElement>(null)
+    const { t } = useTranslation()
     const [showBeatAI, setShowBeatAI] = useState(false)
     const [wallShared, setWallShared] = useState(false)
     const [wallSharing, setWallSharing] = useState(false)
@@ -72,10 +74,10 @@ export default function PredictionPage({ prediction, onBack }: PredictionPagePro
                             lineHeight: '1.6',
                             color: 'var(--color-smoke-gray)',
                         }}>
-                            This image was flagged as inappropriate. Keep it classy — this app is for fun nights out, not whatever that was.
+                            {t('prediction.notAllowedDesc')}
                         </p>
                         <button className="btn btn--primary" onClick={onBack}>
-                            Try a Different Photo
+                            {t('prediction.tryDifferent')}
                         </button>
                     </div>
                 </div>
@@ -98,14 +100,14 @@ export default function PredictionPage({ prediction, onBack }: PredictionPagePro
                         fontSize: '1.4rem',
                         fontWeight: '800',
                     }}>
-                        AI Roast Incoming
+                        {t('prediction.aiRoastIncoming')}
                     </h2>
                     <p style={{
                         fontSize: '0.85rem',
                         color: 'var(--color-smoke-gray)',
                         marginBottom: '16px',
                     }}>
-                        Our AI bouncer took one look and said:
+                        {t('prediction.aiBouncerSaid')}
                     </p>
                     <blockquote style={{
                         fontSize: '1.15rem',
@@ -124,10 +126,10 @@ export default function PredictionPage({ prediction, onBack }: PredictionPagePro
                         color: 'var(--color-smoke-gray)',
                         marginBottom: '20px',
                     }}>
-                        Upload a photo of an actual night out and we'll predict your fate. 🍺
+                        {t('prediction.uploadActualPhoto')}
                     </p>
                     <button className="btn btn--primary" onClick={onBack}>
-                        Try Another Image
+                        {t('prediction.tryAnother')}
                     </button>
                 </div>
             </div>
@@ -160,7 +162,7 @@ export default function PredictionPage({ prediction, onBack }: PredictionPagePro
                         fontWeight: '700',
                     }}
                 >
-                    🔮 New Prediction
+                    🔮 {t('prediction.newPrediction')}
                 </button>
 
                 {/* Share to Wall of Fame */}
@@ -172,10 +174,10 @@ export default function PredictionPage({ prediction, onBack }: PredictionPagePro
                         style={{ width: '100%' }}
                     >
                         {wallShared
-                            ? '✅ Shared to Wall of Fame!'
+                            ? `✅ ${t('prediction.sharedToWall')}`
                             : wallSharing
-                                ? '⏳ Sharing...'
-                                : '🏆 Share to Wall of Fame'}
+                                ? `⏳ ${t('prediction.sharing')}`
+                                : `🏆 ${t('prediction.shareToWall')}`}
                     </button>
                 )}
 
@@ -186,7 +188,7 @@ export default function PredictionPage({ prediction, onBack }: PredictionPagePro
                         onClick={() => setShowBeatAI(true)}
                         style={{ width: '100%' }}
                     >
-                        💪 Beat the AI
+                        💪 {t('prediction.beatTheAi')}
                     </button>
                 )}
             </div>
