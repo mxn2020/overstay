@@ -7,11 +7,12 @@ import { getRandomTheme, applyTheme } from './lib/colorThemes'
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import { ToastProvider } from './components/Toast'
-import { Analytics } from "@vercel/analytics/react"
+import { initAnalytics } from './lib/analytics'
 
 // Apply a random color theme on each visit
 const theme = getRandomTheme()
 applyTheme(theme)
+initAnalytics()
 
 const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined;
 
@@ -75,8 +76,6 @@ if (!convexUrl) {
                     <App />
                 </ToastProvider>
             </ConvexAuthProvider>
-        
-        <Analytics />
-      </StrictMode>,
+        </StrictMode>,
     );
 }

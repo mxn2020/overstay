@@ -4,10 +4,10 @@ import { v } from "convex/values";
 import { auth } from "./auth";
 
 // ---- Top-up packages (maps packageId → credits for validation) ----
-const TOP_UP_PACKAGES: Record<string, { credits: number; priceEnvVar: string }> = {
-    "topup_40": { credits: 40, priceEnvVar: "STRIPE_PRICE_TOPUP_40" },
-    "topup_100": { credits: 100, priceEnvVar: "STRIPE_PRICE_TOPUP_100" },
-    "topup_250": { credits: 250, priceEnvVar: "STRIPE_PRICE_TOPUP_250" },
+const TOP_UP_PACKAGES: Record<string, { credits: number; priceEnvVar: string; priceEnvVarEur?: string }> = {
+    "topup_40": { credits: 40, priceEnvVar: "STRIPE_PRICE_TOPUP_40", priceEnvVarEur: "STRIPE_PRICE_TOPUP_40_EUR" },
+    "topup_100": { credits: 100, priceEnvVar: "STRIPE_PRICE_TOPUP_100", priceEnvVarEur: "STRIPE_PRICE_TOPUP_100_EUR" },
+    "topup_250": { credits: 250, priceEnvVar: "STRIPE_PRICE_TOPUP_250", priceEnvVarEur: "STRIPE_PRICE_TOPUP_250_EUR" },
 };
 
 // ---- Helpers ----
@@ -125,15 +125,20 @@ export const setStripeCustomerId = internalMutation({
 export const createCheckoutSession = action({
     args: {
         plan: v.literal("paid"),
+        currency: v.optional(v.union(v.literal("eur"), v.literal("usd"))),
     },
-    handler: async (ctx, { plan }) => {
+    handler: async (ctx, { plan, currency }) => {
         const userId = await auth.getUserId(ctx);
         if (!userId) throw new Error("Not authenticated");
 
         const stripeKey = process.env.STRIPE_SECRET_KEY;
         if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not configured");
 
-        const proPriceId = process.env.STRIPE_PRICE_PRO;
+        // Select price based on currency (EUR for Europe, USD default)
+        const isEur = currency === "eur";
+        const proPriceId = isEur
+            ? (process.env.STRIPE_PRICE_PRO_EUR || process.env.STRIPE_PRICE_PRO)
+            : process.env.STRIPE_PRICE_PRO;
         if (!proPriceId) throw new Error("STRIPE_PRICE_PRO not configured");
 
         const siteUrl = process.env.SITE_URL ?? "http://localhost:5185";
@@ -182,8 +187,9 @@ export const createCheckoutSession = action({
 export const createTopUpSession = action({
     args: {
         packageId: v.string(), // "topup_40", "topup_100", "topup_250"
+        currency: v.optional(v.union(v.literal("eur"), v.literal("usd"))),
     },
-    handler: async (ctx, { packageId }) => {
+    handler: async (ctx, { packageId, currency }) => {
         const userId = await auth.getUserId(ctx);
         if (!userId) throw new Error("Not authenticated");
 
@@ -193,8 +199,10 @@ export const createTopUpSession = action({
         const stripeKey = process.env.STRIPE_SECRET_KEY;
         if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not configured");
 
-        const priceId = process.env[pkg.priceEnvVar];
-        if (!priceId) throw new Error(`${pkg.priceEnvVar} not configured`);
+        const isEur = currency === "eur";
+        const priceEnvVarStr = isEur && pkg.priceEnvVarEur ? pkg.priceEnvVarEur : pkg.priceEnvVar;
+        const priceId = process.env[priceEnvVarStr];
+        if (!priceId) throw new Error(`${priceEnvVarStr} not configured`);
 
         const siteUrl = process.env.SITE_URL ?? "http://localhost:5185";
 

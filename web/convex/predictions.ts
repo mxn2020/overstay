@@ -2,7 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { auth } from "./auth";
 import { calculateExitTime, calculateChaosRating, calculateSecondaryPredictions, selectRoastLine, formatExitTime } from "./scoring";
-
+import { internal } from "./_generated/api";
 // === Queries ===
 
 export const getById = query({
@@ -53,6 +53,39 @@ export const analyzeUploaded = mutation({
         storageId: v.id("_storage"),
     },
     handler: async (ctx, { storageId }) => {
+        // --- Rate Limiting ---
+        const userId = await auth.getUserId(ctx);
+        const oneHourAgo = Date.now() - 60 * 60 * 1000;
+
+        if (userId) {
+            const recent = await ctx.db
+                .query("predictions")
+                .withIndex("by_userId", (q) => q.eq("userId", userId))
+                .filter((q) => q.gte(q.field("createdAt"), oneHourAgo))
+                .collect();
+
+            if (recent.length >= 10) {
+                throw new Error("RATE_LIMIT_EXCEEDED");
+            }
+        } else {
+            // For MVP: Simple IP-based (or just global unauth) limit if no userId
+            // Convex doesn't expose IP easily in standard queries without headers, 
+            // so we'll just strictly limit unauthenticated usage globally or require auth.
+            // A better way is passing an anonymous client ID, but for now we'll just check
+            // total recent unauth predictions to prevent massive bot abuse.
+            const recentUnauth = await ctx.db
+                .query("predictions")
+                .withIndex("by_createdAt")
+                .filter((q) => q.eq(q.field("userId"), undefined))
+                .filter((q) => q.gte(q.field("createdAt"), oneHourAgo))
+                .collect();
+
+            if (recentUnauth.length >= 50) { // Global unauth limit per hour
+                throw new Error("RATE_LIMIT_EXCEEDED");
+            }
+        }
+        // ---------------------
+
         // For MVP: Use the scoring engine with simulated signals
         // In production, this would call the Vision API action
         const currentHour = new Date().getHours();
@@ -131,6 +164,19 @@ export const savePrediction = mutation({
         const userId = await auth.getUserId(ctx);
         if (!userId) throw new Error("Not authenticated");
 
+        // --- Rate Limiting ---
+        const oneHourAgo = Date.now() - 60 * 60 * 1000;
+        const recent = await ctx.db
+            .query("predictions")
+            .withIndex("by_userId", (q) => q.eq("userId", userId))
+            .filter((q) => q.gte(q.field("createdAt"), oneHourAgo))
+            .collect();
+
+        if (recent.length >= 10) {
+            throw new Error("RATE_LIMIT_EXCEEDED");
+        }
+        // ---------------------
+
         // Generate a placeholder storageId isn't available from frontend
         // The image was processed server-side but not stored per-prediction
         // We'll store the prediction data for the user's history
@@ -140,6 +186,25 @@ export const savePrediction = mutation({
             aiRawResponse: "{}",
             createdAt: Date.now(),
         });
+
+        // --- Auto-Award Badges ---
+        // 1. First Sip (First Prediction)
+        if (recent.length === 0) {
+            await ctx.runMutation(internal.badges.awardInternal, { userId, badgeType: "first_prediction" });
+        }
+
+        // 2. Agent of Chaos (Chaos >= 9.0)
+        if (args.chaosRating >= 9.0) {
+            await ctx.runMutation(internal.badges.awardInternal, { userId, badgeType: "chaos_9" });
+        }
+
+        // 3. Night Owl (Exit time after 4:00 AM)
+        const exitHourStr = args.exitTime.split(":")[0];
+        const isAM = args.exitTime.includes("AM");
+        if (isAM && (exitHourStr === "4" || exitHourStr === "5" || exitHourStr === "6")) {
+            await ctx.runMutation(internal.badges.awardInternal, { userId, badgeType: "night_owl" });
+        }
+        // -------------------------
 
         return { predictionId };
     },

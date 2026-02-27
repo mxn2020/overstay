@@ -5,11 +5,12 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Zap, CreditCard, TrendingUp, Beer } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useToast } from '../components/Toast'
+import { useDetectCurrency, type Currency } from '../lib/useDetectCurrency'
 
 const TOP_UP_PACKAGES = [
-    { id: 'topup_40', credits: 40, price: '$1', perCredit: '$0.025' },
-    { id: 'topup_100', credits: 100, price: '$2', perCredit: '$0.020', popular: true },
-    { id: 'topup_250', credits: 250, price: '$4', perCredit: '$0.016', best: true },
+    { id: 'topup_40', credits: 40, priceUsd: '$1', perCreditUsd: '$0.025', priceEur: '€1', perCreditEur: '€0.025' },
+    { id: 'topup_100', credits: 100, priceUsd: '$2', perCreditUsd: '$0.020', priceEur: '€2', perCreditEur: '€0.020', popular: true },
+    { id: 'topup_250', credits: 250, priceUsd: '$4', perCreditUsd: '$0.016', priceEur: '€4', perCreditEur: '€0.016', best: true },
 ]
 
 export default function PricingPage() {
@@ -22,10 +23,13 @@ export default function PricingPage() {
     const createTopUp = useAction(api.stripe.createTopUpSession)
     const navigate = useNavigate()
     const location = useLocation()
+    const currency = useDetectCurrency()
 
     const currentPlan = subscription?.plan ?? 'free'
     const credits = balance?.credits ?? 0
     const needSubscription = (location.state as { needSubscription?: boolean })?.needSubscription
+
+    const proPriceStr = currency === 'eur' ? '€3' : '$3'
 
     const handleSubscribe = async () => {
         if (!isAuthenticated) {
@@ -33,7 +37,7 @@ export default function PricingPage() {
             return
         }
         try {
-            const { url } = await createCheckout({ plan: 'paid' })
+            const { url } = await createCheckout({ plan: 'paid', currency })
             if (url) window.location.href = url
         } catch (err) {
             showToast(err instanceof Error ? err.message : 'Failed to create checkout', 'error')
@@ -46,7 +50,7 @@ export default function PricingPage() {
             return
         }
         try {
-            const { url } = await createTopUp({ packageId })
+            const { url } = await createTopUp({ packageId, currency })
             if (url) window.location.href = url
         } catch (err) {
             showToast(err instanceof Error ? err.message : 'Failed to create checkout', 'error')
@@ -82,7 +86,7 @@ export default function PricingPage() {
                     <div className="pricing-card__badge">🍻 {t('pricing.bestValue')}</div>
                     <div className="pricing-card__header">
                         <h2><Beer size={22} /> Let's Have Fun</h2>
-                        <div className="pricing-card__price">{t('pricing.proPrice')}<span>{t('pricing.proMonth')}</span></div>
+                        <div className="pricing-card__price">{proPriceStr}<span>{t('pricing.proMonth')}</span></div>
                     </div>
                     <ul className="pricing-card__features">
                         <li><Zap size={14} /> {t('pricing.proFeature1')}</li>
@@ -96,7 +100,7 @@ export default function PricingPage() {
                         disabled={currentPlan === 'paid'}
                         onClick={handleSubscribe}
                     >
-                        {currentPlan === 'paid' ? `✅ ${t('pricing.currentPlan')}` : `🍻 Subscribe — $3/mo`}
+                        {currentPlan === 'paid' ? `✅ ${t('pricing.currentPlan')}` : `🍻 ${t('pricing.subscribe').replace('$3/mo', `${proPriceStr}${t('pricing.proMonth')}`)}`}
                     </button>
                 </div>
             </div>
@@ -123,8 +127,8 @@ export default function PricingPage() {
                                 <Zap size={18} />
                                 {pkg.credits}
                             </div>
-                            <div className="topup-card__price">{pkg.price}</div>
-                            <div className="topup-card__per">{pkg.perCredit}{t('pricing.perCredit')}</div>
+                            <div className="topup-card__price">{currency === 'eur' ? pkg.priceEur : pkg.priceUsd}</div>
+                            <div className="topup-card__per">{currency === 'eur' ? pkg.perCreditEur : pkg.perCreditUsd}{t('pricing.perCredit')}</div>
                             <button
                                 className="btn btn--secondary"
                                 onClick={() => handleTopUp(pkg.id)}

@@ -1,4 +1,5 @@
 import type { SuccessPrediction } from '../App'
+import { useCountUp } from '../lib/useCountUp'
 
 interface PredictionCardProps {
     prediction: SuccessPrediction
@@ -33,6 +34,12 @@ function getStatColor(value: number): string {
 }
 
 export default function PredictionCard({ prediction, cardRef }: PredictionCardProps) {
+    // Animated count-up values
+    const animChaos = useCountUp(prediction.chaosRating, 1200, 1)
+    const animTextRegret = useCountUp(prediction.textRegret, 1000)
+    const animBarHop = useCountUp(prediction.barHop, 1000)
+    const animCryRisk = useCountUp(prediction.cryRisk, 1000)
+
     return (
         <div className="prediction-card" ref={cardRef}>
             {prediction.imageUrl && (
@@ -55,26 +62,26 @@ export default function PredictionCard({ prediction, cardRef }: PredictionCardPr
                 <div className="prediction-card__stats animate-fade-in-delay-2">
                     <div className="stat">
                         <span className="stat__label">Chaos Rating</span>
-                        <span className={`stat__value ${prediction.chaosRating >= 7 ? 'stat__value--pink' : prediction.chaosRating >= 5 ? 'stat__value--amber' : ''}`}>
-                            {prediction.chaosRating.toFixed(1)}/10
+                        <span className={`stat__value ${animChaos >= 7 ? 'stat__value--pink' : animChaos >= 5 ? 'stat__value--amber' : ''}`}>
+                            {animChaos.toFixed(1)}/10
                         </span>
                     </div>
                     <div className="stat">
                         <span className="stat__label">Text Regret</span>
-                        <span className={`stat__value ${getStatColor(prediction.textRegret)}`}>
-                            {prediction.textRegret}%
+                        <span className={`stat__value ${getStatColor(animTextRegret)}`}>
+                            {animTextRegret}%
                         </span>
                     </div>
                     <div className="stat">
                         <span className="stat__label">Bar-Hop</span>
-                        <span className={`stat__value ${getStatColor(prediction.barHop)}`}>
-                            {prediction.barHop}%
+                        <span className={`stat__value ${getStatColor(animBarHop)}`}>
+                            {animBarHop}%
                         </span>
                     </div>
                     <div className="stat">
                         <span className="stat__label">Cry Risk</span>
-                        <span className={`stat__value ${getStatColor(prediction.cryRisk)}`}>
-                            {prediction.cryRisk}%
+                        <span className={`stat__value ${getStatColor(animCryRisk)}`}>
+                            {animCryRisk}%
                         </span>
                     </div>
                     <div className="stat">
