@@ -18,6 +18,9 @@ import BillingPage from './pages/BillingPage'
 import StoryboardPage from './pages/StoryboardPage'
 import MyWallPage from './pages/MyWallPage'
 import NotFoundPage from './pages/NotFoundPage'
+import PrivacyPage from './pages/PrivacyPage'
+import TermsPage from './pages/TermsPage'
+import ModelTestPage from './pages/ModelTestPage'
 import { useState } from 'react'
 
 export type SuccessPrediction = {
@@ -70,10 +73,13 @@ function AppRoutes() {
                 <Route path="/admin" element={<AuthGuard><SubscriptionGuard><AdminPage /></SubscriptionGuard></AuthGuard>} />
                 <Route path="/logs" element={<AuthGuard><SubscriptionGuard><LogsPage /></SubscriptionGuard></AuthGuard>} />
                 <Route path="/audit-logs" element={<AuthGuard><SubscriptionGuard><AuditLogsPage /></SubscriptionGuard></AuthGuard>} />
+                <Route path="/model-tests" element={<AuthGuard><SubscriptionGuard><ModelTestPage /></SubscriptionGuard></AuthGuard>} />
                 {/* Public routes */}
                 <Route path="/login" element={<RedirectIfAuth><LoginPage /></RedirectIfAuth>} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/help" element={<HelpPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/terms" element={<TermsPage />} />
                 <Route path="*" element={<NotFoundPage onGoHome={() => navigate('/')} />} />
             </Routes>
             <CookieBanner />

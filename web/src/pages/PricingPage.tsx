@@ -5,7 +5,9 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Zap, CreditCard, TrendingUp, Beer } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useToast } from '../components/Toast'
-import { useDetectCurrency, type Currency } from '../lib/useDetectCurrency'
+import { useDetectCurrency } from '../lib/useDetectCurrency'
+import { useState } from 'react'
+import { MissingConfigDialog } from '../components/MissingConfigDialog'
 
 const TOP_UP_PACKAGES = [
     { id: 'topup_40', credits: 40, priceUsd: '$1', perCreditUsd: '$0.025', priceEur: '€1', perCreditEur: '€0.025' },
@@ -24,6 +26,7 @@ export default function PricingPage() {
     const navigate = useNavigate()
     const location = useLocation()
     const currency = useDetectCurrency()
+    const [configError, setConfigError] = useState<string | null>(null)
 
     const currentPlan = subscription?.plan ?? 'free'
     const credits = balance?.credits ?? 0
@@ -40,7 +43,12 @@ export default function PricingPage() {
             const { url } = await createCheckout({ plan: 'paid', currency })
             if (url) window.location.href = url
         } catch (err) {
-            showToast(err instanceof Error ? err.message : 'Failed to create checkout', 'error')
+            const msg = err instanceof Error ? err.message : 'Failed to create checkout'
+            if (msg.includes('not configured')) {
+                setConfigError(msg)
+            } else {
+                showToast(msg, 'error')
+            }
         }
     }
 
@@ -53,12 +61,23 @@ export default function PricingPage() {
             const { url } = await createTopUp({ packageId, currency })
             if (url) window.location.href = url
         } catch (err) {
-            showToast(err instanceof Error ? err.message : 'Failed to create checkout', 'error')
+            const msg = err instanceof Error ? err.message : 'Failed to create checkout'
+            if (msg.includes('not configured')) {
+                setConfigError(msg)
+            } else {
+                showToast(msg, 'error')
+            }
         }
     }
 
     return (
         <div className="pricing-page">
+            {configError && (
+                <MissingConfigDialog
+                    message={configError}
+                    onClose={() => setConfigError(null)}
+                />
+            )}
             {/* Onboarding callout for users redirected here */}
             {needSubscription && (
                 <div className="pricing-onboarding">

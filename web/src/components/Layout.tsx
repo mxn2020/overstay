@@ -55,6 +55,15 @@ export default function Layout({ children }: LayoutProps) {
 
     const currentLang = LANGUAGES.find(l => l.code === i18n.language) ?? LANGUAGES[0]
 
+    useEffect(() => {
+        if (mobileMenuOpen) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = ''
+        }
+        return () => { document.body.style.overflow = '' }
+    }, [mobileMenuOpen])
+
     return (
         <div className="app">
             <header className="app__header">

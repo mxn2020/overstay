@@ -175,6 +175,15 @@ h3 {
   gap: var(--space-lg);
 }
 
+.app__mobile-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--color-ice-white);
+  cursor: pointer;
+  z-index: 200;
+}
+
 .app__nav-link {
   font-size: 0.875rem;
   font-weight: 500;
@@ -936,8 +945,42 @@ h3 {
     padding: var(--space-sm) var(--space-md);
   }
 
+  .app__mobile-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .app__nav {
-    gap: var(--space-md);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 10, 15, 0.95);
+    backdrop-filter: blur(16px);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 150;
+    padding: var(--space-2xl);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-20px);
+    transition: opacity var(--transition-normal), transform var(--transition-normal);
+  }
+
+  .app__nav--open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .app__nav-link {
+    font-size: 1.25rem;
+    padding: var(--space-md);
+    width: 100%;
+    text-align: center;
   }
 
   .hero {

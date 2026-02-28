@@ -4,6 +4,8 @@ import { api } from '../../convex/_generated/api'
 import { CreditCard, Zap, ArrowLeft, ExternalLink } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useToast } from '../components/Toast'
+import { useState } from 'react'
+import { MissingConfigDialog } from '../components/MissingConfigDialog'
 
 const TOP_UP_PACKAGES = [
     { id: 'topup_40', credits: 40, price: '$1' },
@@ -21,6 +23,7 @@ export default function BillingPage() {
     const createTopUp = useAction(api.stripe.createTopUpSession)
     const createPortal = useAction(api.stripe.createPortalSession)
     const navigate = useNavigate()
+    const [configError, setConfigError] = useState<string | null>(null)
 
     if (!isAuthenticated) {
         navigate('/login')
@@ -36,7 +39,12 @@ export default function BillingPage() {
             const { url } = await createCheckout({ plan: 'paid' })
             if (url) window.location.href = url
         } catch (err) {
-            showToast(err instanceof Error ? err.message : 'Failed to create checkout', 'error')
+            const msg = err instanceof Error ? err.message : 'Failed to create checkout'
+            if (msg.includes('not configured')) {
+                setConfigError(msg)
+            } else {
+                showToast(msg, 'error')
+            }
         }
     }
 
@@ -45,7 +53,12 @@ export default function BillingPage() {
             const { url } = await createTopUp({ packageId })
             if (url) window.location.href = url
         } catch (err) {
-            showToast(err instanceof Error ? err.message : 'Failed to create checkout', 'error')
+            const msg = err instanceof Error ? err.message : 'Failed to create checkout'
+            if (msg.includes('not configured')) {
+                setConfigError(msg)
+            } else {
+                showToast(msg, 'error')
+            }
         }
     }
 
@@ -54,12 +67,23 @@ export default function BillingPage() {
             const { url } = await createPortal()
             if (url) window.location.href = url
         } catch (err) {
-            showToast(err instanceof Error ? err.message : 'Failed to open billing portal', 'error')
+            const msg = err instanceof Error ? err.message : 'Failed to open billing portal'
+            if (msg.includes('not configured')) {
+                setConfigError(msg)
+            } else {
+                showToast(msg, 'error')
+            }
         }
     }
 
     return (
         <div className="billing-page">
+            {configError && (
+                <MissingConfigDialog
+                    message={configError}
+                    onClose={() => setConfigError(null)}
+                />
+            )}
             <div style={{ marginBottom: '32px' }}>
                 <Link to="/settings" className="btn btn--ghost" style={{ marginBottom: '16px', display: 'inline-flex' }}>
                     <ArrowLeft size={16} /> Back to Settings
