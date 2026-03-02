@@ -1,128 +1,57 @@
-// NVIDIA NIM Model Registry — All Image-to-Text models available on build.nvidia.com
-
 export interface ModelInfo {
-    id: string           // NVIDIA NIM model identifier
-    name: string         // Human-readable name
-    publisher: string    // Model publisher
-    size: string         // Parameter count / size description
-    tags: string[]       // Model tags
-    geoRestricted?: boolean // Some Meta models are geo-restricted
+    id: string
+    name: string
+    provider: 'nvidia' | 'openai' | 'anthropic' | 'xai' | 'google' | 'meta' | 'mistral' | 'stability'
+    description: string
+    contextWindow: number
+    features: ('vision' | 'tools' | 'json' | 'video' | 'audio')[]
 }
+
+export const TEXT_MODELS: ModelInfo[] = [
+    // Standard Llama series
+    { id: 'meta/llama-3.1-70b-instruct', name: 'Llama 3.1 70B', provider: 'meta', description: 'Strong general purpose', contextWindow: 128000, features: ['tools', 'json'] },
+    { id: 'meta/llama-3.1-8b-instruct', name: 'Llama 3.1 8B', provider: 'meta', description: 'Fast, efficient operations', contextWindow: 128000, features: ['tools', 'json'] },
+    // Advanced Llama 3.3
+    { id: 'meta/llama-3.3-70b-instruct', name: 'Llama 3.3 70B', provider: 'meta', description: 'Advanced reasoning and coding', contextWindow: 128000, features: ['tools', 'json'] },
+    // DeepSeek & Reasoning
+    { id: 'deepseek-ai/deepseek-r1', name: 'DeepSeek R1', provider: 'mistral', description: 'Advanced Deep Learning Reasoning', contextWindow: 128000, features: ['tools', 'json'] },
+    { id: 'deepseek-ai/deepseek-coder-6.7b', name: 'DeepSeek Coder 6.7B', provider: 'mistral', description: 'Code-specific reasoning and generation', contextWindow: 16000, features: ['tools'] },
+    // Mistral family
+    { id: 'mistralai/mistral-large-2-instruct', name: 'Mistral Large 2', provider: 'mistral', description: 'Advanced reasoning and multilingual', contextWindow: 128000, features: ['tools', 'json'] },
+    { id: 'mistralai/mistral-nemo-12b-instruct', name: 'Mistral Nemo 12B', provider: 'mistral', description: 'Fast, strong reasoning', contextWindow: 128000, features: ['tools', 'json'] },
+    { id: 'mistralai/mathstral-7b-v0.1', name: 'Mathstral 7B', provider: 'mistral', description: 'Math and scientific reasoning', contextWindow: 32000, features: [] },
+    // Microsoft Phi
+    { id: 'microsoft/phi-3-mini-4k-instruct', name: 'Phi-3 Mini', provider: 'openai', description: 'High-performance small model', contextWindow: 4000, features: [] },
+    { id: 'microsoft/phi-3-medium-4k-instruct', name: 'Phi-3 Medium', provider: 'openai', description: 'Strong reasoning on smaller footprint', contextWindow: 4000, features: [] },
+    // Google Gemma
+    { id: 'google/gemma-2-9b-it', name: 'Gemma 2 9B', provider: 'google', description: 'Google open weights capable model', contextWindow: 8000, features: [] },
+    { id: 'google/gemma-2-27b-it', name: 'Gemma 2 27B', provider: 'google', description: 'Google open weights advanced model', contextWindow: 8000, features: [] },
+    // NVIDIA Nemotron & General 
+    { id: 'nvidia/nemotron-4-340b-instruct', name: 'Nemotron-4 340B', provider: 'nvidia', description: 'Massive scale reasoning and generation', contextWindow: 4096, features: ['tools', 'json'] },
+    { id: 'nvidia/llama-3.1-nemotron-70b-instruct', name: 'Llama 3.1 Nemotron 70B', provider: 'nvidia', description: 'NVIDIA customized Llama 3.1', contextWindow: 128000, features: ['tools', 'json'] },
+    // Multilingual & others
+    { id: '01-ai/yi-large', name: 'Yi Large', provider: 'xai', description: 'Strong bilingual (EN/ZH) reasoning', contextWindow: 32000, features: [] },
+    { id: 'rakuten/rakutenai-7b-chat', name: 'RakutenAI 7B', provider: 'xai', description: 'Japanese reasoning', contextWindow: 8000, features: [] }
+]
 
 export const VISION_MODELS: ModelInfo[] = [
-    {
-        id: 'moonshotai/kimi-k2.5',
-        name: 'Kimi K2.5',
-        publisher: 'Moonshot AI',
-        size: '1T MoE (32B active)',
-        tags: ['Multimodal', 'Reasoning', 'MoE'],
-    },
-    {
-        id: 'mistralai/mistral-large-3-675b-instruct-2512',
-        name: 'Mistral Large 3',
-        publisher: 'Mistral',
-        size: '675B MoE',
-        tags: ['Language Generation', 'Chat'],
-    },
-    {
-        id: 'mistralai/ministral-14b-instruct-2512',
-        name: 'Ministral 14B',
-        publisher: 'Mistral',
-        size: '14B',
-        tags: ['SLM', 'Chat'],
-    },
-    {
-        id: 'nvidia/nemotron-nano-12b-v2-vl',
-        name: 'Nemotron Nano 12B VL',
-        publisher: 'NVIDIA',
-        size: '12B',
-        tags: ['Language Generation', 'Multi-Image', 'Video'],
-    },
-    {
-        id: 'meta/llama-4-maverick-17b-128e-instruct',
-        name: 'Llama 4 Maverick',
-        publisher: 'Meta',
-        size: '17B 128E MoE',
-        tags: ['Language Generation', 'Multilingual'],
-    },
-    {
-        id: 'meta/llama-4-scout-17b-16e-instruct',
-        name: 'Llama 4 Scout',
-        publisher: 'Meta',
-        size: '17B 16E MoE',
-        tags: ['Language Generation', 'Multilingual'],
-    },
-    {
-        id: 'mistralai/mistral-medium-3-instruct',
-        name: 'Mistral Medium 3',
-        publisher: 'Mistral',
-        size: 'Medium',
-        tags: ['Language Generation', 'Enterprise'],
-    },
-    {
-        id: 'meta/llama-3.2-90b-vision-instruct',
-        name: 'Llama 3.2 90B Vision',
-        publisher: 'Meta',
-        size: '90B',
-        tags: ['Visual QA', 'Image Captioning'],
-        geoRestricted: true,
-    },
-    {
-        id: 'meta/llama-3.2-11b-vision-instruct',
-        name: 'Llama 3.2 11B Vision',
-        publisher: 'Meta',
-        size: '11B',
-        tags: ['Visual QA', 'Image Captioning'],
-        geoRestricted: true,
-    },
-    {
-        id: 'google/gemma-3-27b-it',
-        name: 'Gemma 3 27B IT',
-        publisher: 'Google',
-        size: '27B',
-        tags: ['Vision Assistant', 'VQA'],
-    },
-    {
-        id: 'microsoft/phi-4-multimodal-instruct',
-        name: 'Phi-4 Multimodal',
-        publisher: 'Microsoft',
-        size: 'Phi-4',
-        tags: ['Visual QA', 'Speech'],
-    },
-    {
-        id: 'microsoft/phi-3.5-vision-instruct',
-        name: 'Phi-3.5 Vision',
-        publisher: 'Microsoft',
-        size: 'Phi-3.5',
-        tags: ['Vision Assistant', 'VQA'],
-    },
-    {
-        id: 'google/paligemma',
-        name: 'PaliGemma',
-        publisher: 'Google',
-        size: 'PaliGemma',
-        tags: ['VLM', 'Image Captioning'],
-    },
+    { id: 'meta/llama-3.2-90b-vision-instruct', name: 'Llama 3.2 90B Vision', provider: 'meta', description: 'State of the art multimodal reasoning', contextWindow: 128000, features: ['vision'] },
+    { id: 'meta/llama-3.2-11b-vision-instruct', name: 'Llama 3.2 11B Vision', provider: 'meta', description: 'Fast multimodal reasoning', contextWindow: 128000, features: ['vision'] },
+    { id: 'nvidia/neva-22b', name: 'Neva 22B', provider: 'nvidia', description: 'Visual QA and understanding', contextWindow: 4096, features: ['vision'] },
+    { id: 'microsoft/phi-3-vision-128k-instruct', name: 'Phi-3 Vision', provider: 'openai', description: 'Small footprint multimodal', contextWindow: 128000, features: ['vision'] },
 ]
 
-// Text-only models for the prediction step (two-model pipeline)
-export const PREDICTION_MODELS: ModelInfo[] = [
-    {
-        id: 'nvidia/nemotron-3-nano-30b-a3b',
-        name: 'Nemotron-3 Nano 30B',
-        publisher: 'NVIDIA',
-        size: '30B MoE (3B active)',
-        tags: ['Reasoning', 'Instruction Following'],
-    },
-    {
-        id: 'deepseek-ai/deepseek-v3.1',
-        name: 'DeepSeek V3.1',
-        publisher: 'DeepSeek',
-        size: '685B MoE',
-        tags: ['Reasoning', 'Long Context'],
-    },
+export const IMAGE_MODELS: ModelInfo[] = [
+    { id: 'stabilityai/stable-diffusion-xl-base-1.0', name: 'SDXL 1.0', provider: 'stability', description: 'High-quality image generation', contextWindow: 0, features: [] },
+    { id: 'stabilityai/sdxl-turbo', name: 'SDXL Turbo', provider: 'stability', description: 'Real-time image generation', contextWindow: 0, features: [] },
 ]
 
-export function getModelById(id: string): ModelInfo | undefined {
-    return [...VISION_MODELS, ...PREDICTION_MODELS].find(m => m.id === id)
-}
+export const AUDIO_MODELS: ModelInfo[] = [
+    { id: 'nvidia/parakeet-rnnt-1.1b', name: 'Parakeet RNNT ASR', provider: 'nvidia', description: 'English Automatic Speech Recognition', contextWindow: 0, features: ['audio'] },
+    { id: 'nvidia/parakeet-ctc-1.1b', name: 'Parakeet CTC ASR', provider: 'nvidia', description: 'Fast English ASR', contextWindow: 0, features: ['audio'] },
+    { id: 'nvidia/canary-1b', name: 'Canary Multilingual ASR', provider: 'nvidia', description: 'Multilingual speech recognition', contextWindow: 0, features: ['audio'] },
+]
+
+export const VIDEO_MODELS: ModelInfo[] = [
+    { id: 'nvidia/cosmos-nemotron-34b', name: 'Cosmos Nemotron 34B', provider: 'nvidia', description: 'Video to Text Analysis', contextWindow: 0, features: ['video'] }
+]

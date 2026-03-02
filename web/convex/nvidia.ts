@@ -211,40 +211,75 @@ async function performNvidiaCall(ctx: any, args: {
     let errorMessage: string | undefined;
     let status: 'success' | 'error' = 'success';
 
-    console.log(`[NVIDIA API Action] [${requestId}] Calling model: ${model} (caller: ${caller})`);
+    console.log(`[NVIDIA API] [${requestId}] Calling model: ${model} (caller: ${caller})`);
+
+    const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
+    const MAX_RETRIES = 3;
 
     try {
-        const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`,
-            },
-            body: bodyStr,
-        });
+        let lastError: Error | null = null;
 
-        httpStatus = response.status;
-        if (!response.ok) {
-            const errorText = await response.text();
-            status = 'error';
-            errorMessage = errorText.substring(0, 2000);
-            throw new Error(`NVIDIA API error (${response.status}): ${errorText}`);
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                    },
+                    body: bodyStr,
+                });
+
+                httpStatus = response.status;
+                if (!response.ok) {
+                    const errorText = await response.text();
+
+                    if (RETRYABLE_STATUS_CODES.has(response.status) && attempt < MAX_RETRIES) {
+                        const delay = Math.pow(2, attempt - 1) * 1000;
+                        console.log(`[NVIDIA API] [${requestId}] Attempt ${attempt}/${MAX_RETRIES} failed (HTTP ${response.status}). Retrying in ${delay}ms...`);
+                        lastError = new Error(`NVIDIA API error (${response.status}): ${errorText}`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    }
+
+                    status = 'error';
+                    errorMessage = errorText.substring(0, 2000);
+                    throw new Error(`NVIDIA API error (${response.status}): ${errorText}`);
+                }
+
+                const data = await response.json() as any;
+                responseContent = data.choices?.[0]?.message?.content ?? '';
+                finishReason = data.choices?.[0]?.finish_reason;
+                promptTokens = data.usage?.prompt_tokens;
+                completionTokens = data.usage?.completion_tokens;
+                totalTokens = data.usage?.total_tokens;
+
+                if (!responseContent) {
+                    status = 'error';
+                    errorMessage = `Empty content. Finish: ${finishReason}, Tokens: ${completionTokens}`;
+                    throw new Error(errorMessage);
+                }
+
+                if (attempt > 1) {
+                    console.log(`[NVIDIA API] [${requestId}] Succeeded on attempt ${attempt}/${MAX_RETRIES}`);
+                }
+
+                return responseContent;
+            } catch (fetchErr) {
+                lastError = fetchErr instanceof Error ? fetchErr : new Error('Unknown error');
+
+                if (httpStatus === 0 && attempt < MAX_RETRIES) {
+                    const delay = Math.pow(2, attempt - 1) * 1000;
+                    console.log(`[NVIDIA API] [${requestId}] Attempt ${attempt}/${MAX_RETRIES} failed (network error). Retrying in ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    continue;
+                }
+
+                throw fetchErr;
+            }
         }
 
-        const data = await response.json() as any;
-        responseContent = data.choices?.[0]?.message?.content ?? '';
-        finishReason = data.choices?.[0]?.finish_reason;
-        promptTokens = data.usage?.prompt_tokens;
-        completionTokens = data.usage?.completion_tokens;
-        totalTokens = data.usage?.total_tokens;
-
-        if (!responseContent) {
-            status = 'error';
-            errorMessage = `Empty content. Finish: ${finishReason}, Tokens: ${completionTokens}`;
-            throw new Error(errorMessage);
-        }
-
-        return responseContent;
+        throw lastError || new Error('All retry attempts exhausted');
     } catch (err) {
         if (status !== 'error') {
             status = 'error';
@@ -298,7 +333,7 @@ async function performNvidiaCall(ctx: any, args: {
                 totalCostUsd,
             });
         } catch (logErr) {
-            console.error("[NVIDIA API Action] Failed to save log entry:", logErr);
+            console.error("[NVIDIA API] Failed to save log entry:", logErr);
         }
     }
 }
@@ -385,3 +420,61 @@ Rules:
 
 Only output valid JSON.`
 }
+
+export const generateImageAction = action({
+    args: { prompt: v.string() },
+    handler: async (_ctx, args) => {
+        const apiKey = process.env.NVIDIA_API_KEY;
+        if (!apiKey) throw new Error("NVIDIA_API_KEY not configured");
+
+        const response = await fetch('https://integrate.api.nvidia.com/v1/images/generations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                model: "stabilityai/stable-diffusion-xl-base-1.0",
+                prompt: args.prompt.substring(0, 1000),
+                n: 1,
+                response_format: "b64_json",
+                size: "1024x1024"
+            }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`NVIDIA Image API error (${response.status}): ${errorText}`);
+        }
+
+        const data = await response.json() as any;
+        const b64 = data.data?.[0]?.b64_json;
+        if (!b64) throw new Error("NVIDIA Image API did not return b64_json");
+        return b64;
+    }
+});
+
+export const generateAudioAction = action({
+    args: { prompt: v.string(), voiceId: v.optional(v.string()) },
+    handler: async () => {
+        await new Promise(r => setTimeout(r, 1500));
+        return "UklGRuQBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YcABAAAA";
+    }
+});
+
+export const transcribeAudioAction = action({
+    args: { base64Audio: v.string() },
+    handler: async () => {
+        await new Promise(r => setTimeout(r, 1000));
+        return "This is a dummy transcription. Integrate with an actual ASR endpoint.";
+    }
+});
+
+export const generateVideoAction = action({
+    args: { prompt: v.string() },
+    handler: async () => {
+        await new Promise(r => setTimeout(r, 2000));
+        return "https://www.w3schools.com/html/mov_bbb.mp4";
+    }
+});
