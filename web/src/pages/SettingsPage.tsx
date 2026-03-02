@@ -6,6 +6,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { api } from '../../convex/_generated/api'
 import { User, Shield, CreditCard, Trash2, Save } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Input } from '../components/ui/Input'
 
 export default function SettingsPage() {
     const { t } = useTranslation()
@@ -79,21 +80,19 @@ export default function SettingsPage() {
                 </div>
                 <div className="settings-section__body">
                     <div className="settings-field">
-                        <label className="settings-field__label">{t('settings.displayName')}</label>
-                        <input
+                        <Input
+                            label={t('settings.displayName')}
                             type="text"
                             value={name}
                             onChange={(e) => { setName(e.target.value); setSaved(false); }}
-                            className="settings-field__input"
                             placeholder={t('settings.displayName')}
                         />
                     </div>
                     <div className="settings-field">
-                        <label className="settings-field__label">{t('settings.email')}</label>
-                        <input
+                        <Input
+                            label={t('settings.email')}
                             type="email"
                             value={me.email ?? ''}
-                            className="settings-field__input"
                             disabled
                         />
                         <span className="settings-field__hint">{t('settings.emailHint')}</span>
@@ -195,11 +194,10 @@ export default function SettingsPage() {
                             <p style={{ color: '#EF4444', fontWeight: 600, marginBottom: '12px' }}>
                                 {t('settings.typeDelete')}
                             </p>
-                            <input
+                            <Input
                                 type="text"
                                 value={deleteConfirmText}
                                 onChange={(e) => setDeleteConfirmText(e.target.value)}
-                                className="settings-field__input"
                                 placeholder='Type "DELETE"'
                                 style={{ marginBottom: '12px' }}
                             />

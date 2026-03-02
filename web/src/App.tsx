@@ -8,6 +8,7 @@ import LandingPage from './pages/LandingPage'
 import PredictionPage from './pages/PredictionPage'
 import ProfilePage from './pages/ProfilePage'
 import AdminPage from './pages/AdminPage'
+import AdminStripePage from './pages/AdminStripePage'
 import LogsPage from './pages/LogsPage'
 import LoginPage from './pages/LoginPage'
 import PricingPage from './pages/PricingPage'
@@ -71,6 +72,7 @@ function AppRoutes() {
                 <Route path="/my-wall" element={<AuthGuard><SubscriptionGuard><MyWallPage /></SubscriptionGuard></AuthGuard>} />
                 {/* Admin routes — SubscriptionGuard allows admins */}
                 <Route path="/admin" element={<AuthGuard><SubscriptionGuard><AdminPage /></SubscriptionGuard></AuthGuard>} />
+                <Route path="/admin/stripe" element={<AuthGuard><SubscriptionGuard><AdminStripePage /></SubscriptionGuard></AuthGuard>} />
                 <Route path="/logs" element={<AuthGuard><SubscriptionGuard><LogsPage /></SubscriptionGuard></AuthGuard>} />
                 <Route path="/audit-logs" element={<AuthGuard><SubscriptionGuard><AuditLogsPage /></SubscriptionGuard></AuthGuard>} />
                 <Route path="/model-tests" element={<AuthGuard><SubscriptionGuard><ModelTestPage /></SubscriptionGuard></AuthGuard>} />

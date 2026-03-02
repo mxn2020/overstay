@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../../convex/_generated/api'
 import { useTranslation } from 'react-i18next'
 
+import { MissingConfigDialog } from '../components/MissingConfigDialog'
+import { Input } from '../components/ui/Input'
+
 export default function LoginPage() {
     const { signIn } = useAuthActions()
     const { isAuthenticated } = useConvexAuth()
@@ -16,6 +19,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState('')
     const [name, setName] = useState('')
     const [error, setError] = useState('')
+    const [configError, setConfigError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const { t } = useTranslation()
 
@@ -42,10 +46,19 @@ export default function LoginPage() {
             // Auth state change will trigger the useEffect above
         } catch (err) {
             const message = err instanceof Error ? err.message : String(err)
+
+            // Check for missing environment variables first
+            if (message.includes('Missing environment variable') || message.includes('not configured')) {
+                const match = message.match(/`([^`]+)`/) || message.match(/([A-Z_]+)\s+not configured/)
+                const keyName = match ? match[1] : 'JWT_PRIVATE_KEY'
+                setConfigError(`${keyName} not configured`)
+                return
+            }
+
             // Map Convex auth errors to friendly messages
             if (message.includes('InvalidAccountId') || message.includes('Could not find')) {
                 setError(t('login.errorNoAccount'))
-            } else if (message.includes('InvalidSecret') || message.includes('Invalid password')) {
+            } else if (message.includes('InvalidSecret') || message.includes('Invalid password') || message.includes('incorrect password')) {
                 setError(t('login.errorWrongPassword'))
             } else if (message.includes('AccountAlreadyExists')) {
                 setError(t('login.errorAccountExists'))
@@ -61,6 +74,12 @@ export default function LoginPage() {
 
     return (
         <div className="login-page">
+            {configError && (
+                <MissingConfigDialog
+                    message={configError}
+                    onClose={() => setConfigError(null)}
+                />
+            )}
             <div className="login-card">
                 <div className="login-card__header">
                     <h1 className="login-card__title">
@@ -76,38 +95,35 @@ export default function LoginPage() {
                 <form onSubmit={handleSubmit} className="login-form">
                     {mode === 'register' && (
                         <div className="login-form__field">
-                            <label className="login-form__label">{t('login.name')}</label>
-                            <input
+                            <Input
+                                label={t('login.name')}
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="Your name"
-                                className="login-form__input"
                                 required={mode === 'register'}
                             />
                         </div>
                     )}
 
                     <div className="login-form__field">
-                        <label className="login-form__label">{t('login.email')}</label>
-                        <input
+                        <Input
+                            label={t('login.email')}
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="you@example.com"
-                            className="login-form__input"
                             required
                         />
                     </div>
 
                     <div className="login-form__field">
-                        <label className="login-form__label">{t('login.password')}</label>
-                        <input
+                        <Input
+                            label={t('login.password')}
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="login-form__input"
                             required
                             minLength={6}
                         />

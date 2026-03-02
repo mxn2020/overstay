@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { SuccessPrediction } from '../App'
+import { Input } from './ui/Input'
 
 const WIN_MESSAGES = [
     "You actually left? We're impressed. And a little disappointed.",
@@ -51,7 +52,7 @@ export default function BeatTheAI({ prediction }: BeatTheAIProps) {
             {!result ? (
                 <>
                     <div className="beat-ai__input-group">
-                        <input
+                        <Input
                             type="time"
                             className="beat-ai__input"
                             value={actualTime}

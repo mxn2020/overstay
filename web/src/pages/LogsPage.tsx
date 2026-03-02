@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
+import { Select } from '../components/ui/Select'
 
 export default function LogsPage() {
     const [modelFilter, setModelFilter] = useState<string>('')
@@ -75,25 +76,25 @@ export default function LogsPage() {
             <div className="logs-filters">
                 <div className="logs-filter">
                     <label className="admin-label">Model</label>
-                    <select value={modelFilter} onChange={e => setModelFilter(e.target.value)} className="logs-select">
+                    <Select value={modelFilter} onChange={e => setModelFilter(e.target.value)}>
                         <option value="">All Models</option>
                         {stats?.models.map((m: string) => <option key={m} value={m}>{modelShort(m)}</option>)}
-                    </select>
+                    </Select>
                 </div>
                 <div className="logs-filter">
                     <label className="admin-label">Status</label>
-                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="logs-select">
+                    <Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
                         <option value="">All</option>
                         <option value="success">✅ Success</option>
                         <option value="error">❌ Error</option>
-                    </select>
+                    </Select>
                 </div>
                 <div className="logs-filter">
                     <label className="admin-label">Caller</label>
-                    <select value={callerFilter} onChange={e => setCallerFilter(e.target.value)} className="logs-select">
+                    <Select value={callerFilter} onChange={e => setCallerFilter(e.target.value)}>
                         <option value="">All Callers</option>
                         {stats?.callers.map((c: string) => <option key={c} value={c}>{c}</option>)}
-                    </select>
+                    </Select>
                 </div>
                 <div className="logs-filter logs-filter--actions">
                     <button

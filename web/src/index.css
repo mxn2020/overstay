@@ -3548,3 +3548,91 @@ h3 {
   margin: 0;
   color: var(--color-chalk-white, var(--color-ice-white));
 }
+
+/* ====================================
+   UI Form Components
+   ==================================== */
+.app-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  width: 100%;
+}
+
+.app-input-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-smoke-gray);
+}
+
+.app-input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: rgba(10, 10, 10, 0.4);
+  color: var(--color-ice-white);
+  font-family: inherit;
+  font-size: 1rem;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.app-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
+  background: rgba(10, 10, 10, 0.8);
+}
+
+.app-input::placeholder {
+  color: color-mix(in srgb, var(--color-smoke-gray) 60%, transparent);
+}
+
+.app-input--error {
+  border-color: var(--color-hot-red) !important;
+}
+
+.app-input--error:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-hot-red) 15%, transparent) !important;
+}
+
+.app-input-error-msg {
+  color: var(--color-hot-red);
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+/* Specific overrides */
+.app-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+}
+
+.app-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.app-select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 36px;
+}
+
+.app-select-container::after {
+  content: "▼";
+  font-size: 0.7rem;
+  color: var(--color-smoke-gray);
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.app-select option {
+  background: var(--color-void-black);
+  color: var(--color-ice-white);
+  padding: 8px;
+}

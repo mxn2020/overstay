@@ -16,7 +16,7 @@ export default defineSchema({
         beatTheAiWins: v.number(),
         streak: v.number(),
         stripeCustomerId: v.optional(v.string()),
-        plan: v.optional(v.union(v.literal("free"), v.literal("paid"))),
+        plan: v.optional(v.string()),
         creditBalance: v.optional(v.number()),    // current credits
         lastCreditRefill: v.optional(v.number()), // timestamp of last monthly refill
         createdAt: v.number(),

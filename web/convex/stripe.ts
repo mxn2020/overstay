@@ -60,6 +60,36 @@ export const getProfileByStripeCustomerId = internalQuery({
 
 // ---- Queries ----
 
+export const getActivePlans = action({
+    args: {},
+    handler: async () => {
+        const stripeKey = process.env.STRIPE_SECRET_KEY;
+        if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not configured");
+
+        const response = await fetch("https://api.stripe.com/v1/products?active=true&expand[]=data.default_price", {
+            headers: { Authorization: `Bearer ${stripeKey}` },
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch Stripe products");
+        const data = await response.json();
+
+        return data.data.map((product: any) => ({
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            planKey: product.metadata.planKey || product.name.toLowerCase(),
+            appSlug: product.metadata.appSlug || "unknown",
+            features: product.metadata.features ? JSON.parse(product.metadata.features) : [],
+            price: product.default_price ? {
+                id: product.default_price.id,
+                amount: product.default_price.unit_amount,
+                currency: product.default_price.currency,
+                interval: product.default_price.recurring?.interval,
+            } : null,
+        }));
+    },
+});
+
 export const getSubscription = query({
     args: {},
     handler: async (ctx) => {
@@ -87,7 +117,7 @@ export const getSubscription = query({
 export const updateSubscription = mutation({
     args: {
         stripeCustomerId: v.string(),
-        plan: v.union(v.literal("free"), v.literal("paid")),
+        plan: v.string(),
     },
     handler: async (ctx, { stripeCustomerId, plan }) => {
         const profile = await ctx.db
@@ -124,22 +154,16 @@ export const setStripeCustomerId = internalMutation({
 // Create a Stripe Checkout Session for subscription (Pro plan)
 export const createCheckoutSession = action({
     args: {
-        plan: v.literal("paid"),
+        planKey: v.string(),
+        priceId: v.string(),
         currency: v.optional(v.union(v.literal("eur"), v.literal("usd"))),
     },
-    handler: async (ctx, { plan, currency }) => {
+    handler: async (ctx, { planKey, priceId, currency }) => {
         const userId = await auth.getUserId(ctx);
         if (!userId) throw new Error("Not authenticated");
 
         const stripeKey = process.env.STRIPE_SECRET_KEY;
         if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not configured");
-
-        // Select price based on currency (EUR for Europe, USD default)
-        const isEur = currency === "eur";
-        const proPriceId = isEur
-            ? (process.env.STRIPE_PRICE_PRO_EUR || process.env.STRIPE_PRICE_PRO)
-            : process.env.STRIPE_PRICE_PRO;
-        if (!proPriceId) throw new Error("STRIPE_PRICE_PRO not configured");
 
         const siteUrl = process.env.SITE_URL ?? "http://localhost:5185";
 
@@ -165,11 +189,11 @@ export const createCheckoutSession = action({
                 "customer": customerId,
                 "success_url": `${siteUrl}/pricing?success=true`,
                 "cancel_url": `${siteUrl}/pricing?canceled=true`,
-                "line_items[0][price]": proPriceId,
+                "line_items[0][price]": priceId,
                 "line_items[0][quantity]": "1",
                 "metadata[app]": "justonelastdrink",
                 "metadata[userId]": userId,
-                "metadata[plan]": plan,
+                "metadata[plan]": planKey,
             }),
         });
 
@@ -354,7 +378,7 @@ export const activateSubscription = internalMutation({
         const newBalance = currentBalance + 100;
 
         await ctx.db.patch(profile._id, {
-            plan: "paid",
+            plan: "paid", // You can update this to dynamic plan lookup if needed, but 'paid' works for overstay's binary auth
             stripeCustomerId,
             creditBalance: newBalance,
         });

@@ -91,6 +91,7 @@ export default function Layout({ children }: LayoutProps) {
                     {isAuthenticated && me?.role === 'admin' && (
                         <>
                             <Link to="/admin" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>🔬 {t('nav.admin')}</Link>
+                            <Link to="/admin/stripe" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>💳 Billing</Link>
                             <Link to="/logs" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>📋 {t('nav.aiLogs')}</Link>
                             <Link to="/audit-logs" className="app__nav-link" onClick={() => setMobileMenuOpen(false)}>🔍 {t('nav.audit')}</Link>
                         </>

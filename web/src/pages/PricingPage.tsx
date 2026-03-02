@@ -2,11 +2,11 @@ import { useAction, useQuery } from 'convex/react'
 import { useConvexAuth } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Zap, CreditCard, TrendingUp, Beer } from 'lucide-react'
+import { Zap, CreditCard, TrendingUp, Beer, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useToast } from '../components/Toast'
 import { useDetectCurrency } from '../lib/useDetectCurrency'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MissingConfigDialog } from '../components/MissingConfigDialog'
 
 const TOP_UP_PACKAGES = [
@@ -15,6 +15,21 @@ const TOP_UP_PACKAGES = [
     { id: 'topup_250', credits: 250, priceUsd: '$4', perCreditUsd: '$0.016', priceEur: '€4', perCreditEur: '€0.016', best: true },
 ]
 
+type Plan = {
+    id: string
+    name: string
+    description?: string
+    planKey: string
+    appSlug: string
+    features: string[]
+    price?: {
+        id: string
+        amount: number
+        currency: string
+        interval?: string
+    }
+}
+
 export default function PricingPage() {
     const { t } = useTranslation()
     const { showToast } = useToast()
@@ -22,26 +37,42 @@ export default function PricingPage() {
     const subscription = useQuery(api.stripe.getSubscription)
     const balance = useQuery(api.credits.getBalance)
     const createCheckout = useAction(api.stripe.createCheckoutSession)
+    const getActivePlans = useAction(api.stripe.getActivePlans)
     const createTopUp = useAction(api.stripe.createTopUpSession)
     const navigate = useNavigate()
     const location = useLocation()
     const currency = useDetectCurrency()
+
     const [configError, setConfigError] = useState<string | null>(null)
+    const [plans, setPlans] = useState<Plan[]>([])
+    const [loadingPlans, setLoadingPlans] = useState(true)
+
+    useEffect(() => {
+        getActivePlans()
+            .then(data => {
+                const appPlans = data.filter((p: Plan) => p.appSlug === 'overstay' || p.appSlug === 'unknown')
+                setPlans(appPlans)
+            })
+            .catch(err => {
+                const msg = err instanceof Error ? err.message : String(err)
+                if (msg.includes('not configured')) setConfigError(msg)
+                console.error(err)
+            })
+            .finally(() => setLoadingPlans(false))
+    }, [getActivePlans])
 
     const currentPlan = subscription?.plan ?? 'free'
     const credits = balance?.credits ?? 0
     const needSubscription = (location.state as { needSubscription?: boolean })?.needSubscription
 
-    const proPriceStr = currency === 'eur' ? '€3' : '$3'
-
-    const handleSubscribe = async () => {
+    const handleSubscribe = async (planKey: string, priceId: string) => {
         if (!isAuthenticated) {
             navigate('/login')
             return
         }
         try {
-            const { url } = await createCheckout({ plan: 'paid', currency })
-            if (url) window.location.href = url
+            const { url } = await createCheckout({ planKey, priceId, currency })
+            if (url) window.location.assign(url)
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Failed to create checkout'
             if (msg.includes('not configured')) {
@@ -59,7 +90,7 @@ export default function PricingPage() {
         }
         try {
             const { url } = await createTopUp({ packageId, currency })
-            if (url) window.location.href = url
+            if (url) window.location.assign(url)
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Failed to create checkout'
             if (msg.includes('not configured')) {
@@ -78,7 +109,7 @@ export default function PricingPage() {
                     onClose={() => setConfigError(null)}
                 />
             )}
-            {/* Onboarding callout for users redirected here */}
+
             {needSubscription && (
                 <div className="pricing-onboarding">
                     <p>🍻 <strong>Subscribe to unlock all features!</strong> Get 100 credits/month and access the full experience.</p>
@@ -94,35 +125,68 @@ export default function PricingPage() {
                     <div className="pricing-balance">
                         <Zap size={20} />
                         <span>{credits} {t('pricing.credits')}</span>
-                        <span className="pricing-balance__plan">{currentPlan === 'paid' ? "LET'S HAVE FUN" : 'FREE'}</span>
+                        <span className="pricing-balance__plan">{currentPlan.toUpperCase()}</span>
                     </div>
                 )}
             </div>
 
-            {/* Single Plan: Let's Have Fun */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '48px' }}>
-                <div className="pricing-card pricing-card--popular" style={{ maxWidth: '420px' }}>
-                    <div className="pricing-card__badge">🍻 {t('pricing.bestValue')}</div>
-                    <div className="pricing-card__header">
-                        <h2><Beer size={22} /> Let's Have Fun</h2>
-                        <div className="pricing-card__price">{proPriceStr}<span>{t('pricing.proMonth')}</span></div>
-                    </div>
-                    <ul className="pricing-card__features">
-                        <li><Zap size={14} /> {t('pricing.proFeature1')}</li>
-                        <li>✅ {t('pricing.proFeature2')}</li>
-                        <li>✅ {t('pricing.proFeature3')}</li>
-                        <li>✅ {t('pricing.proFeature4')}</li>
-                        <li>✅ {t('pricing.proFeature5')}</li>
-                    </ul>
-                    <button
-                        className="btn btn--primary pricing-card__btn"
-                        disabled={currentPlan === 'paid'}
-                        onClick={handleSubscribe}
-                    >
-                        {currentPlan === 'paid' ? `✅ ${t('pricing.currentPlan')}` : `🍻 ${t('pricing.subscribe').replace('$3/mo', `${proPriceStr}${t('pricing.proMonth')}`)}`}
-                    </button>
+            {loadingPlans ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '64px' }}>
+                    <Loader2 size={48} className="animate-spin" style={{ color: 'var(--color-primary)' }} />
                 </div>
-            </div>
+            ) : (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', flexWrap: 'wrap', marginBottom: '48px' }}>
+                    {plans.map((plan) => (
+                        <div key={plan.id} className="pricing-card pricing-card--popular" style={{ maxWidth: '420px', width: '100%' }}>
+                            <div className="pricing-card__badge">🍻 {t('pricing.bestValue')}</div>
+                            <div className="pricing-card__header">
+                                <h2><Beer size={22} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> {plan.name}</h2>
+                                <div className="pricing-card__price">
+                                    {currency === 'eur' ? '€' : '$'}
+                                    {plan.price ? (plan.price.amount / 100).toFixed(0) : '0'}
+                                    {plan.price?.interval && <span>/{plan.price.interval === 'month' ? t('pricing.proMonth').replace('/', '') : 'yr'}</span>}
+                                </div>
+                            </div>
+
+                            {plan.description && (
+                                <p style={{ color: 'var(--color-smoke-gray)', fontSize: '0.9rem', marginBottom: '16px' }}>
+                                    {plan.description}
+                                </p>
+                            )}
+
+                            <ul className="pricing-card__features">
+                                {plan.features.length > 0 ? plan.features.map((feature, i) => (
+                                    <li key={i}>✅ {feature}</li>
+                                )) : (
+                                    <>
+                                        <li><Zap size={14} /> {t('pricing.proFeature1')}</li>
+                                        <li>✅ {t('pricing.proFeature2')}</li>
+                                        <li>✅ {t('pricing.proFeature3')}</li>
+                                        <li>✅ {t('pricing.proFeature4')}</li>
+                                    </>
+                                )}
+                            </ul>
+
+                            <button
+                                className="btn btn--primary pricing-card__btn"
+                                disabled={currentPlan === plan.planKey}
+                                onClick={() => handleSubscribe(plan.planKey, plan.price!.id)}
+                            >
+                                {currentPlan === plan.planKey ? `✅ ${t('pricing.currentPlan')}` : `🍻 ${t('pricing.subscribe').replace('$3/mo', '')} ${plan.name}`}
+                            </button>
+                        </div>
+                    ))}
+
+                    {plans.length === 0 && (
+                        <div className="pricing-card" style={{ maxWidth: '420px', width: '100%' }}>
+                            <div className="pricing-card__header">
+                                <h2>No active plans</h2>
+                                <p style={{ color: 'var(--color-smoke-gray)' }}>No subscription plans found in Stripe.</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Top-Up Section */}
             <div style={{ textAlign: 'center' }}>

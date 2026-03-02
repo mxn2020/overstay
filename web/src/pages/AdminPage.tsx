@@ -4,6 +4,9 @@ import { api } from '../../convex/_generated/api'
 import { VISION_MODELS, type ModelInfo } from '../lib/modelRegistry'
 import { fileToBase64 } from '../lib/nvidiaApi'
 import LogsPage from './LogsPage'
+import { Input } from '../components/ui/Input'
+import { Select } from '../components/ui/Select'
+import { Textarea } from '../components/ui/Textarea'
 
 interface TestResult {
     model: string
@@ -346,8 +349,7 @@ export default function AdminPage() {
                                     <div className="admin-prompt-selectors">
                                         <div className="admin-prompt-selector">
                                             <label className="admin-label--small">System Prompt</label>
-                                            <select
-                                                className="admin-select"
+                                            <Select
                                                 value={selectedSystemPromptId}
                                                 onChange={(e) => setSelectedSystemPromptId(e.target.value)}
                                             >
@@ -356,12 +358,11 @@ export default function AdminPage() {
                                                         {p.name}
                                                     </option>
                                                 ))}
-                                            </select>
+                                            </Select>
                                         </div>
                                         <div className="admin-prompt-selector">
                                             <label className="admin-label--small">User Prompt</label>
-                                            <select
-                                                className="admin-select"
+                                            <Select
                                                 value={selectedUserPromptId}
                                                 onChange={(e) => setSelectedUserPromptId(e.target.value)}
                                             >
@@ -370,29 +371,27 @@ export default function AdminPage() {
                                                         {p.name}
                                                     </option>
                                                 ))}
-                                            </select>
+                                            </Select>
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="admin-prompt-custom">
                                         <div className="admin-prompt-custom__field">
                                             <label className="admin-label--small">System Prompt</label>
-                                            <textarea
-                                                className="admin-prompt-textarea"
+                                            <Textarea
                                                 rows={4}
                                                 placeholder="Enter a custom system prompt..."
                                                 value={customSystemPrompt}
-                                                onChange={(e) => setCustomSystemPrompt(e.target.value)}
+                                                onChange={(e: any) => setCustomSystemPrompt(e.target.value)}
                                             />
                                         </div>
                                         <div className="admin-prompt-custom__field">
                                             <label className="admin-label--small">User Prompt</label>
-                                            <textarea
-                                                className="admin-prompt-textarea"
+                                            <Textarea
                                                 rows={4}
                                                 placeholder="Enter a custom user prompt (sent with the image)..."
                                                 value={customUserPrompt}
-                                                onChange={(e) => setCustomUserPrompt(e.target.value)}
+                                                onChange={(e: any) => setCustomUserPrompt(e.target.value)}
                                             />
                                         </div>
                                     </div>
@@ -577,10 +576,9 @@ export default function AdminPage() {
 
                                 {editingPrompt === prompt.promptId ? (
                                     <div className="admin-prompt-editor">
-                                        <textarea
+                                        <Textarea
                                             value={promptDraft}
-                                            onChange={(e) => setPromptDraft(e.target.value)}
-                                            className="admin-prompt-textarea"
+                                            onChange={(e: any) => setPromptDraft(e.target.value)}
                                             rows={8}
                                         />
                                         <div className="admin-prompt-actions">
@@ -699,7 +697,7 @@ function CostsDashboard() {
                                 <td>{mc.displayName || mc.model}</td>
                                 <td>
                                     {editingModel === mc.model ? (
-                                        <input
+                                        <Input
                                             value={editInput}
                                             onChange={(e) => setEditInput(e.target.value)}
                                             placeholder="0.00000"
@@ -710,7 +708,7 @@ function CostsDashboard() {
                                 </td>
                                 <td>
                                     {editingModel === mc.model ? (
-                                        <input
+                                        <Input
                                             value={editOutput}
                                             onChange={(e) => setEditOutput(e.target.value)}
                                             placeholder="0.00000"

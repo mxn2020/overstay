@@ -1,10 +1,10 @@
 import { useQuery, useAction, useConvexAuth } from 'convex/react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../convex/_generated/api'
-import { CreditCard, Zap, ArrowLeft, ExternalLink } from 'lucide-react'
+import { CreditCard, Zap, ArrowLeft, ExternalLink, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useToast } from '../components/Toast'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MissingConfigDialog } from '../components/MissingConfigDialog'
 
 const TOP_UP_PACKAGES = [
@@ -13,17 +13,52 @@ const TOP_UP_PACKAGES = [
     { id: 'topup_250', credits: 250, price: '$4' },
 ]
 
+type Plan = {
+    id: string
+    name: string
+    description?: string
+    planKey: string
+    appSlug: string
+    features: string[]
+    price?: {
+        id: string
+        amount: number
+        currency: string
+        interval?: string
+    }
+}
+
 export default function BillingPage() {
     const { isAuthenticated } = useConvexAuth()
     const { showToast } = useToast()
     const subscription = useQuery(api.stripe.getSubscription)
     const balance = useQuery(api.credits.getBalance)
     const transactions = useQuery(api.credits.getTransactionHistory, { limit: 20 })
+    const getActivePlans = useAction(api.stripe.getActivePlans)
     const createCheckout = useAction(api.stripe.createCheckoutSession)
     const createTopUp = useAction(api.stripe.createTopUpSession)
     const createPortal = useAction(api.stripe.createPortalSession)
     const navigate = useNavigate()
+
     const [configError, setConfigError] = useState<string | null>(null)
+    const [plans, setPlans] = useState<Plan[]>([])
+    const [loadingPlans, setLoadingPlans] = useState(true)
+
+    useEffect(() => {
+        if (!isAuthenticated) return
+
+        getActivePlans()
+            .then(data => {
+                const appPlans = data.filter((p: Plan) => p.appSlug === 'overstay' || p.appSlug === 'unknown')
+                setPlans(appPlans)
+            })
+            .catch(err => {
+                const msg = err instanceof Error ? err.message : String(err)
+                if (msg.includes('not configured')) setConfigError(msg)
+                console.error(err)
+            })
+            .finally(() => setLoadingPlans(false))
+    }, [isAuthenticated, getActivePlans])
 
     if (!isAuthenticated) {
         navigate('/login')
@@ -34,10 +69,10 @@ export default function BillingPage() {
     const credits = balance?.credits ?? 0
     const hasStripeCustomer = !!subscription?.stripeCustomerId
 
-    const handleSubscribe = async () => {
+    const handleSubscribe = async (planKey: string, priceId: string) => {
         try {
-            const { url } = await createCheckout({ plan: 'paid' })
-            if (url) window.location.href = url
+            const { url } = await createCheckout({ planKey, priceId })
+            if (url) window.location.assign(url)
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Failed to create checkout'
             if (msg.includes('not configured')) {
@@ -51,7 +86,7 @@ export default function BillingPage() {
     const handleTopUp = async (packageId: string) => {
         try {
             const { url } = await createTopUp({ packageId })
-            if (url) window.location.href = url
+            if (url) window.location.assign(url)
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Failed to create checkout'
             if (msg.includes('not configured')) {
@@ -65,7 +100,7 @@ export default function BillingPage() {
     const handleManageSubscription = async () => {
         try {
             const { url } = await createPortal()
-            if (url) window.location.href = url
+            if (url) window.location.assign(url)
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Failed to open billing portal'
             if (msg.includes('not configured')) {
@@ -98,7 +133,7 @@ export default function BillingPage() {
             <div className="billing-current">
                 <div className="billing-current__info">
                     <span className="plan-badge plan-badge--lg">
-                        {currentPlan === 'paid' ? "LET'S HAVE FUN" : currentPlan.toUpperCase()}
+                        {currentPlan.toUpperCase()}
                     </span>
                     <span style={{ color: 'var(--color-smoke-gray)' }}>
                         {currentPlan === 'paid' ? '🍻 Subscription active' : 'No active subscription'}
@@ -112,12 +147,18 @@ export default function BillingPage() {
 
             {/* Subscribe / Manage / Top-up */}
             <div style={{ marginTop: '32px' }}>
-                {currentPlan !== 'paid' && (
-                    <div style={{ marginBottom: '24px' }}>
-                        <button className="btn btn--primary" onClick={handleSubscribe}>
-                            🍻 Subscribe — $3/mo (100 credits)
-                        </button>
+                {loadingPlans ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '32px' }}>
+                        <Loader2 size={32} className="animate-spin" style={{ color: 'var(--color-primary)' }} />
                     </div>
+                ) : (
+                    currentPlan !== 'paid' && plans.map(plan => (
+                        <div key={plan.id} style={{ marginBottom: '24px' }}>
+                            <button className="btn btn--primary" onClick={() => handleSubscribe(plan.planKey, plan.price!.id)}>
+                                Wait, Subscribe to {plan.name} — ${plan.price ? (plan.price.amount / 100).toFixed(0) : '0'}/mo
+                            </button>
+                        </div>
+                    ))
                 )}
 
                 {hasStripeCustomer && (
