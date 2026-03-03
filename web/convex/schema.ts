@@ -11,7 +11,7 @@ export default defineSchema({
         name: v.optional(v.string()),
         role: v.union(v.literal("user"), v.literal("admin")),
         justOneLastDrinkScore: v.optional(v.number()),
-        overstayScore: v.optional(v.number()),
+        justOneLastDrinkScore: v.optional(v.number()),
         totalPredictions: v.number(),
         beatTheAiWins: v.number(),
         streak: v.number(),

@@ -11,3 +11,6 @@ deploy_url: null
 last_active: 2026-02-25
 tags: []
 notes: 
+focus: true
+category: infra
+open_tasks: 0

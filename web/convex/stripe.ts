@@ -378,7 +378,7 @@ export const activateSubscription = internalMutation({
         const newBalance = currentBalance + 100;
 
         await ctx.db.patch(profile._id, {
-            plan: "paid", // You can update this to dynamic plan lookup if needed, but 'paid' works for overstay's binary auth
+            plan: "paid", // You can update this to dynamic plan lookup if needed, but 'paid' works for justOneLastDrink's binary auth
             stripeCustomerId,
             creditBalance: newBalance,
         });

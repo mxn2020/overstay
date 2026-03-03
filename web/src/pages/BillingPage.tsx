@@ -49,7 +49,7 @@ export default function BillingPage() {
 
         getActivePlans()
             .then(data => {
-                const appPlans = data.filter((p: Plan) => p.appSlug === 'overstay' || p.appSlug === 'unknown')
+                const appPlans = data.filter((p: Plan) => p.appSlug === 'justOneLastDrink' || p.appSlug === 'unknown')
                 setPlans(appPlans)
             })
             .catch(err => {

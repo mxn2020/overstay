@@ -15,7 +15,7 @@ interface PhotoUploadProps {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/heic', 'image/heif', 'image/webp']
-const FREE_TRIAL_KEY = 'overstay_free_used'
+const FREE_TRIAL_KEY = 'justOneLastDrink_free_used'
 
 export default function PhotoUpload({ onAnalysisStart, onResult, useConvex }: PhotoUploadProps) {
     const [isDragging, setIsDragging] = useState(false)

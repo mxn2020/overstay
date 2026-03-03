@@ -31,8 +31,8 @@
     "prediction": {
         "title": "پیش‌بینی شما",
         "exitTime": "زمان خروج",
-        "overstay": "ماندن بیش از حد",
-        "overstayMin": "+{{minutes}}دقیقه",
+        "justOneLastDrink": "ماندن بیش از حد",
+        "justOneLastDrinkMin": "+{{minutes}}دقیقه",
         "chaosRating": "سطح آشوب",
         "textRegret": "پشیمانی پیام",
         "barHop": "بار هاپینگ",
@@ -173,7 +173,7 @@
     },
     "profile": {
         "title": "پروفایل شما",
-        "overstayScore": "امتیاز ماندن",
+        "justOneLastDrinkScore": "امتیاز ماندن",
         "totalPredictions": "پیش‌بینی‌ها",
         "beatTheAi": "شکست هوش",
         "streak": "رکورد",

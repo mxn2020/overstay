@@ -13,15 +13,19 @@ import type * as auditLog from "../auditLog.js";
 import type * as auth from "../auth.js";
 import type * as badges from "../badges.js";
 import type * as credits from "../credits.js";
+import type * as devLogs from "../devLogs.js";
 import type * as http from "../http.js";
 import type * as modelCosts from "../modelCosts.js";
 import type * as modelTests from "../modelTests.js";
 import type * as nvidia from "../nvidia.js";
 import type * as predictions from "../predictions.js";
 import type * as prompts from "../prompts.js";
+import type * as rateLimit from "../rateLimit.js";
 import type * as scoring from "../scoring.js";
 import type * as storyboard from "../storyboard.js";
 import type * as stripe from "../stripe.js";
+import type * as stripeAdmin from "../stripeAdmin.js";
+import type * as usageLimits from "../usageLimits.js";
 import type * as users from "../users.js";
 
 import type {
@@ -36,15 +40,19 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   badges: typeof badges;
   credits: typeof credits;
+  devLogs: typeof devLogs;
   http: typeof http;
   modelCosts: typeof modelCosts;
   modelTests: typeof modelTests;
   nvidia: typeof nvidia;
   predictions: typeof predictions;
   prompts: typeof prompts;
+  rateLimit: typeof rateLimit;
   scoring: typeof scoring;
   storyboard: typeof storyboard;
   stripe: typeof stripe;
+  stripeAdmin: typeof stripeAdmin;
+  usageLimits: typeof usageLimits;
   users: typeof users;
 }>;
 

@@ -41,7 +41,7 @@ export default function AdminStripePage() {
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
     const [planKey, setPlanKey] = useState('')
-    const [appSlug, setAppSlug] = useState('overstay')
+    const [appSlug, setAppSlug] = useState('justOneLastDrink')
     const [amount, setAmount] = useState('') // dollars 
     const [interval, setInterval] = useState<'month' | 'year' | 'none'>('month')
     const [features, setFeatures] = useState('')
@@ -68,7 +68,7 @@ export default function AdminStripePage() {
         setName('')
         setDescription('')
         setPlanKey('')
-        setAppSlug('overstay')
+        setAppSlug('justOneLastDrink')
         setAmount('')
         setInterval('month')
         setFeatures('')
