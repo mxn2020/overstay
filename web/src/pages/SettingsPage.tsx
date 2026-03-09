@@ -6,7 +6,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { api } from '../../convex/_generated/api'
 import { User, Shield, CreditCard, Trash2, Save } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Input } from '../components/ui/Input'
+import { Input } from '@geenius-ui/react-css'
 
 export default function SettingsPage() {
     const { t } = useTranslation()

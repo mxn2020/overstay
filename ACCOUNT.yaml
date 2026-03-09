@@ -1,0 +1,12 @@
+services:
+  convex:
+    project: JustOneLastDrink
+  vercel:
+    project: JustOneLastDrink
+  stripe:
+    mode: live
+  nvidia:
+    api: nvidia-nims
+  github:
+    owner: mxn2020
+    repo: just-one-last-drink

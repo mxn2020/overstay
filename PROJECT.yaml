@@ -1,0 +1,15 @@
+name: JustOneLastDrink
+description: Social party drinking game with AI challenges
+tier: t3
+lane: fun
+priority: medium
+category: app
+focus: active
+open_tasks: 0
+oss: true
+stack: [vite, react, typescript, convex]
+repo: https://github.com/mxn2020/just-one-last-drink
+deploy_url: null
+last_active: 2026-03-09
+tags: [game,drinking,social,convex]
+notes: null

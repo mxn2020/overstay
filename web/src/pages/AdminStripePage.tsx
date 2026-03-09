@@ -4,9 +4,7 @@ import { api } from '../../convex/_generated/api'
 import { SkeletonCard } from '../components/Skeleton'
 import { useToast } from '../components/Toast'
 import { Plus, Archive, Loader2, DollarSign, Edit2 } from 'lucide-react'
-import { Input } from '../components/ui/Input'
-import { Select } from '../components/ui/Select'
-import { Textarea } from '../components/ui/Textarea'
+import { Input, Select, Textarea } from '@geenius-ui/react-css'
 
 type Plan = {
     id: string

@@ -14,6 +14,10 @@
   "dependencies": {
     "@auth/core": "0.37.0",
     "@convex-dev/auth": "^0.0.90",
+    "@geenius-ai/react": "^0.0.1",
+    "@geenius-auth/react": "^0.0.1",
+    "@geenius-tools/errors-react": "^0.0.1",
+    "@geenius-ui/react-css": "^0.1.4",
     "@vercel/analytics": "^1.6.1",
     "browser-image-compression": "^2.0.2",
     "convex": "^1.32.0",
@@ -46,5 +50,19 @@
     "typescript-eslint": "^8.48.0",
     "vite": "^7.3.1",
     "vitest": "^4.0.18"
-  }
+  },
+  "description": "Social party drinking game with AI-generated challenges",
+  "author": "Mehdi Nabhani <mehdi@geenius.app>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mxn2020/just-one-last-drink.git"
+  },
+  "keywords": [
+    "just-one-last-drink",
+    "game",
+    "social",
+    "party",
+    "convex"
+  ]
 }

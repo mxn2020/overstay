@@ -4,9 +4,8 @@ import { api } from '../../convex/_generated/api'
 import { VISION_MODELS, type ModelInfo } from '../lib/modelRegistry'
 import { fileToBase64 } from '../lib/nvidiaApi'
 import LogsPage from './LogsPage'
-import { Input } from '../components/ui/Input'
-import { Select } from '../components/ui/Select'
-import { Textarea } from '../components/ui/Textarea'
+import { Input } from '@geenius-ui/react-css'
+import { Select, Textarea } from '@geenius-ui/react-css'
 
 interface TestResult {
     model: string
