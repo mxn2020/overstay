@@ -17,3 +17,8 @@ dist/
 .DS_Store
 Thumbs.db
 
+
+# Added by AI Agent
+.env.*
+!.env.example
+.vercel

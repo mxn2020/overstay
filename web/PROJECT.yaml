@@ -1,5 +1,7 @@
-id: dad4759e-1c2e-4bb1-9adb-92c3160b0899
 name: justonelastdrink-web
+project_scope: child
+child_type: web-app
+parent_project: JustOneLastDrink
 description: web project
 tier: prototype
 lane: side-projects
@@ -10,7 +12,8 @@ repo: null
 deploy_url: null
 last_active: 2026-02-25
 tags: []
-notes: 
-focus: true
+notes: null
 category: infra
+focus: true
 open_tasks: 0
+id: dad4759e-1c2e-4bb1-9adb-92c3160b0899
